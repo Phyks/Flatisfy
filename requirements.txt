@@ -1,0 +1,8 @@
+appdirs
+bottle
+bottle-sqlalchemy
+enum34
+future
+request
+sqlalchemy
+unidecode
