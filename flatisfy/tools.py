@@ -19,6 +19,9 @@ import unidecode
 
 LOGGER = logging.getLogger(__name__)
 
+# Constants
+NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
+
 
 def pretty_json(data):
     """
@@ -204,7 +207,6 @@ def get_travel_time_between(latlng_from, latlng_to, config):
     .. note :: Uses the Navitia API. Requires a ``navitia_api_key`` field to be
     filled-in in the ``config``.
     """
-    NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
     time = None
 
     # Check that Navitia API key is available
@@ -224,12 +226,12 @@ def get_travel_time_between(latlng_from, latlng_to, config):
             req.raise_for_status()
             time = req.json()["journeys"][0]["durations"]["total"]
         except (requests.exceptions.RequestException,
-                ValueError, IndexError, KeyError) as e:
+                ValueError, IndexError, KeyError) as exc:
             # Ignore any possible exception
             LOGGER.warning(
                 "An exception occurred during travel time lookup on "
                 "Navitia: %s.",
-                str(e)
+                str(exc)
             )
     else:
         LOGGER.warning(

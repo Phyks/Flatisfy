@@ -42,7 +42,7 @@ def get_app(config):
     # API v1 routes
     app.route("/api/v1/", "GET", api_routes.index_v1)
     app.route("/api/v1/flats", "GET", api_routes.flats_v1)
-    app.route("/api/v1/flat/:id", "GET", api_routes.flat_v1)
+    app.route("/api/v1/flat/:flat_id", "GET", api_routes.flat_v1)
 
     # Index
     app.route("/", "GET", lambda: _serve_static_file("index.html"))

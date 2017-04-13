@@ -27,7 +27,8 @@ class StringyJSON(types.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """
-        TODO
+        Process the bound param, serialize the object to JSON before saving
+        into database.
         """
         if value is not None:
             value = json.dumps(value)
@@ -35,7 +36,8 @@ class StringyJSON(types.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         """
-        TODO
+        Process the value fetched from the database, deserialize the JSON
+        string before returning the object.
         """
         if value is not None:
             value = json.loads(value)

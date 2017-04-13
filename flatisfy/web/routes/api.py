@@ -35,13 +35,13 @@ def flats_v1(db):
     }
 
 
-def flat_v1(id, db):
+def flat_v1(flat_id, db):
     """
     API v1 flat route:
 
-        GET /api/v1/flat/:id
+        GET /api/v1/flat/:flat_id
     """
-    flat = db.query(flat_model.Flat).filter_by(id=id).first()
+    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
     return {
         "data": flat.json_api_repr()
     }

@@ -149,7 +149,7 @@ def guess_postal_code(flats_list, config, distance_threshold=20000):
                 "Found postal code in location field for flat %s: %s.",
                 flat["id"], postal_code
             )
-        except AssertionError as e:
+        except AssertionError:
             postal_code = None
 
         # If not found, try to find a city
@@ -294,7 +294,23 @@ def guess_stations(flats_list, config, distance_threshold=1500):
             flat["id"],
             ", ".join(x["name"] for x in good_matched_stations)
         )
-        # TODO: Handle update (second pass)
+
+        # If some stations were already filled in and the result is different,
+        # display some warning to the user
+        if (
+                "matched_stations" in flat["flatisfy"]["matched_stations"] and
+                (
+                    # Do a set comparison, as ordering is not important
+                    set(flat["flatisfy"]["matched_stations"]) !=
+                    set(good_matched_stations)
+                )
+        ):
+            LOGGER.warning(
+                "Replacing previously fetched stations for flat %s. Found "
+                "stations differ from the previously found ones.",
+                flat["id"]
+            )
+
         flat["flatisfy"]["matched_stations"] = good_matched_stations
 
     return flats_list
