@@ -89,9 +89,10 @@ def first_pass(flats_list, config):
 
     :param flats_list: A list of flats dict to filter.
     :param config: A config dict.
-    :return: A tuple of processed flats and purged flats.
+    :return: A tuple of processed flats and ignored flats.
     """
     LOGGER.info("Running first filtering pass.")
+
     # Handle duplicates based on ids
     # Just remove them (no merge) as they should be the exact same object.
     flats_list = duplicates.detect(
@@ -105,16 +106,16 @@ def first_pass(flats_list, config):
         flats_list, key="url", merge=True
     )
 
-    # Add the flatisfy metadata entry
+    # Add the flatisfy metadata entry and prepare the flat objects
     flats_list = metadata.init(flats_list)
     # Guess the postal codes
     flats_list = metadata.guess_postal_code(flats_list, config)
     # Try to match with stations
     flats_list = metadata.guess_stations(flats_list, config)
     # Remove returned housing posts that do not match criteria
-    flats_list, purged_list = refine_with_housing_criteria(flats_list, config)
+    flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
 
-    return (flats_list, purged_list)
+    return (flats_list, ignored_list)
 
 
 def second_pass(flats_list, config):
@@ -130,7 +131,7 @@ def second_pass(flats_list, config):
 
     :param flats_list: A list of flats dict to filter.
     :param config: A config dict.
-    :return: A tuple of processed flats and purged flats.
+    :return: A tuple of processed flats and ignored flats.
     """
     LOGGER.info("Running second filtering pass.")
     # Assumed to run after first pass, so there should be no obvious duplicates
@@ -148,6 +149,6 @@ def second_pass(flats_list, config):
     flats_list = metadata.compute_travel_times(flats_list, config)
 
     # Remove returned housing posts that do not match criteria
-    flats_list, purged_list = refine_with_housing_criteria(flats_list, config)
+    flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
 
-    return (flats_list, purged_list)
+    return (flats_list, ignored_list)

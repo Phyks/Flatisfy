@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-This module contains a Bottle plugin to pass the database argument to any route
+This module contains a Bottle plugin to pass the config argument to any route
 which needs it.
 
 This module is heavily based on code from
@@ -17,21 +17,20 @@ import inspect
 import bottle
 
 
-class DatabasePlugin(object):
+class ConfigPlugin(object):
     """
-    A Bottle plugin to automatically pass an SQLAlchemy database session object
-    to the routes specifying they need it.
+    A Bottle plugin to automatically pass the config object to the routes
+    specifying they need it.
     """
-    name = 'database'
+    name = 'config'
     api = 2
-    KEYWORD = "db"
+    KEYWORD = "config"
 
-    def __init__(self, get_session):
+    def __init__(self, config):
         """
-        :param create_session: SQLAlchemy session maker created with the
-                'sessionmaker' function. Will create its own if undefined.
+        :param config: The config object to pass.
         """
-        self.get_session = get_session
+        self.config = config
 
     def setup(self, app):  # pylint: disable=no-self-use
         """
@@ -39,11 +38,11 @@ class DatabasePlugin(object):
         keyword argument and check if metadata is available.
         """
         for other in app.plugins:
-            if not isinstance(other, DatabasePlugin):
+            if not isinstance(other, ConfigPlugin):
                 continue
             else:
                 raise bottle.PluginError(
-                    "Found another conflicting Database plugin."
+                    "Found another conflicting Config plugin."
                 )
 
     def apply(self, callback, route):
@@ -53,7 +52,7 @@ class DatabasePlugin(object):
 
         We check the presence of ``self.KEYWORD`` in the route signature and
         replace the route callback by a partial invocation where we replaced
-        this argument by a valid SQLAlchemy session.
+        this argument by a valid config object.
         """
         # Check whether the route needs a valid db session or not.
         try:
@@ -65,16 +64,9 @@ class DatabasePlugin(object):
         if self.KEYWORD not in callback_args:
             # If no need for a db session, call the route callback
             return callback
-        else:
-            def wrapper(*args, **kwargs):
-                """
-                Wrap the callback in a call to get_session.
-                """
-                with self.get_session() as session:
-                    # Get a db session and pass it to the callback
-                    kwargs[self.KEYWORD] = session
-                    return callback(*args, **kwargs)
-            return wrapper
+        kwargs = {}
+        kwargs[self.KEYWORD] = self.config
+        return functools.partial(callback, **kwargs)
 
 
-Plugin = DatabasePlugin
+Plugin = ConfigPlugin

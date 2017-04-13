@@ -1,3 +1,4 @@
 #!/bin/sh
 
 pylint --rcfile=.ci/pylintrc flatisfy
+npm run lint

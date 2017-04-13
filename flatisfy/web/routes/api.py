@@ -6,6 +6,11 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
+import json
+
+import bottle
+
+import flatisfy.data
 from flatisfy.models import flat as flat_model
 
 
@@ -20,28 +25,136 @@ def index_v1():
     }
 
 
-def flats_v1(db):
+def flats_v1(config, db):
     """
     API v1 flats route:
 
         GET /api/v1/flats
+
+    :return: The available flats objects in a JSON ``data`` dict.
     """
+    postal_codes = flatisfy.data.load_data("postal_codes", config)
+
     flats = [
         flat.json_api_repr()
         for flat in db.query(flat_model.Flat).all()
     ]
+
+    for flat in flats:
+        if flat["flatisfy_postal_code"]:
+            postal_code_data = postal_codes[flat["flatisfy_postal_code"]]
+            flat["flatisfy_postal_code"] = {
+                "postal_code": flat["flatisfy_postal_code"],
+                "name": postal_code_data["nom"],
+                "gps": postal_code_data["gps"]
+            }
+        else:
+            flat["flatisfy_postal_code"] = {}
+
     return {
         "data": flats
     }
 
 
-def flat_v1(flat_id, db):
+def flats_by_status_v1(status, db):
+    """
+    API v1 flats route with a specific status:
+
+        GET /api/v1/flats/status/:status
+
+    :return: The matching flats objects in a JSON ``data`` dict.
+    """
+    try:
+        flats = [
+            flat.json_api_repr()
+            for flat in (
+                db.query(flat_model.Flat)
+                .filter_by(status=getattr(flat_model.FlatStatus, status))
+                .all()
+            )
+        ]
+    except AttributeError:
+        return bottle.HTTPError(400, "Invalid status provided.")
+
+    return {
+        "data": flats
+    }
+
+
+def flat_v1(flat_id, config, db):
     """
     API v1 flat route:
 
         GET /api/v1/flat/:flat_id
+
+    :return: The flat object in a JSON ``data`` dict.
+    """
+    postal_codes = flatisfy.data.load_data("postal_codes", config)
+
+    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+
+    if not flat:
+        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
+
+    flat = flat.json_api_repr()
+
+    if flat["flatisfy_postal_code"]:
+        postal_code_data = postal_codes[flat["flatisfy_postal_code"]]
+        flat["flatisfy_postal_code"] = {
+            "postal_code": flat["flatisfy_postal_code"],
+            "name": postal_code_data["nom"],
+            "gps": postal_code_data["gps"]
+        }
+    else:
+        flat["flatisfy_postal_code"] = {}
+
+    return {
+        "data": flat
+    }
+
+
+def update_flat_status_v1(flat_id, db):
+    """
+    API v1 route to update flat status:
+
+        POST /api/v1/flat/:flat_id/status
+        Data: {
+            "status": "NEW_STATUS"
+        }
+
+    :return: The new flat object in a JSON ``data`` dict.
     """
     flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+    if not flat:
+        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
+
+    try:
+        flat.status = getattr(
+            flat_model.FlatStatus, json.load(bottle.request.body)["status"]
+        )
+    except (AttributeError, ValueError, KeyError):
+        return bottle.HTTPError(400, "Invalid status provided.")
+
+    json_flat = flat.json_api_repr()
+
     return {
-        "data": flat.json_api_repr()
+        "data": json_flat
+    }
+
+
+def time_to_places_v1(config):
+    """
+    API v1 route to fetch the details of the places to compute time to.
+
+        GET /api/v1/time_to/places
+
+    :return: The JSON dump of the places to compute time to (dict of places
+    names mapped to GPS coordinates).
+    """
+    places = {
+        k: v["gps"]
+        for k, v in config["constraints"]["time_to"].items()
+    }
+    return {
+        "data": places
     }

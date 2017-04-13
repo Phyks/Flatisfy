@@ -104,6 +104,11 @@ The content of this repository is licensed under an MIT license, unless
 explicitly mentionned otherwise.
 
 
+## Contributing
+
+See the `CONTRIBUTING.md` file for more infos.
+
+
 ## Thanks
 
 * [Weboob](http://weboob.org/)

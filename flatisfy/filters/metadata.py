@@ -20,14 +20,20 @@ LOGGER = logging.getLogger(__name__)
 def init(flats_list):
     """
     Create a flatisfy key containing a dict of metadata fetched by flatisfy for
-    each flat in the list.
+    each flat in the list. Also perform some basic transform on flat objects to
+    prepare for the metadata fetching.
 
     :param flats_list: A list of flats dict.
     :return: The updated list
     """
     for flat in flats_list:
+        # Init flatisfy key
         if "flatisfy" not in flat:
             flat["flatisfy"] = {}
+        # Move url key to urls
+        flat["urls"] = [flat["url"]]
+        # Create merged_ids key
+        flat["merged_ids"] = [flat["id"]]
     return flats_list
 
 
@@ -298,11 +304,17 @@ def guess_stations(flats_list, config, distance_threshold=1500):
         # If some stations were already filled in and the result is different,
         # display some warning to the user
         if (
-                "matched_stations" in flat["flatisfy"]["matched_stations"] and
+                "matched_stations" in flat["flatisfy"] and
                 (
                     # Do a set comparison, as ordering is not important
-                    set(flat["flatisfy"]["matched_stations"]) !=
-                    set(good_matched_stations)
+                    set([
+                        station["name"]
+                        for station in flat["flatisfy"]["matched_stations"]
+                    ]) !=
+                    set([
+                        station["name"]
+                        for station in good_matched_stations
+                    ])
                 )
         ):
             LOGGER.warning(

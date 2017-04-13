@@ -5,8 +5,22 @@ Filtering functions to detect and merge duplicates.
 from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
+import logging
 
 from flatisfy import tools
+
+LOGGER = logging.getLogger(__name__)
+
+# Some backends give more infos than others. Here is the precedence we want to
+# use.
+BACKENDS_PRECEDENCE = [
+    "seloger",
+    "pap",
+    "leboncoin",
+    "explorimmo",
+    "logicimmo",
+    "entreparticuliers"
+]
 
 
 def detect(flats_list, key="id", merge=True):
@@ -27,7 +41,6 @@ def detect(flats_list, key="id", merge=True):
 
     :return: A deduplicated list of flat dicts.
     """
-    # TODO: Keep track of found duplicates?
     # ``seen`` is a dict mapping aggregating the flats by the deduplication
     # keys. We basically make buckets of flats for every key value. Flats in
     # the same bucket should be merged together afterwards.
@@ -44,6 +57,18 @@ def detect(flats_list, key="id", merge=True):
             # of the others, to avoid over-deduplication.
             unique_flats_list.extend(matching_flats)
         else:
+            # Sort matching flats by backend precedence
+            matching_flats.sort(
+                key=lambda flat: next(
+                    i for (i, backend) in enumerate(BACKENDS_PRECEDENCE)
+                    if flat["id"].endswith(backend)
+                ),
+                reverse=True
+            )
+
+            if len(matching_flats) > 1:
+                LOGGER.info("Found duplicates: %s.",
+                            [flat["id"] for flat in matching_flats])
             # Otherwise, check the policy
             if merge:
                 # If a merge is requested, do the merge

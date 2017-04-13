@@ -8,6 +8,7 @@ from __future__ import (
 )
 
 import datetime
+import itertools
 import json
 import logging
 import math
@@ -21,6 +22,16 @@ LOGGER = logging.getLogger(__name__)
 
 # Constants
 NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
+
+
+class DateAwareJSONEncoder(json.JSONEncoder):
+    """
+    Extend the default JSON encoder to serialize datetimes to iso strings.
+    """
+    def default(self, o):  # pylint: disable=locally-disabled,E0202
+        if isinstance(o, (datetime.date, datetime.datetime)):
+            return o.isoformat()
+        return json.JSONEncoder.default(self, o)
 
 
 def pretty_json(data):
@@ -38,8 +49,23 @@ def pretty_json(data):
             "toto": "ok"
         }
     """
-    return json.dumps(data, indent=4, separators=(',', ': '),
+    return json.dumps(data, cls=DateAwareJSONEncoder,
+                      indent=4, separators=(',', ': '),
                       sort_keys=True)
+
+
+def batch(iterable, size):
+    """
+    Get items from a sequence a batch at a time.
+
+    :param iterable: The iterable to get the items from.
+    :param size: The size of the batches.
+    :return: A new iterable.
+    """
+    sourceiter = iter(iterable)
+    while True:
+        batchiter = itertools.islice(sourceiter, size)
+        yield itertools.chain([batchiter.next()], batchiter)
 
 
 def is_within_interval(value, min_value=None, max_value=None):
@@ -142,7 +168,7 @@ def distance(gps1, gps2):
     lat2 = math.radians(gps2[0])
     long2 = math.radians(gps2[1])
 
-    # pylint: disable=invalid-name
+    # pylint: disable=locally-disabled,invalid-name
     a = (
         math.sin((lat2 - lat1) / 2.0)**2 +
         math.cos(lat1) * math.cos(lat2) * math.sin((long2 - long1) / 2.0)**2
@@ -175,22 +201,30 @@ def merge_dicts(*args):
     """
     if len(args) == 1:
         return args[0]
-    else:
-        flat1, flat2 = args[:2]
-        merged_flat = {}
-        for k, value2 in flat2.items():
-            value1 = flat1.get(k, None)
-            if value1 is None:
-                # flat1 has empty matching field, just keep the flat2 field
-                merged_flat[k] = value2
-            elif value2 is None:
-                # flat2 field is empty, just keep the flat1 field
-                merged_flat[k] = value1
-            else:
-                # Any other case, we should merge
-                # TODO: Do the merge
-                merged_flat[k] = value1
-        return merge_dicts(merged_flat, *args[2:])
+
+    flat1, flat2 = args[:2]  # pylint: disable=locally-disabled,unbalanced-tuple-unpacking,line-too-long
+    merged_flat = {}
+    for k, value2 in flat2.items():
+        value1 = flat1.get(k, None)
+
+        if k in ["urls", "merged_ids"]:
+            # Handle special fields separately
+            merged_flat[k] = list(set(value2 + value1))
+            continue
+
+        if not value1:
+            # flat1 has empty matching field, just keep the flat2 field
+            merged_flat[k] = value2
+        elif not value2:
+            # flat2 field is empty, just keep the flat1 field
+            merged_flat[k] = value1
+        else:
+            # Any other case, we should keep the value of the more recent flat
+            # dict (the one most at right in arguments)
+            merged_flat[k] = value2
+    for k in [key for key in flat1.keys() if key not in flat2.keys()]:
+        merged_flat[k] = flat1[k]
+    return merge_dicts(merged_flat, *args[2:])
 
 
 def get_travel_time_between(latlng_from, latlng_to, config):

@@ -2,9 +2,12 @@
 """
 This modules defines an SQLAlchemy ORM model for a flat.
 """
-# pylint: disable=invalid-name,too-few-public-methods
+# pylint: disable=locally-disabled,invalid-name,too-few-public-methods
 from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
+
+import arrow
 import enum
 
 from sqlalchemy import Column, DateTime, Enum, Float, String, Text
@@ -13,15 +16,29 @@ from flatisfy.database.base import BASE
 from flatisfy.database.types import MagicJSON
 
 
+LOGGER = logging.getLogger(__name__)
+
+
+class FlatUtilities(enum.Enum):
+    """
+    An enum of the possible utilities status for a flat entry.
+    """
+    included = 10
+    unknown = 0
+    excluded = -10
+
+
 class FlatStatus(enum.Enum):
     """
     An enum of the possible status for a flat entry.
     """
-    purged = -10
+    user_deleted = -100
+    ignored = -10
     new = 0
-    contacted = 10
-    answer_no = 20
-    answer_yes = 21
+    followed = 10
+    contacted = 20
+    answer_no = 30
+    answer_yes = 31
 
 
 class Flat(BASE):
@@ -36,6 +53,7 @@ class Flat(BASE):
     bedrooms = Column(Float)
     cost = Column(Float)
     currency = Column(String)
+    utilities = Column(Enum(FlatUtilities), default=FlatUtilities.unknown)
     date = Column(DateTime)
     details = Column(MagicJSON)
     location = Column(String)
@@ -45,7 +63,8 @@ class Flat(BASE):
     station = Column(String)
     text = Column(Text)
     title = Column(String)
-    url = Column(String)
+    urls = Column(MagicJSON)
+    merged_ids = Column(MagicJSON)
 
     # Flatisfy data
     # TODO: Should be in another table with relationships
@@ -65,25 +84,45 @@ class Flat(BASE):
         # Handle flatisfy metadata
         flat_dict = flat_dict.copy()
         flat_dict["flatisfy_stations"] = (
-            flat_dict["flatisfy"].get("matched_stations", None)
+            flat_dict["flatisfy"].get("matched_stations", [])
         )
         flat_dict["flatisfy_postal_code"] = (
             flat_dict["flatisfy"].get("postal_code", None)
         )
         flat_dict["flatisfy_time_to"] = (
-            flat_dict["flatisfy"].get("time_to", None)
+            flat_dict["flatisfy"].get("time_to", {})
         )
         del flat_dict["flatisfy"]
 
+        # Handle utilities field
+        if not isinstance(flat_dict["utilities"], FlatUtilities):
+            if flat_dict["utilities"] == "C.C.":
+                flat_dict["utilities"] = FlatUtilities.included
+            elif flat_dict["utilities"] == "H.C.":
+                flat_dict["utilities"] = FlatUtilities.excluded
+            else:
+                flat_dict["utilities"] = FlatUtilities.unknown
+
+        # Handle status field
+        flat_status = flat_dict.get("status", "new")
+        if not isinstance(flat_status, FlatStatus):
+            try:
+                flat_dict["status"] = getattr(FlatStatus, flat_status)
+            except AttributeError:
+                if "status" in flat_dict:
+                    del flat_dict["status"]
+                LOGGER.warn("Unkown flat status %s, ignoring it.",
+                            flat_status)
+
         # Handle date field
-        flat_dict["date"] = None  # TODO
+        flat_dict["date"] = arrow.get(flat_dict["date"]).naive
 
         flat_object = Flat()
         flat_object.__dict__.update(flat_dict)
         return flat_object
 
     def __repr__(self):
-        return "<Flat(id=%s, url=%s)>" % (self.id, self.url)
+        return "<Flat(id=%s, urls=%s)>" % (self.id, self.urls)
 
 
     def json_api_repr(self):
@@ -96,6 +135,9 @@ class Flat(BASE):
             for k, v in self.__dict__.items()
             if not k.startswith("_")
         }
-        flat_repr["status"] = str(flat_repr["status"])
+        if isinstance(flat_repr["status"], FlatStatus):
+            flat_repr["status"] = flat_repr["status"].name
+        if isinstance(flat_repr["utilities"], FlatUtilities):
+            flat_repr["utilities"] = flat_repr["utilities"].name
 
         return flat_repr

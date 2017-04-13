@@ -1,6 +1,8 @@
 appdirs
+arrow
 bottle
 bottle-sqlalchemy
+canister
 enum34
 future
 request

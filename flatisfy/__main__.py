@@ -90,6 +90,10 @@ def parse_args(argv=None):
     subparsers.add_parser("import", parents=[parent_parser],
                           help="Import housing posts in database.")
 
+    # Purge subcommand parser
+    subparsers.add_parser("purge", parents=[parent_parser],
+                          help="Purge database.")
+
     # Serve subcommand parser
     parser_serve = subparsers.add_parser("serve", parents=[parent_parser],
                                          help="Serve the web app.")
@@ -103,6 +107,7 @@ def main():
     """
     Main module code.
     """
+    # pylint: disable=locally-disabled,too-many-branches
     # Parse arguments
     args = parse_args()
 
@@ -163,7 +168,12 @@ def main():
         )
     # Import command
     elif args.cmd == "import":
+        # TODO: Do not fetch details for already imported flats / use the last
+        # timestamp
         cmds.import_and_filter(config)
+    # Purge command
+    elif args.cmd == "purge":
+        cmds.purge_db(config)
     # Serve command
     elif args.cmd == "serve":
         cmds.serve(config)

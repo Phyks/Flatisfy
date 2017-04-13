@@ -1,6 +1,8 @@
 build
-*.json
 *.pyc
 *.swp
 *.swo
 *.db
+config/
+node_modules
+flatisfy/web/static/js

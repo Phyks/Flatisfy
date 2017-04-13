@@ -1,0 +1,10 @@
+{
+    extends: ["vue", /* your other extends */],
+    plugins: ["vue"],
+    "env": {
+        "browser": true
+    },
+    rules: {
+        'indent': ["error", 4, { 'SwitchCase': 1 }],
+    }
+}

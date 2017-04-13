@@ -9,6 +9,7 @@ import collections
 import json
 import logging
 import os
+import shutil
 
 import flatisfy.exceptions
 
@@ -157,7 +158,7 @@ def load_data(data_type, config):
         LOGGER.error("Invalid JSON data file: %s.", datafile_path)
         return None
 
-    if len(data) == 0:
+    if not data:
         LOGGER.warning("Loading empty data for %s.", data_type)
 
     return data

@@ -41,16 +41,18 @@ def init_db(database_uri=None):
 
     engine = create_engine(database_uri)
     BASE.metadata.create_all(engine, checkfirst=True)
-    Session = sessionmaker(bind=engine)  # pylint: disable=invalid-name
+    Session = sessionmaker(bind=engine)  # pylint: disable=locally-disabled,invalid-name
 
     @contextmanager
     def get_session():
+        # pylint: disable=locally-disabled,line-too-long
         """
         Provide a transactional scope around a series of operations.
 
         From [1].
         [1]: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html#when-do-i-construct-a-session-when-do-i-commit-it-and-when-do-i-close-it.
         """
+        # pylint: enable=line-too-long,locally-disabled
         session = Session()
         try:
             yield session

@@ -21,10 +21,11 @@ from flatisfy import tools
 
 # Default configuration
 DEFAULT_CONFIG = {
-    # Flatboob queries to fetch
-    "queries": [],
     # Constraints to match
     "constraints": {
+        "type": None,  # RENT, SALE, SHARING
+        "house_types": [],  # List of house types, must be in APART, HOUSE,
+                            # PARKING, LAND, OTHER or UNKNOWN
         "postal_codes": [],  # List of postal codes
         "area": (None, None),  # (min, max) in m^2
         "cost": (None, None),  # (min, max) in currency unit
@@ -42,12 +43,18 @@ DEFAULT_CONFIG = {
     "max_entries": None,
     # Directory in wich data will be put. ``None`` is XDG default location.
     "data_directory": None,
+    # Path to the modules directory containing all Weboob modules. ``None`` if
+    # ``weboob_modules`` package is pip-installed, and you want to use
+    # ``pkgresource`` to automatically find it.
+    "modules_path": None,
     # SQLAlchemy URI to the database to use
     "database": None,
     # Web app port
     "port": 8080,
     # Web app host to listen on
-    "host": "127.0.0.1"
+    "host": "127.0.0.1",
+    # Web server to use to serve the webapp (see Bottle deployment doc)
+    "webserver": None
 }
 
 LOGGER = logging.getLogger(__name__)
@@ -68,7 +75,7 @@ def validate_config(config):
         assert all(
             x is None or
             (
-                (isinstance(x, int) or isinstance(x, float)) and
+                isinstance(x, (float, int)) and
                 x >= 0
             )
             for x in bounds
@@ -81,9 +88,19 @@ def validate_config(config):
         # Then, we disable line-too-long pylint check and E501 flake8 checks
         # and use long lines whenever needed, in order to have the full assert
         # message in the log output.
-        # pylint: disable=line-too-long
+        # pylint: disable=locally-disabled,line-too-long
+        assert "type" in config["constraints"]
+        assert config["constraints"]["type"].upper() in ["RENT",
+                                                         "SALE", "SHARING"]
+
+        assert "house_types" in config["constraints"]
+        assert config["constraints"]["house_types"]
+        for house_type in config["constraints"]["house_types"]:
+            assert house_type.upper() in ["APART", "HOUSE", "PARKING", "LAND",
+                                          "OTHER", "UNKNOWN"]
+
         assert "postal_codes" in config["constraints"]
-        assert len(config["constraints"]["postal_codes"]) > 0
+        assert config["constraints"]["postal_codes"]
 
         assert "area" in config["constraints"]
         _check_constraints_bounds(config["constraints"]["area"])
@@ -111,11 +128,13 @@ def validate_config(config):
         assert config["max_entries"] is None or (isinstance(config["max_entries"], int) and config["max_entries"] > 0)  # noqa: E501
 
         assert config["data_directory"] is None or isinstance(config["data_directory"], str)  # noqa: E501
+        assert config["modules_path"] is None or isinstance(config["modules_path"], str)  # noqa: E501
 
         assert config["database"] is None or isinstance(config["database"], str)  # noqa: E501
 
         assert isinstance(config["port"], int)
         assert isinstance(config["host"], str)
+        assert config["webserver"] is None or isinstance(config["webserver"], str)  # noqa: E501
 
         return True
     except (AssertionError, KeyError):
@@ -140,10 +159,11 @@ def load_config(args=None):
         try:
             with open(args.config, "r") as fh:
                 config_data.update(json.load(fh))
-        except (IOError, ValueError):
+        except (IOError, ValueError) as exc:
             LOGGER.error(
                 "Unable to load configuration from file, "
-                "using default configuration."
+                "using default configuration: %s.",
+                exc
             )
 
     # Overload config with arguments
@@ -188,9 +208,8 @@ def load_config(args=None):
     if config_validation is True:
         LOGGER.info("Config has been fully initialized.")
         return config_data
-    else:
-        LOGGER.error("Error in configuration: %s.", config_validation)
-        return None
+    LOGGER.error("Error in configuration: %s.", config_validation)
+    return None
 
 
 def init_config(output=None):
