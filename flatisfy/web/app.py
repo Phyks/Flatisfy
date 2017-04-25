@@ -83,6 +83,9 @@ def get_app(config):
     app.route("/", "GET", lambda: _serve_static_file("index.html"))
 
     # Static files
-    app.route("/static/<filename:path>", "GET", _serve_static_file)
+    app.route(
+        "/assets/<filename:path>", "GET",
+        lambda filename: _serve_static_file("/assets/{}".format(filename))
+    )
 
     return app

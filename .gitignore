@@ -5,4 +5,4 @@ build
 *.db
 config/
 node_modules
-flatisfy/web/static/js
+flatisfy/web/static/assets

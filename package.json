@@ -10,12 +10,16 @@
   },
   "homepage": "https://git.phyks.me/Phyks/flatisfy",
   "scripts": {
-    "build": "webpack --colors --progress",
-    "watch": "webpack --colors --progress --watch",
+    "build:dev": "webpack --colors --progress",
+    "watch:dev": "webpack --colors --progress --watch",
+    "build:prod": "NODE_ENV=production webpack --colors --progress -p",
+    "watch:prod": "NODE_ENV=production webpack --colors --progress --watch -p",
     "lint": "eslint --ext .js,.vue ./flatisfy/web/js_src/**"
   },
   "dependencies": {
     "es6-promise": "^4.1.0",
+    "font-awesome": "^4.7.0",
+    "font-awesome-webpack": "0.0.5-beta.2",
     "imagesloaded": "^4.1.1",
     "isomorphic-fetch": "^2.2.1",
     "isotope-layout": "^3.0.3",
@@ -42,7 +46,9 @@
     "eslint-plugin-vue": "^2.0.1",
     "file-loader": "^0.11.1",
     "image-webpack-loader": "^3.3.0",
+    "less": "^2.7.2",
     "style-loader": "^0.16.1",
+    "url-loader": "^0.5.8",
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^11.3.4",
     "vue-template-compiler": "^2.2.6",

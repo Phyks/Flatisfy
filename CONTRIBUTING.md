@@ -10,7 +10,8 @@
 * There is a `hooks/pre-commit` file which can be used as a `pre-commit` git
   hook to check coding style.
 * Python coding style is PEP8. JS coding style is enforced by `eslint`.
-* Some useful `npm` scripts are provided (`build` / `watch` / `lint`)
+* Some useful `npm` scripts are provided (`build:{dev,prod}` /
+  `watch:{dev,prod}` / `lint`)
 
 
 ## Translating the webapp

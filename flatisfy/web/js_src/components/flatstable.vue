@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import "font-awesome-webpack"
+
 export default {
     props: ['flats'],
 

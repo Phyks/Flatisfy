@@ -1,8 +1,9 @@
 module.exports = {
     entry: './flatisfy/web/js_src/main.js',
     output: {
-        path: __dirname + '/flatisfy/web/static/js/',
-        filename: 'bundle.js'
+        path: __dirname + '/flatisfy/web/static/assets/',
+        filename: 'bundle.js',
+        publicPath: '/assets/'
     },
     module: {
         loaders: [
@@ -43,6 +44,14 @@ module.exports = {
                         }
                     }
                 ]
+            },
+            {
+                test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+                loader: "url-loader?limit=10000&mimetype=application/font-woff"
+            },
+            {
+                test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+                loader: "file-loader"
             }
         ]
     },

@@ -42,9 +42,9 @@ export default {
             },
             icons: {
                 flat: L.icon({
-                    iconUrl: '/static/js/' + markerUrl,
-                    iconRetinaUrl: '/static/js' + marker2XUrl,
-                    shadowUrl: '/static/js' + shadowUrl
+                    iconUrl: markerUrl,
+                    iconRetinaUrl: marker2XUrl,
+                    shadowUrl: shadowUrl
                 }),
                 place: L.icon.glyph({
                     prefix: 'fa',
