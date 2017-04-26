@@ -3,9 +3,9 @@
         <div class="grid" v-if="flat && timeToPlaces">
             <div class="left-panel">
                 <h2>
-                    <a v-on:click="goBack" class="link">
+                    <router-link :to="'/' + flat.status">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                    </a>
+                    </router-link>
                     ({{ flat.status ? capitalize(flat.status) : '' }}) {{ flat.title }} [{{ flat.id.split("@")[1] }}]
                 </h2>
                 <div class="grid">
@@ -211,10 +211,6 @@ export default {
             this.$store.dispatch('getAllTimeToPlaces')
         },
 
-        goBack () {
-            return this.$router.go(-1)
-        },
-
         updateFlatStatus (status) {
             this.$store.dispatch('updateFlatStatus', { flatId: this.$route.params.id, newStatus: status })
         },
@@ -251,10 +247,6 @@ nav ul {
 
 .contact {
     padding-left: 1em;
-}
-
-.link {
-    cursor: pointer;
 }
 
 .right-panel li {
