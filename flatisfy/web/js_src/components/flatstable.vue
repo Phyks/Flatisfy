@@ -6,28 +6,28 @@
                     {{ $t("flatsDetails.Title") }}
                     <span v-if="sortBy === 'title'">
                         <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
-                        <span class="sr-only"></span>
+                        <span class="sr-only">{{ $t("common.sort" + capitalize(sortOrder)) }}</span>
                     </span>
                 </th>
                 <th class="pointer" v-on:click="updateSortBy('area')">
                     {{ $t("flatsDetails.Area") }}
                     <span v-if="sortBy === 'area'">
                         <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
-                        <span class="sr-only"></span>
+                        <span class="sr-only">{{ $t("common.sort" + capitalize(sortOrder)) }}</span>
                     </span>
                 </th>
                 <th class="pointer" v-on:click="updateSortBy('rooms')">
                     {{ $t("flatsDetails.Rooms") }}
                     <span v-if="sortBy === 'rooms'">
                         <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
-                        <span class="sr-only"></span>
+                        <span class="sr-only">{{ $t("common.sort" + capitalize(sortOrder)) }}</span>
                     </span>
                 </th>
                 <th class="pointer" v-on:click="updateSortBy('cost')">
                     {{ $t("flatsDetails.Cost") }}
                     <span v-if="sortBy === 'cost'">
                         <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
-                        <span class="sr-only"></span>
+                        <span class="sr-only">{{ $t("common.sort" + capitalize(sortOrder)) }}</span>
                     </span>
                 </th>
                 <th>{{ $t("common.Actions") }}</th>
@@ -78,6 +78,8 @@
 <script>
 import "font-awesome-webpack"
 
+import { capitalize } from "../tools"
+
 export default {
     data () {
         return {
@@ -116,7 +118,8 @@ export default {
             } else {
                 this.sortBy = field;
             }
-        }
+        },
+        capitalize: capitalize
     }
 }
 </script>
@@ -142,5 +145,14 @@ button {
 
 .pointer {
     cursor: pointer;
+}
+
+.sr-only {
+    position:absolute;
+    left:-10000px;
+    top:auto;
+    width:1px;
+    height:1px;
+    overflow:hidden;
 }
 </style>

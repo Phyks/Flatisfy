@@ -84,3 +84,4 @@ See the `CONTRIBUTING.md` file for more infos.
 * [Kresus](https://framagit.org/bnjbvr/kresus) which gave me part of the
   original idea (at least proved me such software based on scraping can
   achieve a high quality level :)
+* Current favicon is from [Wikipedia](https://commons.wikimedia.org/wiki/File:Home_Icon.svg)

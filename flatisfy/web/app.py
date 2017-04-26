@@ -83,9 +83,15 @@ def get_app(config):
     app.route("/", "GET", lambda: _serve_static_file("index.html"))
 
     # Static files
+    app.route("/favicon.ico", "GET",
+              lambda: _serve_static_file("favicon.ico"))
     app.route(
         "/assets/<filename:path>", "GET",
         lambda filename: _serve_static_file("/assets/{}".format(filename))
+    )
+    app.route(
+        "/img/<filename:path>", "GET",
+        lambda filename: _serve_static_file("/img/{}".format(filename))
     )
 
     return app
