@@ -2,10 +2,34 @@
     <table>
         <thead>
             <tr>
-                <th>{{ $t("flatsDetails.Title") }}</th>
-                <th>{{ $t("flatsDetails.Area") }}</th>
-                <th>{{ $t("flatsDetails.Rooms") }}</th>
-                <th>{{ $t("flatsDetails.Cost") }}</th>
+                <th class="pointer" v-on:click="updateSortBy('title')">
+                    {{ $t("flatsDetails.Title") }}
+                    <span v-if="sortBy === 'title'">
+                        <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
+                        <span class="sr-only"></span>
+                    </span>
+                </th>
+                <th class="pointer" v-on:click="updateSortBy('area')">
+                    {{ $t("flatsDetails.Area") }}
+                    <span v-if="sortBy === 'area'">
+                        <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
+                        <span class="sr-only"></span>
+                    </span>
+                </th>
+                <th class="pointer" v-on:click="updateSortBy('rooms')">
+                    {{ $t("flatsDetails.Rooms") }}
+                    <span v-if="sortBy === 'rooms'">
+                        <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
+                        <span class="sr-only"></span>
+                    </span>
+                </th>
+                <th class="pointer" v-on:click="updateSortBy('cost')">
+                    {{ $t("flatsDetails.Cost") }}
+                    <span v-if="sortBy === 'cost'">
+                        <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
+                        <span class="sr-only"></span>
+                    </span>
+                </th>
                 <th>{{ $t("common.Actions") }}</th>
             </tr>
         </thead>
@@ -55,17 +79,43 @@
 import "font-awesome-webpack"
 
 export default {
+    data () {
+        return {
+            sortBy: 'cost',
+            sortOrder: 'up'
+        }
+    },
+
     props: ['flats'],
 
     computed: {
         sortedFlats () {
-            return this.flats.sort((flat1, flat2) => flat1.cost - flat2.cost)
+            return this.flats.sort(
+                (flat1, flat2) => {
+                    if (this.sortOrder === "up") {
+                        return flat1[this.sortBy] > flat2[this.sortBy]
+                    } else {
+                        return flat1[this.sortBy] < flat2[this.sortBy]
+                    }
+                }
+            )
         }
     },
 
     methods: {
         updateFlatStatus (id, status) {
             this.$store.dispatch('updateFlatStatus', { flatId: id, newStatus: status })
+        },
+        updateSortBy (field) {
+            if (this.sortBy === field) {
+                if (this.sortOrder === "up") {
+                    this.sortOrder = "down"
+                } else {
+                    this.sortOrder = "up"
+                }
+            } else {
+                this.sortBy = field;
+            }
         }
     }
 }
@@ -87,6 +137,10 @@ button {
     border: none;
     background: transparent;
     font-size: 1em;
+    cursor: pointer;
+}
+
+.pointer {
     cursor: pointer;
 }
 </style>
