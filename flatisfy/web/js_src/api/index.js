@@ -4,7 +4,7 @@ require('es6-promise').polyfill()
 require('isomorphic-fetch')
 
 export const getFlats = function (callback) {
-    fetch('/api/v1/flats')
+    fetch('/api/v1/flats', { credentials: 'same-origin' })
     .then(function (response) {
         return response.json()
     }).then(function (json) {
@@ -22,7 +22,10 @@ export const getFlats = function (callback) {
 }
 
 export const getFlat = function (flatId, callback) {
-    fetch('/api/v1/flat/' + encodeURIComponent(flatId))
+    fetch(
+        '/api/v1/flat/' + encodeURIComponent(flatId),
+        { credentials: 'same-origin' }
+    )
     .then(function (response) {
         return response.json()
     }).then(function (json) {
@@ -40,6 +43,7 @@ export const updateFlatStatus = function (flatId, newStatus, callback) {
     fetch(
         '/api/v1/flat/' + encodeURIComponent(flatId) + '/status',
         {
+            credentials: 'same-origin',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -52,7 +56,7 @@ export const updateFlatStatus = function (flatId, newStatus, callback) {
 }
 
 export const getTimeToPlaces = function (callback) {
-    fetch('/api/v1/time_to/places')
+    fetch('/api/v1/time_to/places', { credentials: 'same-origin' })
     .then(function (response) {
         return response.json()
     }).then(function (json) {

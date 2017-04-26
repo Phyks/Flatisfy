@@ -9,8 +9,8 @@ export default {
         'External_link': 'External link',
         'Follow': 'Follow',
         'Close': 'Close',
-        "sortUp": 'Sort in ascending order',
-        "sortDown": 'Sort in descending order'
+        'sortUp': 'Sort in ascending order',
+        'sortDown': 'Sort in descending order'
     },
     home: {
         'new_available_flats': 'New available flats'

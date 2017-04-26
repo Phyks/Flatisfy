@@ -9,7 +9,7 @@ export default {
         const postalCodeBuckets = {}
 
         state.flats.forEach(flat => {
-            if (filter && filter(flat)) {
+            if (filter && filter(flat)) {  // TODO
                 const postalCode = flat.flatisfy_postal_code.postal_code
                 if (!postalCodeBuckets[postalCode]) {
                     postalCodeBuckets[postalCode] = {

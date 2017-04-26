@@ -76,9 +76,9 @@
 </template>
 
 <script>
-import "font-awesome-webpack"
+import 'font-awesome-webpack'
 
-import { capitalize } from "../tools"
+import { capitalize } from '../tools'
 
 export default {
     data () {
@@ -94,7 +94,7 @@ export default {
         sortedFlats () {
             return this.flats.sort(
                 (flat1, flat2) => {
-                    if (this.sortOrder === "up") {
+                    if (this.sortOrder === 'up') {
                         return flat1[this.sortBy] > flat2[this.sortBy]
                     } else {
                         return flat1[this.sortBy] < flat2[this.sortBy]
@@ -110,13 +110,13 @@ export default {
         },
         updateSortBy (field) {
             if (this.sortBy === field) {
-                if (this.sortOrder === "up") {
-                    this.sortOrder = "down"
+                if (this.sortOrder === 'up') {
+                    this.sortOrder = 'down'
                 } else {
-                    this.sortOrder = "up"
+                    this.sortOrder = 'up'
                 }
             } else {
-                this.sortBy = field;
+                this.sortBy = field
             }
         },
         capitalize: capitalize

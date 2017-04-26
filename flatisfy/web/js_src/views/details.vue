@@ -159,7 +159,7 @@
 </template>
 
 <script>
-import "font-awesome-webpack"
+import 'font-awesome-webpack'
 
 import FlatsMap from '../components/flatsmap.vue'
 import Slider from '../components/slider.vue'
