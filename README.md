@@ -9,6 +9,10 @@ database schema could change at any time. Do not consider it as being
 production ready. However, I am currently using it for my own housing search
 and it is working fine :)
 
+**Note**: For the moment, it requires [this MR on
+Weboob](https://git.weboob.org/weboob/devel/merge_requests/31) which has not
+yet been merged.
+
 
 It uses [Weboob](http://weboob.org/) to get all the housing posts on most of
 the websites offering housings posts, and then offers a bunch of pipelines to
@@ -32,18 +36,7 @@ This code is not restricted to handling flats only!
 
 ## Getting started
 
-1. Clone the repository.
-2. Install required Python modules: `pip install -r requirements.txt`.
-3. Init a configuration file: `python -m flatisfy init-config > config.json`.
-   Edit it according to your needs (see doc).
-4. Build the required data files:
-   `python -m flatisfy build-data --config config.json`.
-5. Use it to `fetch` (and output a filtered JSON list of flats) or `import`
-   (into an SQLite database, for the web visualization) a list of flats
-   matching your criteria.
-6. Install JS libraries and build the webapp:
-   `npm install && npm run build:dev` (use `build:prod` in production).
-7. Use `python -m flatisfy serve --config config.json` to serve the web app.
+See the [getting started guide](doc/0.getting_started.md).
 
 
 ## Documentation
