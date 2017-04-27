@@ -11,6 +11,7 @@ import sys
 import flatisfy.config
 from flatisfy import cmds
 from flatisfy import data
+from flatisfy import fetch
 from flatisfy import tools
 
 
@@ -76,14 +77,18 @@ def parse_args(argv=None):
                           help="Fetch housings posts")
 
     # Filter subcommand parser
-    parser_filter = subparsers.add_parser("filter", parents=[parent_parser],
-                                          help=(
-                                              "Filter housings posts. No "
-                                              "fetching of additional infos "
-                                              "is done."))
+    parser_filter = subparsers.add_parser(
+        "filter", parents=[parent_parser],
+        help="Filter housings posts according to constraints in config."
+    )
     parser_filter.add_argument(
-        "input",
-        help="JSON dump of the housings post to filter."
+        "--input",
+        help=(
+            "Optional JSON dump of the housings post to filter. If provided, "
+            "no additional fetching of infos is done, and the script outputs "
+            "a filtered JSON dump on stdout. If not provided, update status "
+            "of the flats in the database."
+        )
     )
 
     # Import subcommand parser
@@ -149,7 +154,9 @@ def main():
     # Fetch command
     if args.cmd == "fetch":
         # Fetch and filter flats list
-        flats_list, _ = cmds.fetch_and_filter(config)
+        flats_list = fetch.fetch_flats_list(config)
+        flats_list, _ = cmds.filter_flats(config, flats_list=flats_list,
+                                          fetch_details=True)
         # Sort by cost
         flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
 
@@ -159,18 +166,26 @@ def main():
     # Filter command
     elif args.cmd == "filter":
         # Load and filter flats list
-        flats_list = cmds.load_and_filter(args.input, config)
-        # Sort by cost
-        flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
+        if args.input:
+            flats_list = fetch.load_flats_list_from_file(args.input)
 
-        print(
-            tools.pretty_json(flats_list)
-        )
+            flats_list, _ = cmds.filter_flats(config, flats_list=flats_list,
+                                              fetch_details=False)
+
+            # Sort by cost
+            flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
+
+            # Output to stdout
+            print(
+                tools.pretty_json(flats_list)
+            )
+        else:
+            cmds.import_and_filter(config, load_from_db=True)
     # Import command
     elif args.cmd == "import":
         # TODO: Do not fetch details for already imported flats / use the last
         # timestamp
-        cmds.import_and_filter(config)
+        cmds.import_and_filter(config, load_from_db=False)
     # Purge command
     elif args.cmd == "purge":
         cmds.purge_db(config)

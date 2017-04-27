@@ -37,7 +37,10 @@ def _preprocess_ratp(output_dir):
     ratp_data = collections.defaultdict(list)
     for item in ratp_data_raw:
         stop_name = item["fields"]["stop_name"].lower()
-        ratp_data[stop_name].append(item["fields"]["coord"])
+        ratp_data[stop_name].append({
+            "gps": item["fields"]["coord"],
+            "name": item["fields"]["stop_name"]
+        })
 
     # Output it
     with open(os.path.join(output_dir, "ratp.json"), "w") as fh:

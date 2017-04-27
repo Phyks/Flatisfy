@@ -8,7 +8,9 @@ import itertools
 import json
 import logging
 
+from flatisfy import database
 from flatisfy import tools
+from flatisfy.models import flat as flat_model
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,6 +61,13 @@ class WeboobProxy(object):
 
         :param config: A config dict.
         """
+        # Default backends
+        if not config["backends"]:
+            backends = ["seloger", "pap", "leboncoin", "logicimmo",
+                        "explorimmo", "entreparticuliers"]
+        else:
+            backends = config["backends"]
+
         # Create base WebNip object
         self.webnip = WebNip(modules_path=config["modules_path"])
 
@@ -69,8 +78,7 @@ class WeboobProxy(object):
                 module,
                 params={}
             )
-            for module in ["seloger", "pap", "leboncoin", "logicimmo",
-                           "explorimmo", "entreparticuliers"]
+            for module in backends
         ]
 
     def __enter__(self):
@@ -210,13 +218,13 @@ def fetch_details(config, flat_id):
         weboob_output = weboob_proxy.info(flat_id)
 
     flat_details = json.loads(weboob_output)
-    flats_details = WeboobProxy.restore_decimal_fields(flat_details)
+    flat_details = WeboobProxy.restore_decimal_fields(flat_details)
     LOGGER.info("Fetched details for flat %s.", flat_id)
 
     return flat_details
 
 
-def load_flats_list(json_file):
+def load_flats_list_from_file(json_file):
     """
     Load a dumped flats list from JSON file.
 
@@ -231,4 +239,21 @@ def load_flats_list(json_file):
         LOGGER.info("Found %d flats.", len(flats_list))
     except (IOError, ValueError):
         LOGGER.error("File %s is not a valid dump file.", json_file)
+    return flats_list
+
+
+def load_flats_list_from_db(config):
+    """
+    Load flats from database.
+
+    :param config: A config dict.
+    :return: A list of all the flats in the database.
+    """
+    flats_list = []
+    get_session = database.init_db(config["database"])
+
+    with get_session() as session:
+        # TODO: Better serialization
+        flats_list = [flat.json_api_repr()
+                      for flat in session.query(flat_model.Flat).all()]
     return flats_list

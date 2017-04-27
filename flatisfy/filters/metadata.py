@@ -31,9 +31,14 @@ def init(flats_list):
         if "flatisfy" not in flat:
             flat["flatisfy"] = {}
         # Move url key to urls
-        flat["urls"] = [flat["url"]]
+        if "urls" not in flat:
+            if "url" in flat:
+                flat["urls"] = [flat["url"]]
+            else:
+                flat["urls"] = []
         # Create merged_ids key
-        flat["merged_ids"] = [flat["id"]]
+        if "merged_ids" not in flat:
+            flat["merged_ids"] = [flat["id"]]
 
     return flats_list
 
@@ -261,16 +266,18 @@ def guess_stations(flats_list, config, distance_threshold=1500):
                 # of coordinates, for efficiency. Note that multiple stations
                 # with the same name exist in a city, hence the list of
                 # coordinates.
-                for station_gps in opendata["stations"][station[0]]:
-                    distance = tools.distance(station_gps, postal_code_gps)
+                for station_data in opendata["stations"][station[0]]:
+                    distance = tools.distance(station_data["gps"],
+                                              postal_code_gps)
                     if distance < distance_threshold:
                         # If at least one of the coordinates for a given
                         # station is close enough, that's ok and we can add
                         # the station
                         good_matched_stations.append({
-                            "name": station[0],
+                            "key": station[0],
+                            "name": station_data["name"],
                             "confidence": station[1],
-                            "gps": station_gps
+                            "gps": station_data["gps"]
                         })
                         break
                     LOGGER.debug(

@@ -54,7 +54,9 @@ DEFAULT_CONFIG = {
     # Web app host to listen on
     "host": "127.0.0.1",
     # Web server to use to serve the webapp (see Bottle deployment doc)
-    "webserver": None
+    "webserver": None,
+    # List of Weboob backends to use (default to any backend available)
+    "backends": None
 }
 
 LOGGER = logging.getLogger(__name__)
@@ -135,6 +137,7 @@ def validate_config(config):
         assert isinstance(config["port"], int)
         assert isinstance(config["host"], str)
         assert config["webserver"] is None or isinstance(config["webserver"], str)  # noqa: E501
+        assert config["backends"] is None or isinstance(config["backends"], list)  # noqa: E501
 
         return True
     except (AssertionError, KeyError):

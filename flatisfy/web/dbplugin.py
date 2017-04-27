@@ -64,16 +64,15 @@ class DatabasePlugin(object):
         if self.KEYWORD not in callback_args:
             # If no need for a db session, call the route callback
             return callback
-        else:
-            def wrapper(*args, **kwargs):
-                """
-                Wrap the callback in a call to get_session.
-                """
-                with self.get_session() as session:
-                    # Get a db session and pass it to the callback
-                    kwargs[self.KEYWORD] = session
-                    return callback(*args, **kwargs)
-            return wrapper
+        def wrapper(*args, **kwargs):
+            """
+            Wrap the callback in a call to get_session.
+            """
+            with self.get_session() as session:
+                # Get a db session and pass it to the callback
+                kwargs[self.KEYWORD] = session
+                return callback(*args, **kwargs)
+        return wrapper
 
 
 Plugin = DatabasePlugin

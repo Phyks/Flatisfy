@@ -17,18 +17,17 @@ from flatisfy.web import app as web_app
 LOGGER = logging.getLogger(__name__)
 
 
-def fetch_and_filter(config):
+def filter_flats(config, flats_list=None, fetch_details=True):
     """
-    Fetch the available flats list. Then, filter it according to criteria.
+    Filter the available flats list. Then, filter it according to criteria.
 
     :param config: A config dict.
+    :param fetch_details: Whether additional details should be fetched between
+    the two passes.
+    :param flats_list: The initial list of flat objects to filter.
     :return: A tuple of the list of all matching flats and the list of ignored
     flats.
     """
-    # TODO: Reduce load on housings listing websites
-    # Fetch flats list with flatboobs
-    flats_list = fetch.fetch_flats_list(config)
-
     # Do a first pass with the available infos to try to remove as much
     # unwanted postings as possible
     if config["passes"] > 0:
@@ -39,9 +38,10 @@ def fetch_and_filter(config):
     # additional infos
     if config["passes"] > 1:
         # Load additional infos
-        for i, flat in enumerate(flats_list):
-            details = fetch.fetch_details(config, flat["id"])
-            flats_list[i] = tools.merge_dicts(flat, details)
+        if fetch_details:
+            for i, flat in enumerate(flats_list):
+                details = fetch.fetch_details(config, flat["id"])
+                flats_list[i] = tools.merge_dicts(flat, details)
 
         flats_list, extra_ignored_flats = flatisfy.filters.second_pass(
             flats_list, config
@@ -51,44 +51,23 @@ def fetch_and_filter(config):
     return flats_list, ignored_flats
 
 
-def load_and_filter(housing_file, config):
-    """
-    Load the dumped flats list. Then, filter it according to criteria.
-
-    :param housing_file: The JSON file to load flats from.
-    :param config: A config dict.
-    :return: A tuple of the list of all matching flats and the list of ignored
-    flats.
-    """
-    # Load flats list
-    flats_list = fetch.load_flats_list(housing_file)
-
-    # Do a first pass with the available infos to try to remove as much
-    # unwanted postings as possible
-    if config["passes"] > 0:
-        flats_list, ignored_flats = flatisfy.filters.first_pass(flats_list,
-                                                                config)
-
-    # Do a second pass to consolidate all the infos we found
-    if config["passes"] > 1:
-        flats_list, extra_ignored_flats = flatisfy.filters.second_pass(
-            flats_list, config
-        )
-        ignored_flats.extend(extra_ignored_flats)
-
-    return flats_list, ignored_flats
-
-
-def import_and_filter(config):
+def import_and_filter(config, load_from_db=False):
     """
     Fetch the available flats list. Then, filter it according to criteria.
     Finally, store it in the database.
 
     :param config: A config dict.
+    :param load_from_db: Whether to load flats from database or fetch them
+    using Weboob.
     :return: ``None``.
     """
     # Fetch and filter flats list
-    flats_list, ignored_list = fetch_and_filter(config)
+    if load_from_db:
+        flats_list = fetch.load_flats_list_from_db(config)
+    else:
+        flats_list = fetch.fetch_flats_list(config)
+    flats_list, ignored_list = filter_flats(config, flats_list=flats_list,
+                                            fetch_details=True)
     # Create database connection
     get_session = database.init_db(config["database"])
 
