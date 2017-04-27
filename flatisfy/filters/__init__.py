@@ -89,25 +89,23 @@ def first_pass(flats_list, config):
 
     :param flats_list: A list of flats dict to filter.
     :param config: A config dict.
-    :return: A tuple of processed flats and ignored flats.
+    :return: A dict mapping flat status and list of flat objects.
     """
     LOGGER.info("Running first filtering pass.")
 
     # Handle duplicates based on ids
     # Just remove them (no merge) as they should be the exact same object.
-    flats_list = duplicates.detect(
-        flats_list, key="id", merge=False
+    flats_list, duplicates_by_id = duplicates.detect(
+        flats_list, key="id", merge=False, should_intersect=False
     )
-    # Also merge duplicates based on url (these may come from different
+    # Also merge duplicates based on urls (these may come from different
     # flatboob backends)
     # This is especially useful as some websites such as entreparticuliers
     # contains a lot of leboncoin housings posts.
-    flats_list = duplicates.detect(
-        flats_list, key="url", merge=True
+    flats_list, duplicates_by_urls = duplicates.detect(
+        flats_list, key="urls", merge=True, should_intersect=True
     )
 
-    # Add the flatisfy metadata entry and prepare the flat objects
-    flats_list = metadata.init(flats_list)
     # Guess the postal codes
     flats_list = metadata.guess_postal_code(flats_list, config)
     # Try to match with stations
@@ -115,7 +113,11 @@ def first_pass(flats_list, config):
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
 
-    return (flats_list, ignored_list)
+    return {
+        "new": flats_list,
+        "ignored": ignored_list,
+        "duplicate": duplicates_by_id + duplicates_by_urls
+    }
 
 
 def second_pass(flats_list, config):
@@ -131,7 +133,7 @@ def second_pass(flats_list, config):
 
     :param flats_list: A list of flats dict to filter.
     :param config: A config dict.
-    :return: A tuple of processed flats and ignored flats.
+    :return: A dict mapping flat status and list of flat objects.
     """
     LOGGER.info("Running second filtering pass.")
     # Assumed to run after first pass, so there should be no obvious duplicates
@@ -151,4 +153,7 @@ def second_pass(flats_list, config):
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
 
-    return (flats_list, ignored_list)
+    return {
+        "new": flats_list,
+        "ignored": ignored_list
+    }

@@ -23,7 +23,7 @@ BACKENDS_PRECEDENCE = [
 ]
 
 
-def detect(flats_list, key="id", merge=True):
+def detect(flats_list, key="id", merge=True, should_intersect=False):
     """
     Detect obvious duplicates within a given list of flats.
 
@@ -38,18 +38,32 @@ def detect(flats_list, key="id", merge=True):
     done.
     :param merge: Whether the found duplicates should be merged or we should
     only keep one of them.
+    :param should_intersect: Set to ``True`` if the values in the flat dicts
+    are lists and you want to deduplicate on non-empty intersection (typically
+    if they have a common url).
 
-    :return: A deduplicated list of flat dicts.
+    :return: A tuple of the deduplicated list of flat dicts and the list of all
+    the flats objects that should be removed and considered as duplicates (they
+    were already merged).
     """
     # ``seen`` is a dict mapping aggregating the flats by the deduplication
     # keys. We basically make buckets of flats for every key value. Flats in
     # the same bucket should be merged together afterwards.
     seen = collections.defaultdict(list)
     for flat in flats_list:
-        seen[flat.get(key, None)].append(flat)
+        if should_intersect:
+            # We add each value separately. We will add some flats multiple
+            # times, but we deduplicate again on id below to compensate.
+            for value in flat.get(key, []):
+                seen[value].append(flat)
+        else:
+            seen[flat.get(key, None)].append(flat)
 
     # Generate the unique flats list based on these buckets
     unique_flats_list = []
+    # Keep track of all the flats that were removed by deduplication
+    duplicate_flats = []
+
     for flat_key, matching_flats in seen.items():
         if flat_key is None:
             # If the key is None, it means Weboob could not load the data. In
@@ -67,7 +81,8 @@ def detect(flats_list, key="id", merge=True):
             )
 
             if len(matching_flats) > 1:
-                LOGGER.info("Found duplicates: %s.",
+                LOGGER.info("Found duplicates using key \"%s\": %s.",
+                            key,
                             [flat["id"] for flat in matching_flats])
             # Otherwise, check the policy
             if merge:
@@ -76,6 +91,19 @@ def detect(flats_list, key="id", merge=True):
                     tools.merge_dicts(*matching_flats)
                 )
             else:
-                # Otherwise, just keep any of them
-                unique_flats_list.append(matching_flats[0])
-    return unique_flats_list
+                # Otherwise, just keep the most important of them
+                unique_flats_list.append(matching_flats[-1])
+
+            # The ID of the added merged flat will be the one of the last item
+            # in ``matching_flats``. Then, any flat object that was before in
+            # the ``matching_flats`` list is to be considered as a duplicate
+            # and should have a ``duplicate`` status.
+            duplicate_flats.extend(matching_flats[:-1])
+
+    if should_intersect:
+        # We added some flats twice with the above method, let's deduplicate on
+        # id.
+        unique_flats_list, _ = detect(unique_flats_list, key="id", merge=True,
+                                      should_intersect=False)
+
+    return unique_flats_list, duplicate_flats

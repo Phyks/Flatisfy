@@ -155,8 +155,8 @@ def main():
     if args.cmd == "fetch":
         # Fetch and filter flats list
         flats_list = fetch.fetch_flats_list(config)
-        flats_list, _ = cmds.filter_flats(config, flats_list=flats_list,
-                                          fetch_details=True)
+        flats_list = cmds.filter_flats(config, flats_list=flats_list,
+                                       fetch_details=True)["new"]
         # Sort by cost
         flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
 
@@ -169,8 +169,8 @@ def main():
         if args.input:
             flats_list = fetch.load_flats_list_from_file(args.input)
 
-            flats_list, _ = cmds.filter_flats(config, flats_list=flats_list,
-                                              fetch_details=False)
+            flats_list = cmds.filter_flats(config, flats_list=flats_list,
+                                           fetch_details=False)["new"]
 
             # Sort by cost
             flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")

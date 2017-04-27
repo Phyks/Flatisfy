@@ -33,6 +33,7 @@ class FlatStatus(enum.Enum):
     An enum of the possible status for a flat entry.
     """
     user_deleted = -100
+    duplicate = -20
     ignored = -10
     new = 0
     followed = 10
@@ -83,16 +84,17 @@ class Flat(BASE):
         """
         # Handle flatisfy metadata
         flat_dict = flat_dict.copy()
-        flat_dict["flatisfy_stations"] = (
-            flat_dict["flatisfy"].get("matched_stations", [])
-        )
-        flat_dict["flatisfy_postal_code"] = (
-            flat_dict["flatisfy"].get("postal_code", None)
-        )
-        flat_dict["flatisfy_time_to"] = (
-            flat_dict["flatisfy"].get("time_to", {})
-        )
-        del flat_dict["flatisfy"]
+        if "flatisfy" in flat_dict:
+            flat_dict["flatisfy_stations"] = (
+                flat_dict["flatisfy"].get("matched_stations", [])
+            )
+            flat_dict["flatisfy_postal_code"] = (
+                flat_dict["flatisfy"].get("postal_code", None)
+            )
+            flat_dict["flatisfy_time_to"] = (
+                flat_dict["flatisfy"].get("time_to", {})
+            )
+            del flat_dict["flatisfy"]
 
         # Handle utilities field
         if not isinstance(flat_dict["utilities"], FlatUtilities):

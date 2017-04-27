@@ -4,6 +4,7 @@ Main commands available for flatisfy.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import collections
 import logging
 
 import flatisfy.filters
@@ -11,13 +12,14 @@ from flatisfy import database
 from flatisfy.models import flat as flat_model
 from flatisfy import fetch
 from flatisfy import tools
+from flatisfy.filters import metadata
 from flatisfy.web import app as web_app
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-def filter_flats(config, flats_list=None, fetch_details=True):
+def filter_flats(config, flats_list, fetch_details=True):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
@@ -25,30 +27,43 @@ def filter_flats(config, flats_list=None, fetch_details=True):
     :param fetch_details: Whether additional details should be fetched between
     the two passes.
     :param flats_list: The initial list of flat objects to filter.
-    :return: A tuple of the list of all matching flats and the list of ignored
-    flats.
+    :return: A dict mapping flat status and list of flat objects.
     """
+    # Add the flatisfy metadata entry and prepare the flat objects
+    flats_list = metadata.init(flats_list)
+
+    first_pass_result = collections.defaultdict(list)
+    second_pass_result = collections.defaultdict(list)
     # Do a first pass with the available infos to try to remove as much
     # unwanted postings as possible
     if config["passes"] > 0:
-        flats_list, ignored_flats = flatisfy.filters.first_pass(flats_list,
-                                                                config)
+        first_pass_result = flatisfy.filters.first_pass(flats_list,
+                                                        config)
+    else:
+        first_pass_result["new"] = flats_list
+
+    # Load additional infos
+    if fetch_details:
+        for i, flat in enumerate(first_pass_result["new"]):
+            details = fetch.fetch_details(config, flat["id"])
+            first_pass_result["new"][i] = tools.merge_dicts(flat, details)
 
     # Do a second pass to consolidate all the infos we found and make use of
     # additional infos
     if config["passes"] > 1:
-        # Load additional infos
-        if fetch_details:
-            for i, flat in enumerate(flats_list):
-                details = fetch.fetch_details(config, flat["id"])
-                flats_list[i] = tools.merge_dicts(flat, details)
-
-        flats_list, extra_ignored_flats = flatisfy.filters.second_pass(
-            flats_list, config
+        second_pass_result = flatisfy.filters.second_pass(
+            first_pass_result["new"], config
         )
-        ignored_flats.extend(extra_ignored_flats)
+    else:
+        second_pass_result["new"] = first_pass_result["new"]
 
-    return flats_list, ignored_flats
+    return {
+        "new": second_pass_result["new"],
+        "duplicate": first_pass_result["duplicate"],
+        "ignored": (
+            first_pass_result["ignored"] + second_pass_result["ignored"]
+        )
+    }
 
 
 def import_and_filter(config, load_from_db=False):
@@ -66,20 +81,17 @@ def import_and_filter(config, load_from_db=False):
         flats_list = fetch.load_flats_list_from_db(config)
     else:
         flats_list = fetch.fetch_flats_list(config)
-    flats_list, ignored_list = filter_flats(config, flats_list=flats_list,
-                                            fetch_details=True)
+    flats_list_by_status = filter_flats(config, flats_list=flats_list,
+                                        fetch_details=True)
     # Create database connection
     get_session = database.init_db(config["database"])
 
     with get_session() as session:
-        for flat_dict in flats_list:
-            flat = flat_model.Flat.from_dict(flat_dict)
-            session.merge(flat)
-
-        for flat_dict in ignored_list:
-            flat = flat_model.Flat.from_dict(flat_dict)
-            flat.status = flat_model.FlatStatus.ignored
-            session.merge(flat)
+        for status, flats_list in flats_list_by_status.items():
+            for flat_dict in flats_list:
+                flat = flat_model.Flat.from_dict(flat_dict)
+                flat.status = getattr(flat_model.FlatStatus, status)
+                session.merge(flat)
 
 
 def purge_db(config):

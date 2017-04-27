@@ -55,7 +55,7 @@
                             </th>
                             <td>
                                 <template v-if="flat.flatisfy_postal_code.postal_code">
-                                    {{ flat.flatisfy_postal_code.name }} ( {{ flat.flatisfy_postal_code.postal_code }} )
+                                    {{ flat.flatisfy_postal_code.name }} ({{ flat.flatisfy_postal_code.postal_code }})
                                 </template>
                                 <template v-else>
                                     ?
