@@ -34,6 +34,7 @@ def init(flats_list):
         flat["urls"] = [flat["url"]]
         # Create merged_ids key
         flat["merged_ids"] = [flat["id"]]
+
     return flats_list
 
 

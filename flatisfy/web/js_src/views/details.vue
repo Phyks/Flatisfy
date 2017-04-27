@@ -197,7 +197,7 @@ export default {
         },
         displayedStations () {
             if (this.flat.flatisfy_stations.length > 0) {
-                const stationsNames = this.flat.flatisfy_stations.map(station => station.name)
+                const stationsNames = this.flat.flatisfy_stations.map(station => capitalize(station.name))
                 return stationsNames.join(', ')
             } else {
                 return null

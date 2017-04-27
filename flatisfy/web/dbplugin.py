@@ -11,7 +11,6 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
-import functools
 import inspect
 
 import bottle
@@ -33,7 +32,7 @@ class DatabasePlugin(object):
         """
         self.get_session = get_session
 
-    def setup(self, app):  # pylint: disable=no-self-use
+    def setup(self, app):  # pylint: disable=locally-disabled,no-self-use
         """
         Make sure that other installed plugins don't affect the same
         keyword argument and check if metadata is available.

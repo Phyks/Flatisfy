@@ -8,7 +8,6 @@ import itertools
 import json
 import logging
 
-from flatisfy import data
 from flatisfy import tools
 
 LOGGER = logging.getLogger(__name__)
@@ -37,6 +36,22 @@ class WeboobProxy(object):
         :return: The installed Weboob version.
         """
         return WebNip.VERSION
+
+    @staticmethod
+    def restore_decimal_fields(flat):
+        """
+        Parse fields expected to be in Decimal type to float. They were dumped
+        as str in the JSON dump process.
+
+        :param flat: A flat dict.
+        :return: A flat dict with Decimal fields converted to float.
+        """
+        for field in ["area", "cost", "rooms", "bedrooms", "price_per_meter"]:
+            try:
+                flat[field] = float(flat[field])
+            except (TypeError, ValueError):
+                flat[field] = None
+        return flat
 
     def __init__(self, config):
         """
@@ -177,6 +192,8 @@ def fetch_flats_list(config):
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
     flats_list = [json.loads(flat) for flat in housing_posts]
+    flats_list = [WeboobProxy.restore_decimal_fields(flat)
+                  for flat in flats_list]
     return flats_list
 
 
@@ -193,6 +210,7 @@ def fetch_details(config, flat_id):
         weboob_output = weboob_proxy.info(flat_id)
 
     flat_details = json.loads(weboob_output)
+    flats_details = WeboobProxy.restore_decimal_fields(flat_details)
     LOGGER.info("Fetched details for flat %s.", flat_id)
 
     return flat_details

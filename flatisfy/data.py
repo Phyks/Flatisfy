@@ -9,7 +9,6 @@ import collections
 import json
 import logging
 import os
-import shutil
 
 import flatisfy.exceptions
 
