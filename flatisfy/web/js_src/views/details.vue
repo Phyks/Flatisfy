@@ -84,7 +84,7 @@
                                 <template v-if="Object.keys(flat.flatisfy_time_to).length">
                                     <ul class="time_to_list">
                                         <li v-for="(time_to, place) in flat.flatisfy_time_to" :key="place">
-                                            {{ place }}: {{ time_to }}
+                                            {{ place }}: {{ time_to["time"] }}
                                         </li>
                                     </ul>
                                 </template>
@@ -98,7 +98,7 @@
                 <div>
                     <h3>{{ $t("flatsDetails.Location") }}</h3>
 
-                    <FlatsMap :flats="flatMarkers" :places="timeToPlaces"></FlatsMap>
+                    <FlatsMap :flats="flatMarkers" :places="timeToPlaces" :journeys="journeys"></FlatsMap>
                 </div>
             </div>
             <div class="right-panel">
@@ -194,6 +194,24 @@ export default {
         },
         flat () {
             return this.$store.getters.flat(this.$route.params.id)
+        },
+        journeys () {
+            if (Object.keys(this.flat.flatisfy_time_to).length > 0) {
+                const journeys = []
+                for (const place in this.flat.flatisfy_time_to) {
+                    this.flat.flatisfy_time_to[place].sections.forEach(
+                        section => journeys.push({
+                            geojson: section.geojson,
+                            options: {
+                                color: section.color ? ('#' + section.color) : '#2196f3',
+                                dashArray: section.color ? 'none' : '2, 10'
+                            }
+                        })
+                    )
+                }
+                return journeys
+            }
+            return []
         },
         displayedStations () {
             if (this.flat.flatisfy_stations.length > 0) {

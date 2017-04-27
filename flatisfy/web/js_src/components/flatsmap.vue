@@ -12,6 +12,9 @@
                     <v-tooltip :content="place_name"></v-tooltip>
                 </v-marker>
             </template>
+            <template v-for="journey in journeys">
+                <v-geojson-layer :geojson="journey.geojson" :options="Object.assign({}, defaultGeoJSONOptions, journey.options)"></v-geojson-layer>
+            </template>
         </v-map>
     </div>
 </template>
@@ -30,6 +33,13 @@ import Vue2Leaflet from 'vue2-leaflet'
 export default {
     data () {
         return {
+            defaultGeoJSONOptions: {
+                weight: 5,
+                color: '#000',
+                opacity: 1,
+                fillColor: '#e4ce7f',
+                fillOpacity: 1
+            },
             center: null,
             zoom: {
                 defaultZoom: 13,
@@ -59,7 +69,8 @@ export default {
         'v-tilelayer': Vue2Leaflet.TileLayer,
         'v-marker': Vue2Leaflet.Marker,
         'v-tooltip': Vue2Leaflet.Tooltip,
-        'v-popup': Vue2Leaflet.Popup
+        'v-popup': Vue2Leaflet.Popup,
+        'v-geojson-layer': Vue2Leaflet.GeoJSON
     },
 
     computed: {
@@ -77,7 +88,7 @@ export default {
         }
     },
 
-    props: ['flats', 'places']
+    props: ['flats', 'places', 'journeys']
 
     // TODO: Add a switch to display a layer with isochrones
 }

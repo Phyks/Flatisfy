@@ -21,8 +21,7 @@ export default {
     menu: {
         'available_flats': 'Available flats',
         'followed_flats': 'Followed flats',
-        'ignored_flats': 'Ignored flats',
-        'user_deleted_flats': 'User deleted flats'
+        'by_status': 'Flats by status'
     },
     flatsDetails: {
         'Title': 'Title',
@@ -49,7 +48,8 @@ export default {
         'new': 'new',
         'followed': 'followed',
         'ignored': 'ignored',
-        'user_deleted': 'user deleted'
+        'user_deleted': 'user deleted',
+        'duplicate': 'duplicate'
     },
     slider: {
         'Fullscreen_photo': 'Fullscreen photo'

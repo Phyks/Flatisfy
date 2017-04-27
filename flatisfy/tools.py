@@ -235,8 +235,8 @@ def get_travel_time_between(latlng_from, latlng_to, config):
     :param latlng_from: A tuple of (latitude, longitude) for the starting
     point.
     :param latlng_to: A tuple of (latitude, longitude) for the destination.
-    :return: The travel time in seconds. Returns ``None`` if it could not fetch
-    it.
+    :return: A dict of the travel time in seconds and sections of the journey
+    with GeoJSON paths. Returns ``None`` if it could not fetch it.
 
     .. note :: Uses the Navitia API. Requires a ``navitia_api_key`` field to be
     filled-in in the ``config``.
@@ -258,7 +258,28 @@ def get_travel_time_between(latlng_from, latlng_to, config):
                 auth=(config["navitia_api_key"], "")
             )
             req.raise_for_status()
-            time = req.json()["journeys"][0]["durations"]["total"]
+
+            journeys = req.json()["journeys"][0]
+            time = journeys["durations"]["total"]
+            sections = []
+            for section in journeys["sections"]:
+                if section["type"] == "public_transport":
+                    # Public transport
+                    sections.append({
+                        "geojson": section["geojson"],
+                        "color": (
+                            section["display_informations"].get("color", None)
+                        )
+                    })
+                elif section["type"] == "street_network":
+                    # Walking
+                    sections.append({
+                        "geojson": section["geojson"],
+                        "color": None
+                    })
+                else:
+                    # Skip anything else
+                    continue
         except (requests.exceptions.RequestException,
                 ValueError, IndexError, KeyError) as exc:
             # Ignore any possible exception
@@ -272,4 +293,10 @@ def get_travel_time_between(latlng_from, latlng_to, config):
             "No API key available for travel time lookup. Please provide "
             "a Navitia API key. Skipping travel time lookup."
         )
-    return time
+    if time:
+        return {
+            "time": time,
+            "sections": sections
+        }
+    else:
+        return None
