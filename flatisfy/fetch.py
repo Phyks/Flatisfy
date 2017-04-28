@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__)
 
 try:
     from weboob.capabilities.housing import Query
+    from weboob.core.bcall import CallErrors
     from weboob.core.ouiboube import WebNip
     from weboob.tools.json import WeboobEncoder
 except ImportError:
@@ -103,15 +104,31 @@ class WeboobProxy(object):
             query = Query()
             query.cities = []
             for postal_code in postal_codes:
+                matching_cities = []
                 try:
                     for city in self.webnip.do("search_city", postal_code):
-                        query.cities.append(city)
-                except IndexError:
+                        matching_cities.append(city)
+                except CallErrors as exc:
+                    # If an error occured, just log it
                     LOGGER.error(
+                        (
+                            "An error occured while building query for "
+                            "postal code %s: %s"
+                        ),
+                        postal_code,
+                        str(exc)
+                    )
+
+                if not matching_cities:
+                    # If postal code gave no match, warn the user
+                    LOGGER.warn(
                         "Postal code %s could not be matched with a city.",
                         postal_code
                     )
-                    return None
+
+                # Append the matched cities to the query
+                for city in matching_cities:
+                    query.cities.append(city)
 
             try:
                 query.house_types = [
@@ -154,11 +171,18 @@ class WeboobProxy(object):
         """
         housings = []
         # TODO: Handle max_entries better
-        for housing in itertools.islice(
-                self.webnip.do('search_housings', query),
-                max_entries
-        ):
-            housings.append(json.dumps(housing, cls=WeboobEncoder))
+        try:
+            for housing in itertools.islice(
+                    self.webnip.do('search_housings', query),
+                    max_entries
+            ):
+                housings.append(json.dumps(housing, cls=WeboobEncoder))
+        except CallErrors as exc:
+            # If an error occured, just log it
+            LOGGER.error(
+                "An error occured while fetching the housing posts: %s",
+                str(exc)
+            )
         return housings
 
     def info(self, full_flat_id):
@@ -169,13 +193,23 @@ class WeboobProxy(object):
         (ID@BACKEND)
         :return: The details in JSON.
         """
+        housing = {}
         flat_id, backend_name = full_flat_id.rsplit("@", 1)
         backend = next(
             backend
             for backend in self.backends
             if backend.name == backend_name
         )
-        housing = backend.get_housing(flat_id)
+        try:
+            housing = backend.get_housing(flat_id)
+        except CallErrors as exc:
+            # If an error occured, just log it
+            LOGGER.error(
+                "An error occured while fetching housing %s: %s",
+                full_flat_id,
+                str(exc)
+            )
+
         housing.id = full_flat_id  # Otherwise, we miss the @backend afterwards
         return json.dumps(housing, cls=WeboobEncoder)
 

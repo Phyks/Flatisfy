@@ -29,6 +29,7 @@ def filter_flats(config, flats_list, fetch_details=True):
     :param flats_list: The initial list of flat objects to filter.
     :return: A dict mapping flat status and list of flat objects.
     """
+    # pylint: disable=locally-disabled,redefined-variable-type
     # Add the flatisfy metadata entry and prepare the flat objects
     flats_list = metadata.init(flats_list)
 
