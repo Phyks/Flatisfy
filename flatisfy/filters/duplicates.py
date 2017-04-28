@@ -107,3 +107,76 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
                                       should_intersect=False)
 
     return unique_flats_list, duplicate_flats
+
+
+def deep_detect(flats_list):
+    """
+    TODO
+    """
+    for i, flat1 in enumerate(flats_list):
+        for j, flat2 in enumerate(flats_list):
+            if i < j:
+                continue
+
+            n_common_items = 0
+            try:
+                # They should have the same area, up to one unit
+                assert abs(flat1["area"] - flat2["area"]) < 1
+                n_common_items += 1
+
+                # They should be at the same price, up to one unit
+                assert abs(flat1["cost"] - flat2["cost"]) < 1
+                n_common_items += 1
+
+                # They should have the same number of bedrooms if this was
+                # fetched for both
+                if flat1["bedrooms"] and flat2["bedrooms"]:
+                    assert flat1["bedrooms"] == flat2["bedrooms"]
+                    n_common_items += 1
+
+                # They should have the same utilities (included or excluded for
+                # both of them), if this was fetched for both
+                if flat1["utilities"] and flat2["utilities"]:
+                    assert flat1["utilities"] == flat2["utilities"]
+                    n_common_items += 1
+
+                # They should have the same number of rooms if it was fetched
+                # for both of them
+                if flat1["rooms"] and flat2["rooms"]:
+                    assert flat1["rooms"] == flat2["rooms"]
+                    n_common_items += 1
+
+                # They should have the same postal code, if available
+                if (
+                        flat1["flatisfy"].get("postal_code", None) and
+                        flat2["flatisfy"].get("postal_code", None)
+                ):
+                    assert (
+                        flat1["flatisfy"]["postal_code"] ==
+                        flat2["flatisfy"]["postal_code"]
+                    )
+                    n_common_items += 1
+
+                # They should have the same phone number if it was fetched for
+                # both
+                if flat1["phone"] and flat2["phone"]:
+                    homogeneize_phone_number = lambda number: (
+                        number.replace(".", "").replace(" ", "")
+                    )
+                    pass  # TODO: Homogeneize phone numbers
+
+                # TODO: Compare texts (one is included in another? fuzzymatch?)
+            except AssertionError:
+                # Skip and consider as not duplicates whenever the conditions
+                # are not met
+                continue
+            except TypeError:
+                # TypeError occurs when an area or a cost is None, which should
+                # not be considered as duplicates
+                continue
+
+            # TODO: Check the number of common items
+
+            # TODO: Merge flats
+
+            # TODO: Compare photos

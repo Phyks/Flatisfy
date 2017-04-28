@@ -183,8 +183,6 @@ def main():
             cmds.import_and_filter(config, load_from_db=True)
     # Import command
     elif args.cmd == "import":
-        # TODO: Do not fetch details for already imported flats / use the last
-        # timestamp
         cmds.import_and_filter(config, load_from_db=False)
     # Purge command
     elif args.cmd == "purge":

@@ -3,10 +3,11 @@
         <div class="grid" v-if="flat && timeToPlaces">
             <div class="left-panel">
                 <h2>
-                    <router-link :to="'/' + flat.status">
-                        <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                    </router-link>
-                    ({{ flat.status ? capitalize(flat.status) : '' }}) {{ flat.title }} [{{ flat.id.split("@")[1] }}]
+                    (<!--
+                        --><router-link :to="{ name: 'status', params: { status: flat.status }}"><!--
+                            -->{{ flat.status ? capitalize($t("status." + flat.status)) : '' }}<!--
+                        --></router-link><!--
+                    -->) {{ flat.title }} [{{ flat.id.split("@")[1] }}]
                 </h2>
                 <div class="grid">
                     <div class="left-panel">
@@ -128,10 +129,18 @@
                     <ul>
                         <template v-if="flat.status !== 'user_deleted'">
                             <li>
-                                <button v-on:click="updateFlatStatus('follow')">
-                                    <i class="fa fa-star" aria-hidden="true"></i>
-                                    {{ $t("common.Follow") }}
-                                </button>
+                                <template v-if="flat.status !== 'followed'">
+                                    <button v-on:click="updateFlatStatus('followed')">
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        {{ $t("common.Follow") }}
+                                    </button>
+                                </template>
+                                <template v-else>
+                                    <button v-on:click="updateFlatStatus('new')">
+                                        <i class="fa fa-star-o" aria-hidden="true"></i>
+                                        {{ $t("common.Unfollow") }}
+                                    </button>
+                                </template>
                             </li>
                             <li>
                                 <button v-on:click="updateFlatStatus('user_deleted')">

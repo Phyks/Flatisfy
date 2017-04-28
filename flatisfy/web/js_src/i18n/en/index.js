@@ -8,6 +8,7 @@ export default {
         'Restore': 'Restore',
         'External_link': 'External link',
         'Follow': 'Follow',
+        'Unfollow': 'Unfollow',
         'Close': 'Close',
         'sortUp': 'Sort in ascending order',
         'sortDown': 'Sort in descending order'
