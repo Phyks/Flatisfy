@@ -5,6 +5,8 @@ bottle-sqlalchemy
 canister
 enum34
 future
+imagehash
+pillow
 request
 sqlalchemy
 unidecode

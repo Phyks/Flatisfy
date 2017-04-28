@@ -54,6 +54,8 @@ class WeboobProxy(object):
                 flat[field] = float(flat[field])
             except (TypeError, ValueError):
                 flat[field] = None
+            except KeyError:
+                pass
         return flat
 
     def __init__(self, config):
@@ -193,15 +195,23 @@ class WeboobProxy(object):
         (ID@BACKEND)
         :return: The details in JSON.
         """
-        housing = {}
         flat_id, backend_name = full_flat_id.rsplit("@", 1)
-        backend = next(
-            backend
-            for backend in self.backends
-            if backend.name == backend_name
-        )
+        try:
+            backend = next(
+                backend
+                for backend in self.backends
+                if backend.name == backend_name
+            )
+        except StopIteration:
+            LOGGER.error("Backend %s is not available.", backend_name)
+            return "{}"
+
         try:
             housing = backend.get_housing(flat_id)
+            # Otherwise, we miss the @backend afterwards
+            housing.id = full_flat_id
+
+            return json.dumps(housing, cls=WeboobEncoder)
         except CallErrors as exc:
             # If an error occured, just log it
             LOGGER.error(
@@ -209,9 +219,6 @@ class WeboobProxy(object):
                 full_flat_id,
                 str(exc)
             )
-
-        housing.id = full_flat_id  # Otherwise, we miss the @backend afterwards
-        return json.dumps(housing, cls=WeboobEncoder)
 
 
 def fetch_flats_list(config):

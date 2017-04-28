@@ -142,18 +142,20 @@ def second_pass(flats_list, config):
     # Confirm postal code
     flats_list = metadata.guess_postal_code(flats_list, config)
 
-    # TODO: Guess the address
-
     # Better match with stations (confirm and check better)
     flats_list = metadata.guess_stations(flats_list, config)
 
     # Compute travel time to specified points
     flats_list = metadata.compute_travel_times(flats_list, config)
 
+    # Deduplicate the list using every available data
+    flats_list, duplicate_flats = duplicates.deep_detect(flats_list)
+
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
 
     return {
         "new": flats_list,
-        "ignored": ignored_list
+        "ignored": ignored_list,
+        "duplicate": duplicate_flats
     }

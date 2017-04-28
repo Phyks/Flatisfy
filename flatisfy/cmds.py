@@ -60,7 +60,10 @@ def filter_flats(config, flats_list, fetch_details=True):
 
     return {
         "new": second_pass_result["new"],
-        "duplicate": first_pass_result["duplicate"],
+        "duplicate": (
+            first_pass_result["duplicate"] +
+            second_pass_result["duplicate"]
+        ),
         "ignored": (
             first_pass_result["ignored"] + second_pass_result["ignored"]
         )

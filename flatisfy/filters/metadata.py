@@ -236,7 +236,6 @@ def guess_stations(flats_list, config, distance_threshold=1500):
 
     for flat in flats_list:
         flat_station = flat.get("station", None)
-        # TODO: Use flat location field as well?
 
         if not flat_station:
             # Skip everything if empty station

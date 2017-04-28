@@ -5,7 +5,15 @@ Filtering functions to detect and merge duplicates.
 from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
+import itertools
 import logging
+import re
+
+from io import BytesIO
+
+import imagehash
+import PIL.Image
+import requests
 
 from flatisfy import tools
 
@@ -21,6 +29,64 @@ BACKENDS_PRECEDENCE = [
     "logicimmo",
     "entreparticuliers"
 ]
+
+
+def homogeneize_phone_number(number):
+    """
+    Homogeneize the phone numbers, by stripping any space, dash or dot as well
+    as the international prefix. Assumes it is dealing with French phone
+    numbers (starting with a zero and having 10 characters).
+
+    :param number: The phone number to homogeneize.
+    :return: The cleaned phone number. ``None`` if the number is not valid.
+    """
+    if not number:
+        return None
+    number = number.replace(".", "")
+    number = number.replace(" ", "")
+    number = number.replace("-", "")
+    number = number.replace("(", "")
+    number = number.replace(")", "")
+    number = re.sub(r'^\+\d\d', "", number)
+
+    if not number.startswith("0"):
+        number = "0" + number
+
+    if len(number) != 10:
+        return None
+
+    return number
+
+
+def find_number_common_photos(flat1_photos, flat2_photos):
+    """
+    Compute the number of common photos between the two lists of photos for the
+    flats.
+
+    Fetch the photos and compare them with dHash method.
+
+    :param flat1_photos: First list of flat photos. Each photo should be a
+    ``dict`` with a ``url`` key.
+    :param flat2_photos: First list of flat photos. Each photo should be a
+    ``dict`` with a ``url`` key.
+    :return: The found number of common photos.
+    """
+    n_common_photos = 0
+    for photo1, photo2 in itertools.product(flat1_photos, flat2_photos):
+        try:
+            req1 = requests.get(photo1["url"])
+            im1 = PIL.Image.open(BytesIO(req1.content))
+            hash1 = imagehash.average_hash(im1)
+
+            req2 = requests.get(photo2["url"])
+            im2 = PIL.Image.open(BytesIO(req2.content))
+            hash2 = imagehash.average_hash(im2)
+
+            if hash1 - hash2 == 0:
+                n_common_photos += 1
+        except (IOError, requests.exceptions.RequestException):
+            pass
+    return n_common_photos
 
 
 def detect(flats_list, key="id", merge=True, should_intersect=False):
@@ -111,11 +177,21 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
 
 def deep_detect(flats_list):
     """
-    TODO
+    Deeper detection of duplicates based on any available data.
+
+    :param flats_list: A list of flats dicts.
+    :return: A tuple of the deduplicated list of flat dicts and the list of all
+    the flats objects that should be removed and considered as duplicates (they
+    were already merged).
     """
+    matching_flats = collections.defaultdict(list)
     for i, flat1 in enumerate(flats_list):
+        matching_flats[flat1["id"]].append(flat1["id"])
         for j, flat2 in enumerate(flats_list):
-            if i < j:
+            if i <= j:
+                continue
+
+            if flat2["id"] in matching_flats[flat1["id"]]:
                 continue
 
             n_common_items = 0
@@ -157,26 +233,75 @@ def deep_detect(flats_list):
                     )
                     n_common_items += 1
 
+                # TODO: Compare texts (one is included in another? fuzzymatch?)
+
                 # They should have the same phone number if it was fetched for
                 # both
-                if flat1["phone"] and flat2["phone"]:
-                    homogeneize_phone_number = lambda number: (
-                        number.replace(".", "").replace(" ", "")
-                    )
-                    pass  # TODO: Homogeneize phone numbers
+                flat1_phone = homogeneize_phone_number(flat1["phone"])
+                flat2_phone = homogeneize_phone_number(flat2["phone"])
+                if flat1_phone and flat2_phone:
+                    assert flat1_phone == flat2_phone
+                    n_common_items += 10  # Counts much more that the rest
 
-                # TODO: Compare texts (one is included in another? fuzzymatch?)
-            except AssertionError:
+                # They should have at least one photo in common if there
+                # are some photos
+                if flat1["photos"] and flat2["photos"]:
+                    max_number_photos = max(len(flat1["photos"]),
+                                            len(flat2["photos"]))
+                    n_common_photos = find_number_common_photos(
+                        flat1["photos"],
+                        flat2["photos"]
+                    )
+                    assert n_common_photos > 1
+                    n_common_items += int(
+                        20 * n_common_photos / max_number_photos
+                    )
+
+                # Minimal score to consider they are duplicates
+                assert n_common_items >= 15
+            except (AssertionError, TypeError):
                 # Skip and consider as not duplicates whenever the conditions
                 # are not met
-                continue
-            except TypeError:
                 # TypeError occurs when an area or a cost is None, which should
                 # not be considered as duplicates
                 continue
 
-            # TODO: Check the number of common items
+            # Mark flats as duplicates
+            LOGGER.info(
+                ("Found duplicates using deep detection: (%s, %s). "
+                 "Score is %d."),
+                flat1["id"],
+                flat2["id"],
+                n_common_items
+            )
+            matching_flats[flat1["id"]].append(flat2["id"])
+            matching_flats[flat2["id"]].append(flat1["id"])
 
-            # TODO: Merge flats
+    seen_ids = []
+    duplicate_flats = []
+    unique_flats_list = []
+    for flat_id in [flat["id"] for flat in flats_list]:
+        if flat_id in seen_ids:
+            continue
 
-            # TODO: Compare photos
+        seen_ids.extend(matching_flats[flat_id])
+        to_merge = sorted(
+            [
+                flat
+                for flat in flats_list
+                if flat["id"] in matching_flats[flat_id]
+            ],
+            key=lambda flat: next(
+                i for (i, backend) in enumerate(BACKENDS_PRECEDENCE)
+                if flat["id"].endswith(backend)
+            ),
+            reverse=True
+        )
+        unique_flats_list.append(tools.merge_dicts(*to_merge))
+        # The ID of the added merged flat will be the one of the last item
+        # in ``matching_flats``. Then, any flat object that was before in
+        # the ``matching_flats`` list is to be considered as a duplicate
+        # and should have a ``duplicate`` status.
+        duplicate_flats.extend(to_merge[:-1])
+
+    return unique_flats_list, duplicate_flats
