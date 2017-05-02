@@ -3,18 +3,34 @@ import moment from 'moment'
 require('es6-promise').polyfill()
 require('isomorphic-fetch')
 
+const postProcessAPIResults = function (flat) {
+    /* eslint-disable camelcase */
+    if (flat.date) {
+        flat.date = moment(flat.date)
+    }
+    if (flat.flatisfy_time_to) {
+        const momentifiedTimeTo = {}
+        Object.keys(flat.flatisfy_time_to).forEach(key => {
+            const value = flat.flatisfy_time_to[key]
+            momentifiedTimeTo[key] = Object.assign(
+                {},
+                value,
+                { time: moment.duration(value.time, 'seconds') }
+            )
+        })
+        flat.flatisfy_time_to = momentifiedTimeTo
+    }
+    /* eslint-enable camelcase */
+    return flat
+}
+
 export const getFlats = function (callback) {
     fetch('/api/v1/flats', { credentials: 'same-origin' })
     .then(function (response) {
         return response.json()
     }).then(function (json) {
         const flats = json.data
-        flats.map(flat => {
-            if (flat.date) {
-                flat.date = moment(flat.date)
-            }
-            return flat
-        })
+        flats.map(postProcessAPIResults)
         callback(flats)
     }).catch(function (ex) {
         console.error('Unable to parse flats: ' + ex)
@@ -29,11 +45,8 @@ export const getFlat = function (flatId, callback) {
     .then(function (response) {
         return response.json()
     }).then(function (json) {
-        const flat = json.data
-        if (flat.date) {
-            flat.date = moment(flat.date)
-        }
-        callback(json.data)
+        const flat = postProcessAPIResults(json.data)
+        callback(flat)
     }).catch(function (ex) {
         console.error('Unable to parse flats: ' + ex)
     })

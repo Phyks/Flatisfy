@@ -11,7 +11,8 @@ export default {
         'Unfollow': 'Unfollow',
         'Close': 'Close',
         'sortUp': 'Sort in ascending order',
-        'sortDown': 'Sort in descending order'
+        'sortDown': 'Sort in descending order',
+        'mins': 'min | mins'
     },
     home: {
         'new_available_flats': 'New available flats'

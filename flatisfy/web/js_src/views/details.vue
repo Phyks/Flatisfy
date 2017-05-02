@@ -85,7 +85,7 @@
                                 <template v-if="Object.keys(flat.flatisfy_time_to).length">
                                     <ul class="time_to_list">
                                         <li v-for="(time_to, place) in flat.flatisfy_time_to" :key="place">
-                                            {{ place }}: {{ time_to["time"] }}
+                                            {{ place }}: {{ humanizeTimeTo(time_to["time"]) }}
                                         </li>
                                     </ul>
                                 </template>
@@ -240,6 +240,11 @@ export default {
 
         updateFlatStatus (status) {
             this.$store.dispatch('updateFlatStatus', { flatId: this.$route.params.id, newStatus: status })
+        },
+
+        humanizeTimeTo (time) {
+            const minutes = Math.floor(time.as('minutes'))
+            return minutes + ' ' + this.$tc('common.mins', minutes)
         },
 
         capitalize: capitalize
