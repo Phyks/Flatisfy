@@ -90,12 +90,37 @@ def import_and_filter(config, load_from_db=False):
     # Create database connection
     get_session = database.init_db(config["database"])
 
+    LOGGER.info("Merging fetched flats in database...")
     with get_session() as session:
         for status, flats_list in flats_list_by_status.items():
-            for flat_dict in flats_list:
-                flat = flat_model.Flat.from_dict(flat_dict)
-                flat.status = getattr(flat_model.FlatStatus, status)
-                session.merge(flat)
+            # Build SQLAlchemy Flat model objects for every available flat
+            flats_objects = {
+                flat_dict["id"]: flat_model.Flat.from_dict(flat_dict)
+                for flat_dict in flats_list
+            }
+
+            if flats_objects:
+                # If there are some flats, try to merge them with the ones in
+                # db
+                existing_flats_queries = session.query(flat_model.Flat).filter(
+                    flat_model.Flat.id.in_(flats_objects.keys())
+                )
+                for each in existing_flats_queries.all():
+                    # For each flat to merge, take care not to overwrite the
+                    # status if the user defined it
+                    flat_object = flats_objects[each.id]
+                    if each.status in flat_model.AUTOMATED_STATUSES:
+                        flat_object.status = getattr(
+                            flat_model.FlatStatus, status
+                        )
+                    else:
+                        flat_object.status = each.status
+                    # For each flat already in the db, merge it (UPDATE)
+                    # instead of adding it
+                    session.merge(flats_objects.pop(each.id))
+            # Add (INSERT) all the other flats in the db
+            session.add_all(flats_objects.values())
+    LOGGER.info("Done!")
 
 
 def purge_db(config):

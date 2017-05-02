@@ -42,6 +42,15 @@ class FlatStatus(enum.Enum):
     answer_yes = 31
 
 
+# List of statuses that are automatically handled, and which the user cannot
+# manually set through the UI.
+AUTOMATED_STATUSES = [
+    FlatStatus.new,
+    FlatStatus.duplicate,
+    FlatStatus.ignored
+]
+
+
 class Flat(BASE):
     """
     SQLAlchemy ORM model to store a flat.
