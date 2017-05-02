@@ -256,6 +256,7 @@ export default {
 .grid {
     display: grid;
     grid-gap: 50px;
+    grid-template-columns: 75fr 25fr;
 }
 
 .left-panel {
@@ -293,9 +294,18 @@ button {
     font-size: 0.9em;
 }
 
+table {
+    table-layout: fixed;
+}
+
+td {
+    word-wrap: break-word;
+}
+
 .time_to_list {
     margin: 0;
     padding-left: 0;
     list-style-position: outside;
+    list-style-type: none;
 }
 </style>
