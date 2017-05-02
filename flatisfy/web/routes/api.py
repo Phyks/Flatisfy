@@ -13,6 +13,8 @@ import bottle
 import flatisfy.data
 from flatisfy.models import flat as flat_model
 
+# TODO: Flat post-processing code should be factorized
+
 
 def index_v1():
     """
@@ -21,7 +23,10 @@ def index_v1():
         GET /api/v1/
     """
     return {
-        "flats": "/api/v1/flats"
+        "flats": "/api/v1/flats",
+        "flat": "/api/v1/flat/:id",
+        "search": "/api/v1/search",
+        "time_to_places": "/api/v1/time_to/places"
     }
 
 
@@ -157,4 +162,44 @@ def time_to_places_v1(config):
     }
     return {
         "data": places
+    }
+
+
+def search_v1(config, db):
+    """
+    API v1 route to perform a fulltext search on flats.
+
+        POST /api/v1/search
+        Data: {
+            "query": "SOME_QUERY"
+        }
+
+    :return: The matching flat objects in a JSON ``data`` dict.
+    """
+    postal_codes = flatisfy.data.load_data("postal_codes", config)
+
+    try:
+        query = json.load(bottle.request.body)["query"]
+    except (ValueError, KeyError):
+        return bottle.HTTPError(400, "Invalid query provided.")
+
+    flats_db_query = flat_model.Flat.search_query(query)
+    flats = [
+        flat.json_api_repr()
+        for flat in flats_db_query
+    ]
+
+    for flat in flats:
+        if flat["flatisfy_postal_code"]:
+            postal_code_data = postal_codes[flat["flatisfy_postal_code"]]
+            flat["flatisfy_postal_code"] = {
+                "postal_code": flat["flatisfy_postal_code"],
+                "name": postal_code_data["nom"],
+                "gps": postal_code_data["gps"]
+            }
+        else:
+            flat["flatisfy_postal_code"] = {}
+
+    return {
+        "data": flats
     }

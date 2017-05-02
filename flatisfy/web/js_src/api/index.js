@@ -65,7 +65,10 @@ export const updateFlatStatus = function (flatId, newStatus, callback) {
                 status: newStatus
             })
         }
-    ).then(callback)
+    ).then(callback).catch(function (ex) {
+        console.error('Unable to update flat status: ' + ex)
+    })
+
 }
 
 export const getTimeToPlaces = function (callback) {
@@ -77,4 +80,26 @@ export const getTimeToPlaces = function (callback) {
     }).catch(function (ex) {
         console.error('Unable to fetch time to places: ' + ex)
     })
+}
+
+
+export const doSearch = function (query, callback) {
+    fetch(
+        '/api/v1/search',
+        {
+            credentials: 'same-origin',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: query
+            })
+        }
+    ).then(response => response.json()).then(json => {
+        callback(json.data)
+    }).catch(function (ex) {
+        console.error('Unable to perform search: ' + ex)
+    })
+
 }

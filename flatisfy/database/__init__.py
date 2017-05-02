@@ -11,9 +11,11 @@ from contextlib import contextmanager
 from sqlalchemy import event, create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 
 import flatisfy.models.flat  # noqa: F401
 from flatisfy.database.base import BASE
+from flatisfy.database.whooshalchemy import IndexService
 
 
 @event.listens_for(Engine, "connect")
@@ -28,12 +30,13 @@ def set_sqlite_pragma(dbapi_connection, _):
         cursor.close()
 
 
-def init_db(database_uri=None):
+def init_db(database_uri=None, search_db_uri=None):
     """
     Initialize the database, ensuring tables exist etc.
 
     :param database_uri: An URI describing an engine to use. Defaults to
     in-memory SQLite database.
+    :param search_db_uri: Path to the Whoosh index file to use.
     :return: A tuple of an SQLAlchemy session maker and the created engine.
     """
     if database_uri is None:
@@ -54,10 +57,16 @@ def init_db(database_uri=None):
         """
         # pylint: enable=line-too-long,locally-disabled
         session = Session()
+        if search_db_uri:
+            index_service = IndexService(
+                whoosh_base=search_db_uri,
+                session=session
+            )
+            index_service.register_class(flatisfy.models.flat.Flat)
         try:
             yield session
             session.commit()
-        except:
+        except SQLAlchemyError:
             session.rollback()
             raise
         finally:

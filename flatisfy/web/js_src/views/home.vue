@@ -4,9 +4,9 @@
             <FlatsMap :flats="flatsMarkers" :places="timeToPlaces"></FlatsMap>
 
             <h2>{{ $t("home.new_available_flats") }}</h2>
-            <template v-if="postalCodesFlatsBuckets">
+            <template v-if="Object.keys(postalCodesFlatsBuckets).length > 0">
                 <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                    <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", 42) }}</h3>
+                    <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", Object.keys(postalCodesFlatsBuckets).length) }}</h3>
                     <FlatsTable :flats="postal_code_data.flats"></FlatsTable>
                 </template>
             </template>

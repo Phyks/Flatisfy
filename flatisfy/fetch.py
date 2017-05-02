@@ -291,7 +291,7 @@ def load_flats_list_from_db(config):
     :return: A list of all the flats in the database.
     """
     flats_list = []
-    get_session = database.init_db(config["database"])
+    get_session = database.init_db(config["database"], config["search_index"])
 
     with get_session() as session:
         # TODO: Better serialization

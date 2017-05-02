@@ -49,6 +49,9 @@ DEFAULT_CONFIG = {
     "modules_path": None,
     # SQLAlchemy URI to the database to use
     "database": None,
+    # Path to the Whoosh search index file. Use ``None`` to put it in
+    # ``data_directory``.
+    "search_index": None,
     # Web app port
     "port": 8080,
     # Web app host to listen on
@@ -56,7 +59,7 @@ DEFAULT_CONFIG = {
     # Web server to use to serve the webapp (see Bottle deployment doc)
     "webserver": None,
     # List of Weboob backends to use (default to any backend available)
-    "backends": None
+    "backends": None,
 }
 
 LOGGER = logging.getLogger(__name__)
@@ -130,6 +133,7 @@ def validate_config(config):
         assert config["max_entries"] is None or (isinstance(config["max_entries"], int) and config["max_entries"] > 0)  # noqa: E501
 
         assert config["data_directory"] is None or isinstance(config["data_directory"], str)  # noqa: E501
+        assert isinstance(config["search_index"], str)
         assert config["modules_path"] is None or isinstance(config["modules_path"], str)  # noqa: E501
 
         assert config["database"] is None or isinstance(config["database"], str)  # noqa: E501
@@ -205,6 +209,12 @@ def load_config(args=None):
         config_data["database"] = "sqlite:///" + os.path.join(
             config_data["data_directory"],
             "flatisfy.db"
+        )
+
+    if config_data["search_index"] is None:
+        config_data["search_index"] = os.path.join(
+            config_data["data_directory"],
+            "search_index"
         )
 
     config_validation = validate_config(config_data)

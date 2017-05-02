@@ -88,7 +88,7 @@ def import_and_filter(config, load_from_db=False):
     flats_list_by_status = filter_flats(config, flats_list=flats_list,
                                         fetch_details=True)
     # Create database connection
-    get_session = database.init_db(config["database"])
+    get_session = database.init_db(config["database"], config["search_index"])
 
     LOGGER.info("Merging fetched flats in database...")
     with get_session() as session:
@@ -130,12 +130,15 @@ def purge_db(config):
     :param config: A config dict.
     :return: ``None``
     """
-    get_session = database.init_db(config["database"])
+    get_session = database.init_db(config["database"], config["search_index"])
 
     with get_session() as session:
         # Delete every flat in the db
         LOGGER.info("Purge all flats from the database.")
-        session.query(flat_model.Flat).delete(synchronize_session=False)
+        for flat in session.query(flat_model.Flat).all():
+            # Use (slower) deletion by object, to ensure whoosh index is
+            # updated
+            session.delete(flat)
 
 
 def serve(config):

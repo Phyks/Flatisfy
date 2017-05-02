@@ -49,7 +49,7 @@ def get_app(config):
 
     :return: The built bottle app.
     """
-    get_session = database.init_db(config["database"])
+    get_session = database.init_db(config["database"], config["search_index"])
 
     app = bottle.default_app()
     app.install(DatabasePlugin(get_session))
@@ -78,6 +78,8 @@ def get_app(config):
     app.route("/api/v1/flat/:flat_id", "GET", api_routes.flat_v1)
     app.route("/api/v1/flat/:flat_id/status", "POST",
               api_routes.update_flat_status_v1)
+
+    app.route("/api/v1/search", "POST", api_routes.search_v1)
 
     # Index
     app.route("/", "GET", lambda: _serve_static_file("index.html"))

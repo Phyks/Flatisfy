@@ -18,12 +18,14 @@ export default {
         'new_available_flats': 'New available flats'
     },
     flatListing: {
-        'no_available_flats': 'No available flats.'
+        'no_available_flats': 'No available flats.',
+        'no_matching_flats': 'No matching flats.'
     },
     menu: {
         'available_flats': 'Available flats',
         'followed_flats': 'Followed flats',
-        'by_status': 'Flats by status'
+        'by_status': 'Flats by status',
+        'search': 'Search'
     },
     flatsDetails: {
         'Title': 'Title',
@@ -55,5 +57,9 @@ export default {
     },
     slider: {
         'Fullscreen_photo': 'Fullscreen photo'
+    },
+    search: {
+        'input_placeholder': 'Type anything to look for…',
+        'Search': 'Search!'
     }
 }

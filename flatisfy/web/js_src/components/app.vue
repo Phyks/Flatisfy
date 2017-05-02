@@ -6,6 +6,7 @@
                 <li><router-link :to="{name: 'home'}">{{ $t("menu.available_flats") }}</router-link></li>
                 <li><router-link :to="{name: 'status', params: {status: 'followed'}}">{{ $t("menu.followed_flats") }}</router-link></li>
                 <li><router-link :to="{name: 'status', params: {status: 'new'}}">{{ $t("menu.by_status") }}</router-link></li>
+                <li><router-link :to="{name: 'search' }">{{ $t("menu.search") }}</router-link></li>
             </ul>
         </nav>
         <router-view></router-view>

@@ -5,11 +5,13 @@ export default {
 
     flat: (state, getters) => id => state.flats.find(flat => flat.id === id),
 
+    isLoading: state => state.loading,
+
     postalCodesFlatsBuckets: (state, getters) => filter => {
         const postalCodeBuckets = {}
 
         state.flats.forEach(flat => {
-            if (filter && filter(flat)) {  // TODO
+            if (!filter || filter(flat)) {
                 const postalCode = flat.flatisfy_postal_code.postal_code
                 if (!postalCodeBuckets[postalCode]) {
                     postalCodeBuckets[postalCode] = {

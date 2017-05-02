@@ -36,6 +36,10 @@
         <tbody>
             <tr v-for="flat in sortedFlats" :key="flat.id">
                 <td>
+                    <template v-if="flat.status === 'followed'">
+                        <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
+                    </template>
+
                     [{{ flat.id.split("@")[1] }}] {{ flat.title }}
 
                     <template v-if="flat.photos && flat.photos.length > 0">
