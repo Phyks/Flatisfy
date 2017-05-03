@@ -85,8 +85,9 @@ def import_and_filter(config, load_from_db=False):
         flats_list = fetch.load_flats_list_from_db(config)
     else:
         flats_list = fetch.fetch_flats_list(config)
+    # Do not fetch additional details if we loaded data from the db.
     flats_list_by_status = filter_flats(config, flats_list=flats_list,
-                                        fetch_details=True)
+                                        fetch_details=(not load_from_db))
     # Create database connection
     get_session = database.init_db(config["database"], config["search_index"])
 
