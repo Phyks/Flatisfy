@@ -36,7 +36,7 @@
         <tbody>
             <tr v-for="flat in sortedFlats" :key="flat.id">
                 <td>
-                    <template v-if="flat.status === 'followed'">
+                    <template v-for="n in range(flat.notation)">
                         <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
                     </template>
 
@@ -82,7 +82,7 @@
 <script>
 import 'font-awesome-webpack'
 
-import { capitalize } from '../tools'
+import { capitalize, range } from '../tools'
 
 export default {
     data () {
@@ -123,7 +123,8 @@ export default {
                 this.sortBy = field
             }
         },
-        capitalize: capitalize
+        capitalize: capitalize,
+        range: range
     }
 }
 </script>

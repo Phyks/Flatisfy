@@ -27,6 +27,12 @@ export default {
             commit(types.UPDATE_FLAT_STATUS, { flatId, newStatus })
         })
     },
+    updateFlatNotation ({ commit }, { flatId, newNotation }) {
+        commit(types.IS_LOADING)
+        api.updateFlatNotation(flatId, newNotation, response => {
+            commit(types.UPDATE_FLAT_NOTATION, { flatId, newNotation })
+        })
+    },
     updateFlatNotes ({ commit }, { flatId, newNotes }) {
         commit(types.IS_LOADING)
         api.updateFlatNotes(flatId, newNotes, response => {

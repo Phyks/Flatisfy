@@ -136,17 +136,15 @@
                 <nav>
                     <ul>
                         <template v-if="flat.status !== 'user_deleted'">
-                            <li>
-                                <template v-if="flat.status !== 'followed'">
-                                    <button v-on:click="updateFlatStatus('followed')">
+                            <li ref="notationButton">
+                                <template v-for="n in range(notation)">
+                                    <button class="btnIcon" v-on:mouseover="handleNotationHover(n)" v-on:mouseout="handleNotationOut()" v-on:click="updateFlatNotation(n)">
                                         <i class="fa fa-star" aria-hidden="true"></i>
-                                        {{ $t("common.Follow") }}
                                     </button>
                                 </template>
-                                <template v-else>
-                                    <button v-on:click="updateFlatStatus('new')">
+                                <template v-for="n in range(5 - notation)">
+                                    <button class="btnIcon" v-on:mouseover="handleNotationHover(notation + n)" v-on:mouseout="handleNotationOut()" v-on:click="updateFlatNotation(notation + n)">
                                         <i class="fa fa-star-o" aria-hidden="true"></i>
-                                        {{ $t("common.Unfollow") }}
                                     </button>
                                 </template>
                             </li>
@@ -181,7 +179,7 @@ import 'font-awesome-webpack'
 import FlatsMap from '../components/flatsmap.vue'
 import Slider from '../components/slider.vue'
 
-import { capitalize } from '../tools'
+import { capitalize, range } from '../tools'
 
 export default {
     components: {
@@ -202,6 +200,12 @@ export default {
         '$route': 'fetchData'
     },
 
+    data () {
+        return {
+            'overloadNotation': null
+        }
+    },
+
     computed: {
         flatMarkers () {
             return this.$store.getters.flatsMarkers(this.$router, flat => flat.id === this.$route.params.id)
@@ -211,6 +215,12 @@ export default {
         },
         flat () {
             return this.$store.getters.flat(this.$route.params.id)
+        },
+        notation () {
+            if (this.overloadNotation) {
+                return this.overloadNotation
+            }
+            return this.flat.notation
         },
         journeys () {
             if (Object.keys(this.flat.flatisfy_time_to).length > 0) {
@@ -246,8 +256,16 @@ export default {
             this.$store.dispatch('getAllTimeToPlaces')
         },
 
-        updateFlatStatus (status) {
-            this.$store.dispatch('updateFlatStatus', { flatId: this.$route.params.id, newStatus: status })
+        updateFlatNotation (notation) {
+            notation = notation + 1
+
+            if (notation === this.flat.notation) {
+                this.$store.dispatch('updateFlatNotation', { flatId: this.$route.params.id, newNotation: 0 })
+                this.$store.dispatch('updateFlatStatus', { flatId: this.$route.params.id, newStatus: 'new' })
+            } else {
+                this.$store.dispatch('updateFlatNotation', { flatId: this.$route.params.id, newNotation: notation })
+                this.$store.dispatch('updateFlatStatus', { flatId: this.$route.params.id, newStatus: 'followed' })
+            }
         },
 
         updateFlatNotes () {
@@ -263,7 +281,17 @@ export default {
             return minutes + ' ' + this.$tc('common.mins', minutes)
         },
 
-        capitalize: capitalize
+        handleNotationHover (n) {
+            this.overloadNotation = n + 1
+        },
+
+        handleNotationOut () {
+            this.overloadNotation = null
+        },
+
+        capitalize: capitalize,
+
+        range: range
     }
 }
 </script>
@@ -327,5 +355,11 @@ td {
     padding-left: 0;
     list-style-position: outside;
     list-style-type: none;
+}
+
+.btnIcon {
+    border: none;
+    width: auto;
+    background-color: transparent;
 }
 </style>

@@ -39,6 +39,13 @@ export const mutations = {
             Vue.set(state.flats[index], 'notes', newNotes)
         }
     },
+    [types.UPDATE_FLAT_NOTATION] (state, { flatId, newNotation }) {
+        state.loading = false
+        const index = state.flats.findIndex(flat => flat.id === flatId)
+        if (index > -1) {
+            Vue.set(state.flats[index], 'notation', newNotation)
+        }
+    },
     [types.RECEIVE_TIME_TO_PLACES] (state, { timeToPlaces }) {
         state.loading = false
         state.timeToPlaces = timeToPlaces

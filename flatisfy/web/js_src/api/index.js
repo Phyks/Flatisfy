@@ -88,6 +88,24 @@ export const updateFlatNotes = function (flatId, newNotes, callback) {
     })
 }
 
+export const updateFlatNotation = function (flatId, newNotation, callback) {
+    fetch(
+        '/api/v1/flat/' + encodeURIComponent(flatId) + '/notation',
+        {
+            credentials: 'same-origin',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                notation: newNotation
+            })
+        }
+    ).then(callback).catch(function (ex) {
+        console.error('Unable to update flat notation: ' + ex)
+    })
+}
+
 export const getTimeToPlaces = function (callback) {
     fetch('/api/v1/time_to/places', { credentials: 'same-origin' })
     .then(function (response) {

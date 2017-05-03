@@ -10,7 +10,9 @@ import logging
 import arrow
 import enum
 
-from sqlalchemy import Column, DateTime, Enum, Float, String, Text
+from sqlalchemy import (
+    Column, DateTime, Enum, Float, SmallInteger, String, Text
+)
 
 from flatisfy.database.base import BASE
 from flatisfy.database.types import MagicJSON
@@ -77,6 +79,7 @@ class Flat(BASE):
     urls = Column(MagicJSON)
     merged_ids = Column(MagicJSON)
     notes = Column(Text)
+    notation = Column(SmallInteger, default=0)
 
     # Flatisfy data
     # TODO: Should be in another table with relationships
