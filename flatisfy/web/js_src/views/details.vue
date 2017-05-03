@@ -101,6 +101,14 @@
 
                     <FlatsMap :flats="flatMarkers" :places="timeToPlaces" :journeys="journeys"></FlatsMap>
                 </div>
+                <div>
+                    <h3>Notes</h3>
+
+                    <form v-on:submit="updateFlatNotes">
+                        <textarea ref="notesTextarea" rows="10">{{ flat.notes }}</textarea>
+                        <p class="right"><input type="submit" value="Save"/></p>
+                    </form>
+                </div>
             </div>
             <div class="right-panel">
                 <h3>{{ $t("flatsDetails.Contact") }}</h3>
@@ -242,6 +250,14 @@ export default {
             this.$store.dispatch('updateFlatStatus', { flatId: this.$route.params.id, newStatus: status })
         },
 
+        updateFlatNotes () {
+            const notes = this.$refs.notesTextarea.value
+            this.$store.dispatch(
+                'updateFlatNotes',
+                { flatId: this.$route.params.id, newNotes: notes }
+            )
+        },
+
         humanizeTimeTo (time) {
             const minutes = Math.floor(time.as('minutes'))
             return minutes + ' ' + this.$tc('common.mins', minutes)
@@ -267,6 +283,10 @@ export default {
 .right-panel {
     grid-column: 2;
     grid-row: 1;
+}
+
+.left-panel textarea {
+    width: 100%;
 }
 
 .right {

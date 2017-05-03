@@ -68,7 +68,24 @@ export const updateFlatStatus = function (flatId, newStatus, callback) {
     ).then(callback).catch(function (ex) {
         console.error('Unable to update flat status: ' + ex)
     })
+}
 
+export const updateFlatNotes = function (flatId, newNotes, callback) {
+    fetch(
+        '/api/v1/flat/' + encodeURIComponent(flatId) + '/notes',
+        {
+            credentials: 'same-origin',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                notes: newNotes
+            })
+        }
+    ).then(callback).catch(function (ex) {
+        console.error('Unable to update flat notes: ' + ex)
+    })
 }
 
 export const getTimeToPlaces = function (callback) {
@@ -81,7 +98,6 @@ export const getTimeToPlaces = function (callback) {
         console.error('Unable to fetch time to places: ' + ex)
     })
 }
-
 
 export const doSearch = function (query, callback) {
     fetch(
@@ -101,5 +117,4 @@ export const doSearch = function (query, callback) {
     }).catch(function (ex) {
         console.error('Unable to perform search: ' + ex)
     })
-
 }

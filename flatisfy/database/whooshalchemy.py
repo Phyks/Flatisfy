@@ -12,6 +12,7 @@ Based on Flask-whooshalchemy by Karl Gyllstrom (Flask is still supported, but no
 :copyright: (c) 2012 by Karl Gyllstrom
 :license: BSD (see LICENSE.txt)
 """
+# pylint: skip-file
 
 from __future__ import absolute_import, print_function, unicode_literals
 

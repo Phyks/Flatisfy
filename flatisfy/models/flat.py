@@ -76,6 +76,7 @@ class Flat(BASE):
     title = Column(String)
     urls = Column(MagicJSON)
     merged_ids = Column(MagicJSON)
+    notes = Column(Text)
 
     # Flatisfy data
     # TODO: Should be in another table with relationships

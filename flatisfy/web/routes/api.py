@@ -147,6 +147,33 @@ def update_flat_status_v1(flat_id, db):
     }
 
 
+def update_flat_notes_v1(flat_id, db):
+    """
+    API v1 route to update flat notes:
+
+        POST /api/v1/flat/:flat_id/notes
+        Data: {
+            "notes": "NEW_NOTES"
+        }
+
+    :return: The new flat object in a JSON ``data`` dict.
+    """
+    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+    if not flat:
+        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
+
+    try:
+        flat.notes = json.load(bottle.request.body)["notes"]
+    except (ValueError, KeyError):
+        return bottle.HTTPError(400, "Invalid notes provided.")
+
+    json_flat = flat.json_api_repr()
+
+    return {
+        "data": json_flat
+    }
+
+
 def time_to_places_v1(config):
     """
     API v1 route to fetch the details of the places to compute time to.
@@ -165,7 +192,7 @@ def time_to_places_v1(config):
     }
 
 
-def search_v1(config, db):
+def search_v1(config):
     """
     API v1 route to perform a fulltext search on flats.
 

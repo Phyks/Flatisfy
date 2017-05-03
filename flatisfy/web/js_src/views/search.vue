@@ -47,24 +47,24 @@ export default {
             }
 
             return this.$store.getters.postalCodesFlatsBuckets(
-                flat => flat.status != "duplicate" && flat.status != "ignored"
+                flat => flat.status !== 'duplicate' && flat.status !== 'ignored'
             )
         },
         loading () {
-            return this.$store.getters.isLoading;
+            return this.$store.getters.isLoading
         }
     },
 
     methods: {
-        onSearch(event) {
+        onSearch (event) {
             event.preventDefault()
 
-            let query = this.$refs.searchInput.value
+            const query = this.$refs.searchInput.value
             this.$router.replace({ name: 'search', query: { query: query }})
         },
 
-        doSearch() {
-            let query = this.$route.query.query
+        doSearch () {
+            const query = this.$route.query.query
 
             if (query) {
                 this.$store.dispatch('doSearch', { query: query })

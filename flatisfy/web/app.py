@@ -78,6 +78,8 @@ def get_app(config):
     app.route("/api/v1/flat/:flat_id", "GET", api_routes.flat_v1)
     app.route("/api/v1/flat/:flat_id/status", "POST",
               api_routes.update_flat_status_v1)
+    app.route("/api/v1/flat/:flat_id/notes", "POST",
+              api_routes.update_flat_notes_v1)
 
     app.route("/api/v1/search", "POST", api_routes.search_v1)
 
