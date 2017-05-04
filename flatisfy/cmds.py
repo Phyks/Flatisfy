@@ -119,7 +119,12 @@ def import_and_filter(config, load_from_db=False):
                     # For each flat already in the db, merge it (UPDATE)
                     # instead of adding it
                     session.merge(flats_objects.pop(each.id))
-            # Add (INSERT) all the other flats in the db
+
+            # For any other flat, it is not already in the database, so we can
+            # just set the status field without worrying
+            for flat in flats_objects.values():
+                flat.status = getattr(flat_model.FlatStatus, status)
+
             session.add_all(flats_objects.values())
     LOGGER.info("Done!")
 
