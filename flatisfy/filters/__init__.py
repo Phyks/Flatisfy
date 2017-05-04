@@ -44,13 +44,14 @@ def refine_with_housing_criteria(flats_list, config):
 
         # Check time_to
         for place_name, time in flat["flatisfy"].get("time_to", {}).items():
+            time = time["time"]
             is_within_interval = tools.is_within_interval(
                 time,
                 *(config["constraints"]["time_to"][place_name]["time"])
             )
             if not is_within_interval:
-                LOGGER.info("Flat %s is too far from place %s.",
-                            flat["id"], place_name)
+                LOGGER.info("Flat %s is too far from place %s: %ds.",
+                            flat["id"], place_name, time)
             is_ok[i] = is_ok[i] and is_within_interval
 
         # Check other fields
@@ -148,14 +149,32 @@ def second_pass(flats_list, config):
     # Compute travel time to specified points
     flats_list = metadata.compute_travel_times(flats_list, config)
 
-    # Deduplicate the list using every available data
-    flats_list, duplicate_flats = duplicates.deep_detect(flats_list)
-
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
 
     return {
         "new": flats_list,
         "ignored": ignored_list,
+        "duplicate": []
+    }
+
+
+def third_pass(flats_list, config):
+    """
+    Third filtering pass.
+
+    This pass is expected to perform deep duplicate detection on available
+    flats.
+
+    :param flats_list: A list of flats dict to filter.
+    :param config: A config dict.
+    :return: A dict mapping flat status and list of flat objects.
+    """
+    # Deduplicate the list using every available data
+    flats_list, duplicate_flats = duplicates.deep_detect(flats_list)
+
+    return {
+        "new": flats_list,
+        "ignored": [],
         "duplicate": duplicate_flats
     }

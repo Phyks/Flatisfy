@@ -268,6 +268,10 @@ export default {
             }
         },
 
+        updateFlatStatus (status) {
+            this.$store.dispatch('updateFlatStatus', { flatId: this.$route.params.id, newStatus: status })
+        },
+
         updateFlatNotes () {
             const notes = this.$refs.notesTextarea.value
             this.$store.dispatch(

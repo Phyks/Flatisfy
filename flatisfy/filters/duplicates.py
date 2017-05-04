@@ -184,6 +184,7 @@ def deep_detect(flats_list):
     the flats objects that should be removed and considered as duplicates (they
     were already merged).
     """
+    LOGGER.info("Running deep duplicates detection.")
     matching_flats = collections.defaultdict(list)
     for i, flat1 in enumerate(flats_list):
         matching_flats[flat1["id"]].append(flat1["id"])

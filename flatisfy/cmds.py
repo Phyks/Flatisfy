@@ -35,6 +35,7 @@ def filter_flats(config, flats_list, fetch_details=True):
 
     first_pass_result = collections.defaultdict(list)
     second_pass_result = collections.defaultdict(list)
+    third_pass_result = collections.defaultdict(list)
     # Do a first pass with the available infos to try to remove as much
     # unwanted postings as possible
     if config["passes"] > 0:
@@ -58,14 +59,25 @@ def filter_flats(config, flats_list, fetch_details=True):
     else:
         second_pass_result["new"] = first_pass_result["new"]
 
+    # Do a third pass to deduplicate better
+    if config["passes"] > 2:
+        third_pass_result = flatisfy.filters.third_pass(
+            second_pass_result["new"], config
+        )
+    else:
+        third_pass_result["new"] = second_pass_result["new"]
+
     return {
-        "new": second_pass_result["new"],
+        "new": third_pass_result["new"],
         "duplicate": (
             first_pass_result["duplicate"] +
-            second_pass_result["duplicate"]
+            second_pass_result["duplicate"] +
+            third_pass_result["duplicate"]
         ),
         "ignored": (
-            first_pass_result["ignored"] + second_pass_result["ignored"]
+            first_pass_result["ignored"] +
+            second_pass_result["ignored"] +
+            third_pass_result["ignored"]
         )
     }
 

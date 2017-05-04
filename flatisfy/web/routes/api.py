@@ -191,7 +191,7 @@ def update_flat_notation_v1(flat_id, db):
 
     try:
         flat.notation = json.load(bottle.request.body)["notation"]
-        assert flat.notes >= 0 and flat.notes <= 5
+        assert flat.notation >= 0 and flat.notation <= 5
     except (AssertionError, ValueError, KeyError):
         return bottle.HTTPError(400, "Invalid notation provided.")
 

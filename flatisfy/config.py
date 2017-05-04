@@ -38,7 +38,7 @@ DEFAULT_CONFIG = {
     # Navitia API key
     "navitia_api_key": None,
     # Number of filtering passes to run
-    "passes": 2,
+    "passes": 3,
     # Maximum number of entries to fetch
     "max_entries": None,
     # Directory in wich data will be put. ``None`` is XDG default location.
@@ -129,7 +129,7 @@ def validate_config(config):
             assert "time" in item
             _check_constraints_bounds(item["time"])
 
-        assert config["passes"] in [0, 1, 2]
+        assert config["passes"] in [0, 1, 2, 3]
         assert config["max_entries"] is None or (isinstance(config["max_entries"], int) and config["max_entries"] > 0)  # noqa: E501
 
         assert config["data_directory"] is None or isinstance(config["data_directory"], str)  # noqa: E501

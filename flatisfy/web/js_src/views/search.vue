@@ -14,7 +14,7 @@
         </template>
         <template v-else-if="Object.keys(postalCodesFlatsBuckets).length > 0">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", Object.keys(postalCodesFlatsBuckets).length) }}</h3>
+                <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}</h3>
                 <FlatsTable :flats="postal_code_data.flats"></FlatsTable>
             </template>
         </template>
@@ -47,7 +47,7 @@ export default {
             }
 
             return this.$store.getters.postalCodesFlatsBuckets(
-                flat => flat.status !== 'duplicate' && flat.status !== 'ignored'
+                flat => flat.status !== 'duplicate' && flat.status !== 'ignored' && flat.status !== "user_deleted"
             )
         },
         loading () {

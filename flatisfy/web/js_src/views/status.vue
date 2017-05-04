@@ -15,7 +15,7 @@
         </h2>
         <template v-if="Object.keys(postalCodesFlatsBuckets).length">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", Object.keys(postalCodesFlatsBuckets).length) }}</h3>
+                <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}</h3>
                 <FlatsTable :flats="postal_code_data.flats"></FlatsTable>
             </template>
         </template>
