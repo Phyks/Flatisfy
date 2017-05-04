@@ -9,10 +9,11 @@ database schema could change at any time. Do not consider it as being
 production ready. However, I am currently using it for my own housing search
 and it is working fine :)
 
-**Note**: For the moment, it requires [this MR on
+**Note**: For the moment, it requires [this MR on
 Weboob](https://git.weboob.org/weboob/devel/merge_requests/31) which has not
 yet been merged.
 
+<img src="doc/img/home.png" width="45%"/> <img src="doc/img/home2.png" width="45%"/>
 
 It uses [Weboob](http://weboob.org/) to get all the housing posts on most of
 the websites offering housings posts, and then offers a bunch of pipelines to
@@ -42,6 +43,31 @@ See the [getting started guide](doc/0.getting_started.md).
 ## Documentation
 
 See the [dedicated folder](doc/).
+
+
+## Screenshots
+
+### Home page
+
+Display available flats on a map:
+<img src="doc/img/home.png"/>
+
+And list them with the details in a sortable table:
+<img src="doc/img/home2.png"/>
+
+
+### Details page
+
+Uniform display of the flat information in a dedicated page, with the contact etc:
+
+<img src="doc/img/details.png"/>
+
+
+### Follow flats
+
+Track interesting flats and store them with notes:
+
+<img src="doc/img/followed.png"/>
 
 
 ## OpenData
