@@ -36,6 +36,14 @@ export default {
         this.doSearch()
     },
 
+    mounted () {
+        // Fill-in the value of the input
+        const query = this.$route.query.query
+        if (query) {
+            this.$refs.searchInput.value = query
+        }
+    },
+
     watch: {
         '$route': 'doSearch'
     },
@@ -47,7 +55,7 @@ export default {
             }
 
             return this.$store.getters.postalCodesFlatsBuckets(
-                flat => flat.status !== 'duplicate' && flat.status !== 'ignored' && flat.status !== "user_deleted"
+                flat => flat.status !== 'duplicate' && flat.status !== 'ignored' && flat.status !== 'user_deleted'
             )
         },
         loading () {
