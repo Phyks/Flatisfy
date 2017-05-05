@@ -220,7 +220,7 @@ def time_to_places_v1(config):
     }
 
 
-def search_v1(config):
+def search_v1(db, config):
     """
     API v1 route to perform a fulltext search on flats.
 
@@ -238,7 +238,7 @@ def search_v1(config):
     except (ValueError, KeyError):
         return bottle.HTTPError(400, "Invalid query provided.")
 
-    flats_db_query = flat_model.Flat.search_query(query)
+    flats_db_query = flat_model.Flat.search_query(db, query)
     flats = [
         flat.json_api_repr()
         for flat in flats_db_query

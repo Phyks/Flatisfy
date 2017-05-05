@@ -46,6 +46,12 @@ def init_db(database_uri=None, search_db_uri=None):
     BASE.metadata.create_all(engine, checkfirst=True)
     Session = sessionmaker(bind=engine)  # pylint: disable=locally-disabled,invalid-name
 
+    if search_db_uri:
+        index_service = IndexService(
+            whoosh_base=search_db_uri
+        )
+        index_service.register_class(flatisfy.models.flat.Flat)
+
     @contextmanager
     def get_session():
         # pylint: disable=locally-disabled,line-too-long
@@ -57,12 +63,6 @@ def init_db(database_uri=None, search_db_uri=None):
         """
         # pylint: enable=line-too-long,locally-disabled
         session = Session()
-        if search_db_uri:
-            index_service = IndexService(
-                whoosh_base=search_db_uri,
-                session=session
-            )
-            index_service.register_class(flatisfy.models.flat.Flat)
         try:
             yield session
             session.commit()
