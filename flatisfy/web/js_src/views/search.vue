@@ -33,6 +33,8 @@ export default {
     },
 
     created () {
+        document.title = "Flatisfy - " + this.$t('menu.search')  // Set title
+
         this.doSearch()
     },
 

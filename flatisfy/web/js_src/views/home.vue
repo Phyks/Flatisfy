@@ -31,6 +31,8 @@ export default {
     },
 
     created () {
+        document.title = "Flatisfy"  // Set title
+
         // Fetch flats when the component is created
         this.$store.dispatch('getAllFlats')
         // Fetch time to places when the component is created

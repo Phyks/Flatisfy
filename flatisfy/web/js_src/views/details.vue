@@ -110,6 +110,7 @@
                     </form>
                 </div>
             </div>
+
             <div class="right-panel">
                 <h3>{{ $t("flatsDetails.Contact") }}</h3>
                 <div class="contact">
@@ -119,11 +120,11 @@
                             {{ $t("flatsDetails.no_phone_found") }}
                         </template>
                     </p>
-                    <p>{{ $t("flatsDetails.Original_posts") }}
+                    <p>{{ $tc("common.Original_post", 42) }}
                         <ul>
                             <li v-for="(url, index) in flat.urls">
                                 <a :href="url">
-                                    {{ $t("flatsDetails.Original_post") }} {{ index + 1 }}
+                                    {{ $tc("common.Original_post", 1) }} {{ index + 1 }}
                                     <i class="fa fa-external-link" aria-hidden="true"></i>
                                 </a>
                             </li>
@@ -149,7 +150,7 @@
                                 </template>
                             </li>
                             <li>
-                                <button v-on:click="updateFlatStatus('user_deleted')">
+                                <button v-on:click="updateFlatStatus('user_deleted')" class="fullButton">
                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                     {{ $t("common.Remove") }}
                                 </button>
@@ -157,7 +158,7 @@
                         </template>
                         <template v-else>
                             <li>
-                                <button v-on:click="updateFlatStatus('new')">
+                                <button v-on:click="updateFlatStatus('new')" class="fullButton">
                                     <i class="fa fa-undo" aria-hidden="true"></i>
                                     {{ $t("common.Restore") }}
                                 </button>
@@ -188,6 +189,8 @@ export default {
     },
 
     created () {
+        document.title = this.title  // Set title
+
         // Fetch data when the component is created
         this.fetchData()
 
@@ -197,7 +200,10 @@ export default {
 
     watch: {
         // Fetch data again when the component is updated
-        '$route': 'fetchData'
+        '$route': 'fetchData',
+        title () {
+            document.title = this.title;
+        }
     },
 
     data () {
@@ -207,6 +213,9 @@ export default {
     },
 
     computed: {
+        title () {
+            return "Flatisfy - " + this.$route.params.id
+        },
         flatMarkers () {
             return this.$store.getters.flatsMarkers(this.$router, flat => flat.id === this.$route.params.id)
         },
@@ -301,20 +310,22 @@ export default {
 </script>
 
 <style scoped>
-.grid {
-    display: grid;
-    grid-gap: 50px;
-    grid-template-columns: 75fr 25fr;
-}
+@media screen and (min-width: 768px) {
+    .grid {
+        display: grid;
+        grid-gap: 50px;
+        grid-template-columns: 75fr 25fr;
+    }
 
-.left-panel {
-    grid-column: 1;
-    grid-row: 1;
-}
+    .left-panel {
+        grid-column: 1;
+        grid-row: 1;
+    }
 
-.right-panel {
-    grid-column: 2;
-    grid-row: 1;
+    .right-panel {
+        grid-column: 2;
+        grid-row: 1;
+    }
 }
 
 .left-panel textarea {
@@ -365,5 +376,15 @@ td {
     border: none;
     width: auto;
     background-color: transparent;
+}
+
+@media screen and (max-width: 767px) {
+    .right-panel nav {
+        text-align: center;
+    }
+
+    .fullButton {
+        width: 100%;
+    }
 }
 </style>

@@ -49,13 +49,22 @@ export default {
     },
 
     created () {
+        document.title = this.title  // Set title
+
         // Fetch flats when the component is created
         this.$store.dispatch('getAllFlats')
     },
 
+    watch: {
+        title () {
+            // only used when the title changes after page load
+            document.title = this.title;
+        }
+    },
+
     mounted () {
         window.addEventListener('click', event => {
-            if (event.target !== this.$refs.dropdownToggle) {
+            if (event.target !== this.$refs.dropdownToggle && event.target.parentNode !== this.$refs.dropdownToggle) {
                 this.isDropdownVisible = false
             }
         })
@@ -64,6 +73,9 @@ export default {
     computed: {
         postalCodesFlatsBuckets () {
             return this.$store.getters.postalCodesFlatsBuckets(flat => flat.status === this.$route.params.status)
+        },
+        title () {
+            return "Flatisfy - " + capitalize(this.$t("status." + this.$route.params.status))
         }
     },
 
