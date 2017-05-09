@@ -41,7 +41,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="flat in sortedFlats" :key="flat.id" v-on:click="showMore(flat.id)" class="pointer">
+            <tr v-for="flat in sortedFlats" :key="flat.id" v-on:click="event => showMore(event, flat.id)" class="pointer">
                 <td v-if="showNotationColumn">
                     <template v-for="n in range(flat.notation)">
                         <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
@@ -167,8 +167,10 @@ export default {
                 this.sortBy = field
             }
         },
-        showMore (flatId) {
-            this.$router.push({ name: 'details', params: { id: flatId }})
+        showMore (event, flatId) {
+            if (event.target.tagName === "TD") {
+                this.$router.push({ name: 'details', params: { id: flatId }})
+            }
         },
         capitalize: capitalize,
         range: range
