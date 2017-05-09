@@ -2,6 +2,13 @@
     <table>
         <thead>
             <tr>
+                <th v-if="showNotationColumn" class="pointer" v-on:click="updateSortBy('notation')">
+                    {{ $t("flatsDetails.Notation") }}
+                    <span v-if="sortBy === 'notation'">
+                        <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
+                        <span class="sr-only">{{ $t("common.sort" + capitalize(sortOrder)) }}</span>
+                    </span>
+                </th>
                 <th class="pointer" v-on:click="updateSortBy('title')">
                     {{ $t("flatsDetails.Title") }}
                     <span v-if="sortBy === 'title'">
@@ -35,8 +42,13 @@
         </thead>
         <tbody>
             <tr v-for="flat in sortedFlats" :key="flat.id" v-on:click="showMore(flat.id)" class="pointer">
-                <td>
+                <td v-if="showNotationColumn">
                     <template v-for="n in range(flat.notation)">
+                        <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
+                    </template>
+                </td>
+                <td>
+                    <template v-if="!showNotationColumn" v-for="n in range(flat.notation)">
                         <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
                     </template>
 
@@ -45,6 +57,11 @@
                     <template v-if="flat.photos && flat.photos.length > 0">
                         <br/>
                         <img :src="flat.photos[0].url"/>
+                    </template>
+
+                    <template v-if="showNotes">
+                        <br/>
+                        <pre>{{ flat.notes }}</pre>
                     </template>
                 </td>
                 <td>{{ flat.area }} m²</td>
@@ -87,12 +104,39 @@ import { capitalize, range } from '../tools'
 export default {
     data () {
         return {
-            sortBy: 'cost',
-            sortOrder: 'up'
+            sortBy: this.initialSortBy,
+            sortOrder: this.initialSortOrder
         }
     },
 
-    props: ['flats'],
+    props: {
+        flats: Array,
+        showNotationColumn: {
+            type: Boolean,
+            default: false
+        },
+        showNotes: {
+            type: Boolean,
+            default: false
+        },
+        initialSortBy: {
+            type: String,
+            default: 'cost'
+        },
+        initialSortOrder: {
+            type: String,
+            default: 'up'
+        }
+    },
+
+    watch: {
+        initialSortBy () {
+            this.sortBy = this.initialSortBy
+        },
+        initialSortOrder () {
+            this.sortOrder = this.initialSortOrder
+        }
+    },
 
     computed: {
         sortedFlats () {
@@ -162,5 +206,10 @@ button {
     width:1px;
     height:1px;
     overflow:hidden;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 </style>

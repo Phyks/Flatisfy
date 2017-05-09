@@ -202,7 +202,7 @@ export default {
         // Fetch data again when the component is updated
         '$route': 'fetchData',
         title () {
-            document.title = this.title;
+            document.title = this.title
         }
     },
 
@@ -214,7 +214,7 @@ export default {
 
     computed: {
         title () {
-            return "Flatisfy - " + this.$route.params.id
+            return 'Flatisfy - ' + this.$route.params.id
         },
         flatMarkers () {
             return this.$store.getters.flatsMarkers(this.$router, flat => flat.id === this.$route.params.id)

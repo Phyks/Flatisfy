@@ -31,7 +31,7 @@ export default {
     },
 
     created () {
-        document.title = "Flatisfy"  // Set title
+        document.title = 'Flatisfy'  // Set title
 
         // Fetch flats when the component is created
         this.$store.dispatch('getAllFlats')

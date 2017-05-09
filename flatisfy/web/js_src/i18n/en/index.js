@@ -29,6 +29,7 @@ export default {
         'search': 'Search'
     },
     flatsDetails: {
+        'Notation': 'Note',
         'Title': 'Title',
         'Area': 'Area',
         'Rooms': 'Rooms',

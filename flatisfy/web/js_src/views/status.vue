@@ -16,7 +16,13 @@
         <template v-if="Object.keys(postalCodesFlatsBuckets).length">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
                 <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}</h3>
-                <FlatsTable :flats="postal_code_data.flats"></FlatsTable>
+                <FlatsTable
+                    :flats="postal_code_data.flats"
+                    :showNotationColumn="$route.params.status === 'followed'"
+                    :showNotes="$route.params.status === 'followed'"
+                    :initialSortBy="$route.params.status === 'followed' ? 'notation' : undefined"
+                    :initialSortOrder="$route.params.status === 'followed' ? 'down' : undefined"
+                ></FlatsTable>
             </template>
         </template>
         <template v-else>
@@ -58,7 +64,7 @@ export default {
     watch: {
         title () {
             // only used when the title changes after page load
-            document.title = this.title;
+            document.title = this.title
         }
     },
 
@@ -75,7 +81,7 @@ export default {
             return this.$store.getters.postalCodesFlatsBuckets(flat => flat.status === this.$route.params.status)
         },
         title () {
-            return "Flatisfy - " + capitalize(this.$t("status." + this.$route.params.status))
+            return 'Flatisfy - ' + capitalize(this.$t('status.' + this.$route.params.status))
         }
     },
 
@@ -120,6 +126,7 @@ export default {
     font-weight: 700;
     color: #333;
     font-family: "Helvetica", "Arial", sans-serif;
+    cursor: pointer;
 }
 
 .hidden {
