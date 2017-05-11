@@ -140,15 +140,17 @@ export default {
 
     computed: {
         sortedFlats () {
-            return this.flats.sort(
+            const sortedFlats = this.flats.slice(0)
+            sortedFlats.sort(
                 (flat1, flat2) => {
                     if (this.sortOrder === 'up') {
-                        return flat1[this.sortBy] > flat2[this.sortBy]
+                        return flat1[this.sortBy] - flat2[this.sortBy]
                     } else {
-                        return flat1[this.sortBy] < flat2[this.sortBy]
+                        return flat2[this.sortBy] - flat1[this.sortBy]
                     }
                 }
             )
+            return sortedFlats
         }
     },
 
@@ -168,7 +170,7 @@ export default {
             }
         },
         showMore (event, flatId) {
-            if (event.target.tagName === "TD") {
+            if (event.target.tagName === 'TD') {
                 this.$router.push({ name: 'details', params: { id: flatId }})
             }
         },
