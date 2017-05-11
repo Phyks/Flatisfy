@@ -215,5 +215,6 @@ button {
 pre {
     white-space: pre-wrap;
     word-wrap: break-word;
+    word-break: break-all;
 }
 </style>

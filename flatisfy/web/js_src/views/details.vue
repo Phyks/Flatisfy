@@ -363,6 +363,8 @@ table {
 
 td {
     word-wrap: break-word;
+    word-break: break-all;
+    white-space: pre-wrap;
 }
 
 .time_to_list {
