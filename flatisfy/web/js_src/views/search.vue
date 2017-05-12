@@ -9,8 +9,8 @@
         </form>
 
         <h2>Results</h2>
-        <template v-if="loading">
-            {{ $t("common.loading") }}
+        <template v-if="isLoading">
+            <p>{{ $t("common.loading") }}</p>
         </template>
         <template v-else-if="Object.keys(postalCodesFlatsBuckets).length > 0">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
@@ -60,7 +60,7 @@ export default {
                 flat => flat.status !== 'duplicate' && flat.status !== 'ignored' && flat.status !== 'user_deleted'
             )
         },
-        loading () {
+        isLoading () {
             return this.$store.getters.isLoading
         }
     },

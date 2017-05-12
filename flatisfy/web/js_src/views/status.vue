@@ -13,7 +13,11 @@
                 </li>
             </ul>
         </h2>
-        <template v-if="Object.keys(postalCodesFlatsBuckets).length">
+
+        <template v-if="isLoading">
+            <p>{{ $t("common.loading") }}</p>
+        </template>
+        <template v-else-if="Object.keys(postalCodesFlatsBuckets).length">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
                 <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}</h3>
                 <FlatsTable
@@ -82,6 +86,9 @@ export default {
         },
         title () {
             return 'Flatisfy - ' + capitalize(this.$t('status.' + this.$route.params.status))
+        },
+        isLoading () {
+            return this.$store.getters.isLoading
         }
     },
 

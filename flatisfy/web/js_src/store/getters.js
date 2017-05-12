@@ -5,7 +5,7 @@ export default {
 
     flat: (state, getters) => id => state.flats.find(flat => flat.id === id),
 
-    isLoading: state => state.loading,
+        isLoading: state => state.loading > 0,
 
     postalCodesFlatsBuckets: (state, getters) => filter => {
         const postalCodeBuckets = {}

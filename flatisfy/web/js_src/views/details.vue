@@ -1,6 +1,9 @@
 <template>
     <div>
-        <div class="grid" v-if="flat && timeToPlaces">
+        <template v-if="isLoading">
+            <p>{{ $t("common.loading") }}</p>
+        </template>
+        <div class="grid" v-else-if="flat && timeToPlaces">
             <div class="left-panel">
                 <h2>
                     (<!--
@@ -168,9 +171,6 @@
                 </nav>
             </div>
         </div>
-        <template v-else>
-            <p>{{ $t("common.loading") }}</p>
-        </template>
     </div>
 </template>
 
@@ -213,6 +213,9 @@ export default {
     },
 
     computed: {
+        isLoading () {
+            return this.$store.getters.isLoading
+        },
         title () {
             return 'Flatisfy - ' + this.$route.params.id
         },
