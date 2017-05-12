@@ -391,5 +391,9 @@ td {
     .fullButton {
         width: 100%;
     }
+
+    td, th {
+        padding: 0;
+    }
 }
 </style>

@@ -46,7 +46,8 @@ export default {
         'Contact': 'Contact',
         'no_phone_found': 'No phone found',
         'rooms': 'room | rooms',
-        'bedrooms': 'bedroom | bedrooms'
+        'bedrooms': 'bedroom | bedrooms',
+        'RM': 'RM'
     },
     status: {
         'new': 'new',

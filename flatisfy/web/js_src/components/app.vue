@@ -15,13 +15,30 @@
 
 <style>
 body {
-  margin: 0 auto;
-  max-width: 75em;
-  font-family: "Helvetica", "Arial", sans-serif;
-  line-height: 1.5;
-  padding: 4em 1em;
-  padding-top: 1em;
-  color: #555;
+    margin: 0 auto;
+    max-width: 75em;
+    font-family: "Helvetica", "Arial", sans-serif;
+    line-height: 1.5;
+    padding: 4em 1em;
+    padding-top: 1em;
+    color: #555;
+    font-size: 14px;
+}
+
+.mobile-only {
+    display: none;
+}
+
+@media screen and (max-width: 767px) {
+    body {
+        max-width: auto;
+        width: 100%;
+        padding: 1em 0.1em;
+    }
+
+    .mobile-only {
+        display: initial;
+    }
 }
 
 h1 {

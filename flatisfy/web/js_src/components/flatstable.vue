@@ -67,6 +67,7 @@
                 <td>{{ flat.area }} m²</td>
                 <td>
                     {{ flat.rooms ? flat.rooms : '?'}}
+                    <span class="mobile-only">{{ $t("flatsDetails.RM") }}</span>
                 </td>
                 <td>
                     {{ flat.cost }} {{ flat.currency }}
@@ -97,6 +98,7 @@
 </template>
 
 <script>
+// TODO: Table is too wide on mobile device, and button trash is not aligned with links
 import 'font-awesome-webpack'
 
 import { capitalize, range } from '../tools'
@@ -216,5 +218,29 @@ pre {
     white-space: pre-wrap;
     word-wrap: break-word;
     word-break: break-all;
+}
+
+@media screen and (max-width: 767px) {
+    table {
+        margin: 0;
+        width: 100%;
+    }
+
+    thead {
+        display: none;
+    }
+
+    th, td {
+        padding: 0.25em;
+    }
+
+    td a, td button {
+        display: block;
+        width: 1em;
+    }
+
+    td {
+        vertical-align: top;
+    }
 }
 </style>
