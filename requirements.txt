@@ -7,7 +7,7 @@ enum34
 future
 imagehash
 pillow
-request
+requests
 sqlalchemy
 unidecode
 whoosh
