@@ -41,28 +41,30 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="flat in sortedFlats" :key="flat.id" v-on:click="event => showMore(event, flat.id)" class="pointer">
+            <tr v-for="flat in sortedFlats" :key="flat.id">
                 <td v-if="showNotationColumn">
                     <template v-for="n in range(flat.notation)">
                         <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
                     </template>
                 </td>
                 <td>
-                    <template v-if="!showNotationColumn" v-for="n in range(flat.notation)">
-                        <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
-                    </template>
+                    <a class="fill" :href="makeDetailsUrl(flat.id)">
+                        <template v-if="!showNotationColumn" v-for="n in range(flat.notation)">
+                            <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
+                        </template>
 
-                    [{{ flat.id.split("@")[1] }}] {{ flat.title }}
+                        [{{ flat.id.split("@")[1] }}] {{ flat.title }}
 
-                    <template v-if="flat.photos && flat.photos.length > 0">
-                        <br/>
-                        <img :src="flat.photos[0].url"/>
-                    </template>
+                        <template v-if="flat.photos && flat.photos.length > 0">
+                            <br/>
+                            <img :src="flat.photos[0].url"/>
+                        </template>
 
-                    <template v-if="showNotes">
-                        <br/>
-                        <pre>{{ flat.notes }}</pre>
-                    </template>
+                        <template v-if="showNotes">
+                            <br/>
+                            <pre>{{ flat.notes }}</pre>
+                        </template>
+                    </a>
                 </td>
                 <td>{{ flat.area }} m²</td>
                 <td>
@@ -169,10 +171,8 @@ export default {
                 this.sortBy = field
             }
         },
-        showMore (event, flatId) {
-            if (event.target.tagName === 'TD') {
-                this.$router.push({ name: 'details', params: { id: flatId }})
-            }
+        makeDetailsUrl(flatId) {
+            return `/#/flat/${flatId}`;
         },
         capitalize: capitalize,
         range: range
@@ -216,5 +216,12 @@ pre {
     white-space: pre-wrap;
     word-wrap: break-word;
     word-break: break-all;
+}
+
+.fill {
+    display: block;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
 }
 </style>
