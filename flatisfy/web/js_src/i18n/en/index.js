@@ -34,6 +34,7 @@ export default {
         'Area': 'Area',
         'Rooms': 'Rooms',
         'Cost': 'Cost',
+        'SquareMeterCost': 'Cost / m²',
         'utilities_included': '(utilities included)',
         'utilities_excluded': '(utilities excluded)',
         'Description': 'Description',
