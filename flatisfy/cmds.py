@@ -9,6 +9,7 @@ import logging
 
 import flatisfy.filters
 from flatisfy import database
+from flatisfy import email
 from flatisfy.models import flat as flat_model
 from flatisfy.models import postal_code as postal_code_model
 from flatisfy.models import public_transport as public_transport_model
@@ -143,6 +144,8 @@ def import_and_filter(config, load_from_db=False):
     # Create database connection
     get_session = database.init_db(config["database"], config["search_index"])
 
+    new_flats = []
+
     LOGGER.info("Merging fetched flats in database...")
     # Flatten the flats_by_status dict
     flatten_flats_by_status = collections.defaultdict(list)
@@ -182,8 +185,14 @@ def import_and_filter(config, load_from_db=False):
             # just set the status field without worrying
             for flat in flats_objects.values():
                 flat.status = getattr(flat_model.FlatStatus, status)
+                if flat.status == flat_model.FlatStatus.new:
+                    new_flats.append(flat)
 
             session.add_all(flats_objects.values())
+
+        if config["send_email"]:
+            email.send_notification(config, new_flats)
+
     LOGGER.info("Done!")
 
 

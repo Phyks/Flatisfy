@@ -62,6 +62,15 @@ DEFAULT_CONFIG = {
     "webserver": None,
     # List of Weboob backends to use (default to any backend available)
     "backends": None,
+    # Should email notifications be sent?
+    "send_email": False,
+    "smtp_server": 'localhost',
+    "smtp_port": 25,
+    "smtp_from": "noreply@flatisfy.org",
+    "smtp_to": [],
+    # The web site url, to be used in email notifications. (doesn't matter
+    # whether the trailing slash is present or not)
+    "website_url": "http://127.0.0.1:8080"
 }
 
 LOGGER = logging.getLogger(__name__)
@@ -148,6 +157,11 @@ def validate_config(config):
         assert isinstance(config["host"], str)
         assert config["webserver"] is None or isinstance(config["webserver"], str)  # noqa: E501
         assert config["backends"] is None or isinstance(config["backends"], list)  # noqa: E501
+
+        assert isinstance(config["send_email"], bool)
+        assert config["smtp_server"] is None or isinstance(config["smtp_server"], (str, unicode))
+        assert config["smtp_port"] is None or isinstance(config["smtp_port"], int)
+        assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
 
         return True
     except (AssertionError, KeyError):
@@ -241,6 +255,11 @@ def load_config(args=None):
             for k, v in config_data["constraints"].items()
             if k in constraints_filter
         }
+
+    # Sanitize website url
+    if config_data["website_url"] is not None:
+        if config_data["website_url"][-1] != '/':
+            config_data["website_url"] += '/'
 
     config_validation = validate_config(config_data)
     if config_validation is True:
