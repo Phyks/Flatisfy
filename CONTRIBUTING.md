@@ -45,5 +45,14 @@ locale.
   WIP commits into a single one, to maintain the invariant of "one feature, one
   commit".
 
-
 Thanks!
+
+
+## Adding support for a new Weboob backend
+
+To enable a new Weboob `CapHousing` backend in Flatisfy, you should add it to
+the list of available backends in
+[flatisfy/fetch.py#L69-70](https://git.phyks.me/Phyks/flatisfy/blob/master/flatisfy/fetch.py#L69-70)
+and update the list of `BACKEND_PRECEDENCES` for deduplication in
+[flatisfy/filters/duplicates.py#L24-31](https://git.phyks.me/Phyks/flatisfy/blob/master/flatisfy/filters/duplicates.py#L24-31).
+Thats' all!

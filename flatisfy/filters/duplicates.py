@@ -20,7 +20,9 @@ from flatisfy import tools
 LOGGER = logging.getLogger(__name__)
 
 # Some backends give more infos than others. Here is the precedence we want to
-# use.
+# use. First is most important one, last is the one that will always be
+# considered as less trustable if two backends have similar info about a
+# housing.
 BACKENDS_PRECEDENCE = [
     "seloger",
     "pap",
