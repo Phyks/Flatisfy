@@ -66,7 +66,7 @@ class WeboobProxy(object):
         """
         # Default backends
         if not config["backends"]:
-            backends = ["seloger", "pap", "leboncoin", "logicimmo",
+            backends = ["foncia", "seloger", "pap", "leboncoin", "logicimmo",
                         "explorimmo", "entreparticuliers"]
         else:
             backends = config["backends"]

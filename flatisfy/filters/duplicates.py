@@ -22,6 +22,7 @@ LOGGER = logging.getLogger(__name__)
 # Some backends give more infos than others. Here is the precedence we want to
 # use.
 BACKENDS_PRECEDENCE = [
+    "foncia",
     "seloger",
     "pap",
     "leboncoin",
