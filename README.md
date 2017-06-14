@@ -9,10 +9,6 @@ database schema could change at any time. Do not consider it as being
 production ready. However, I am currently using it for my own housing search
 and it is working fine :)
 
-**Note**: For the moment, it requires [this MR on
-Weboob](https://git.weboob.org/weboob/devel/merge_requests/31) which has not
-yet been merged.
-
 <img src="doc/img/home.png" width="45%"/> <img src="doc/img/home2.png" width="45%"/>
 
 It uses [Weboob](http://weboob.org/) to get all the housing posts on most of
