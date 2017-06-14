@@ -95,6 +95,7 @@ def validate_config(config):
         # message in the log output.
         # pylint: disable=locally-disabled,line-too-long
         assert "type" in config["constraints"]
+        assert isinstance(config["constraints"]["type"], (str, unicode))
         assert config["constraints"]["type"].upper() in ["RENT",
                                                          "SALE", "SHARING"]
 
