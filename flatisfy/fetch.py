@@ -219,6 +219,10 @@ class WeboobProxy(object):
                 full_flat_id,
                 str(exc)
             )
+            return "{}"
+        except ValueError as exc:
+            LOGGER.error("ValueError for flat_id=%s: %s", flat_id, str(exc))
+            return "{}"
 
 
 def fetch_flats_list(config):
