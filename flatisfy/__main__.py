@@ -8,6 +8,8 @@ import argparse
 import logging
 import sys
 
+logging.basicConfig()
+
 import flatisfy.config
 from flatisfy import cmds
 from flatisfy import data
@@ -118,14 +120,14 @@ def main():
 
     # Set logger
     if args.vv:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.getLogger('').setLevel(logging.DEBUG)
         logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
     elif args.verbose:
-        logging.basicConfig(level=logging.INFO)
+        logging.getLogger('').setLevel(logging.INFO)
         # sqlalchemy INFO level is way too loud, just stick with WARNING
         logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
     else:
-        logging.basicConfig(level=logging.WARNING)
+        logging.getLogger('').setLevel(logging.WARNING)
         logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
     # Init-config command

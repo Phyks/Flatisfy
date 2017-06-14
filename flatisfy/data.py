@@ -10,11 +10,26 @@ import json
 import logging
 import os
 
+
 import flatisfy.exceptions
 
 
 LOGGER = logging.getLogger(__name__)
 MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
+
+# Try to load lru_cache
+try:
+    from functools import lru_cache
+except ImportError:
+    try:
+        from functools32 import lru_cache
+    except ImportError:
+        lru_cache = lambda maxsize=None: lambda func: func
+        LOGGER.warning(
+            "`functools.lru_cache` is not available on your system. Consider "
+            "installing `functools32` Python module if using Python2 for "
+            "better performances."
+        )
 
 
 def _preprocess_ratp(output_dir):
@@ -98,6 +113,18 @@ def _preprocess_laposte(output_dir):
     return True
 
 
+DATA_FILES = {
+    "ratp.json": {
+        "preprocess": _preprocess_ratp,
+        "output": ["ratp.json"]
+    },
+    "laposte.json": {
+        "preprocess": _preprocess_laposte,
+        "output": ["cities.json", "postal_codes.json"]
+    },
+}
+
+
 def preprocess_data(config, force=False):
     """
     Ensures that all the necessary data files have been built from the raw
@@ -115,38 +142,32 @@ def preprocess_data(config, force=False):
     except OSError:
         LOGGER.debug("Opendata directory already existed, doing nothing.")
 
-    is_built_ratp = os.path.isfile(
-        os.path.join(opendata_directory, "ratp.json")
-    )
-    if not is_built_ratp or force:
-        LOGGER.info("Building from RATP data.")
-        if not _preprocess_ratp(opendata_directory):
-            raise flatisfy.exceptions.DataBuildError("Error with RATP data.")
-
-    is_built_laposte = (
-        os.path.isfile(os.path.join(opendata_directory, "cities.json")) and
-        os.path.isfile(os.path.join(opendata_directory, "postal_codes.json"))
-    )
-    if not is_built_laposte or force:
-        LOGGER.info("Building from LaPoste data.")
-        if not _preprocess_laposte(opendata_directory):
-            raise flatisfy.exceptions.DataBuildError(
-                "Error with LaPoste data."
-            )
+    # Build all the necessary data files
+    for data_file in DATA_FILES:
+        # Check if already built
+        is_built = all(
+            os.path.isfile(
+                os.path.join(opendata_directory, output)
+            ) for output in DATA_FILES[data_file]["output"]
+        )
+        if not is_built or force:
+            # Build if needed
+            LOGGER.info("Building from {} data.".format(data_file))
+            if not DATA_FILES[data_file]["preprocess"](opendata_directory):
+                raise flatisfy.exceptions.DataBuildError(
+                    "Error with {} data.".format(data_file)
+                )
 
 
+@lru_cache(maxsize=5)
 def load_data(data_type, config):
     """
-    Load a given built data file.
+    Load a given built data file. This function is memoized.
 
     :param data_type: A valid data identifier.
     :param config: A config dictionary.
     :return: The loaded data. ``None`` if the query is incorrect.
     """
-    if data_type not in ["postal_codes", "cities", "ratp"]:
-        LOGGER.error("Invalid request. No %s data file.", data_type)
-        return None
-
     opendata_directory = os.path.join(config["data_directory"], "opendata")
     datafile_path = os.path.join(opendata_directory, "%s.json" % data_type)
     data = {}
