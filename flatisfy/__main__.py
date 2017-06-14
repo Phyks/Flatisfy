@@ -36,7 +36,7 @@ def parse_args(argv=None):
         help="Configuration file to use."
     )
     parent_parser.add_argument(
-        "--passes", choices=[0, 1, 2], type=int,
+        "--passes", choices=[0, 1, 2, 3], type=int,
         help="Number of passes to do on the filtered data."
     )
     parent_parser.add_argument(
