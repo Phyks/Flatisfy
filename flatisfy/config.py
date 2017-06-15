@@ -134,6 +134,7 @@ def validate_config(config):
         assert config["max_entries"] is None or (isinstance(config["max_entries"], int) and config["max_entries"] > 0)  # noqa: E501
 
         assert config["data_directory"] is None or isinstance(config["data_directory"], str)  # noqa: E501
+        assert os.path.isdir(config["data_directory"])
         assert isinstance(config["search_index"], str)
         assert config["modules_path"] is None or isinstance(config["modules_path"], str)  # noqa: E501
 
@@ -205,6 +206,11 @@ def load_config(args=None):
         )
         LOGGER.debug("Using default XDG data directory: %s.",
                      config_data["data_directory"])
+
+    if not os.path.isdir(config_data["data_directory"]):
+        LOGGER.info("Creating data directory according to config: %s",
+                    config_data["data_directory"])
+        os.mkdir(config_data["data_directory"])
 
     if config_data["database"] is None:
         config_data["database"] = "sqlite:///" + os.path.join(

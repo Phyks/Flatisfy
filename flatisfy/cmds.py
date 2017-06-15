@@ -10,6 +10,8 @@ import logging
 import flatisfy.filters
 from flatisfy import database
 from flatisfy.models import flat as flat_model
+from flatisfy.models import postal_code as postal_code_model
+from flatisfy.models import public_transport as public_transport_model
 from flatisfy import fetch
 from flatisfy import tools
 from flatisfy.filters import metadata
@@ -157,6 +159,10 @@ def purge_db(config):
             # Use (slower) deletion by object, to ensure whoosh index is
             # updated
             session.delete(flat)
+        LOGGER.info("Purge all postal codes from the database.")
+        session.query(postal_code_model.PostalCode).delete()
+        LOGGER.info("Purge all public transportations from the database.")
+        session.query(public_transport_model.PublicTransport).delete()
 
 
 def serve(config):

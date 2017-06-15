@@ -56,3 +56,20 @@ the list of available backends in
 and update the list of `BACKEND_PRECEDENCES` for deduplication in
 [flatisfy/filters/duplicates.py#L24-31](https://git.phyks.me/Phyks/flatisfy/blob/master/flatisfy/filters/duplicates.py#L24-31).
 Thats' all!
+
+
+## Adding new data files
+
+If you want to add new data files, especially for public transportation stops
+(to cover more cities), please follow these steps:
+
+1. Download and put the **original** file in `flatisfy/data_files`. Please,
+   use the original data file to ease tracking licenses and be able to still
+   have a working pipeline, by letting the user download it and place it in
+   the right place, in case of license conflict.
+2. Mention the added data file and its license in `README.md`, in the
+   dedicated section.
+3. Write a preprocessing function in `flatisfy/data_files/__init__.py`. You
+   can have a look at the existing functions for a model.
+
+Thanks!

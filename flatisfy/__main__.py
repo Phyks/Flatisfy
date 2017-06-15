@@ -143,14 +143,24 @@ def main():
                          "you run Flatisfy.")
             sys.exit(1)
 
+    # Purge command
+    if args.cmd == "purge":
+        cmds.purge_db(config)
+        return
+
     # Build data files
     try:
+        force = False
         if args.cmd == "build-data":
-            data.preprocess_data(config, force=True)
+            force = True
+
+        data.preprocess_data(config, force=force)
+        LOGGER.info("Done building data!")
+
+        if args.cmd == "build-data":
             sys.exit(0)
-        else:
-            data.preprocess_data(config)
-    except flatisfy.exceptions.DataBuildError:
+    except flatisfy.exceptions.DataBuildError as exc:
+        LOGGER.error("%s", exc)
         sys.exit(1)
 
     # Fetch command
@@ -165,6 +175,7 @@ def main():
         print(
             tools.pretty_json(flats_list)
         )
+        return
     # Filter command
     elif args.cmd == "filter":
         # Load and filter flats list
@@ -183,15 +194,15 @@ def main():
             )
         else:
             cmds.import_and_filter(config, load_from_db=True)
+        return
     # Import command
     elif args.cmd == "import":
         cmds.import_and_filter(config, load_from_db=False)
-    # Purge command
-    elif args.cmd == "purge":
-        cmds.purge_db(config)
+        return
     # Serve command
     elif args.cmd == "serve":
         cmds.serve(config)
+        return
 
 
 if __name__ == "__main__":

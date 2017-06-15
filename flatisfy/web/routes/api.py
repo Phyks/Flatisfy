@@ -12,6 +12,7 @@ import bottle
 
 import flatisfy.data
 from flatisfy.models import flat as flat_model
+from flatisfy.models.postal_code import PostalCode
 
 # TODO: Flat post-processing code should be factorized
 
@@ -38,7 +39,7 @@ def flats_v1(config, db):
 
     :return: The available flats objects in a JSON ``data`` dict.
     """
-    postal_codes = flatisfy.data.load_data("postal_codes", config)
+    postal_codes = flatisfy.data.load_data(PostalCode, config)
 
     flats = [
         flat.json_api_repr()
@@ -47,11 +48,15 @@ def flats_v1(config, db):
 
     for flat in flats:
         if flat["flatisfy_postal_code"]:
-            postal_code_data = postal_codes[flat["flatisfy_postal_code"]]
+            postal_code_data = next(
+                x
+                for x in postal_codes
+                if x.postal_code == flat["flatisfy_postal_code"]
+            )
             flat["flatisfy_postal_code"] = {
                 "postal_code": flat["flatisfy_postal_code"],
-                "name": postal_code_data["nom"],
-                "gps": postal_code_data["gps"]
+                "name": postal_code_data["name"],
+                "gps": (postal_code_data["lat"], postal_code_data["lng"])
             }
         else:
             flat["flatisfy_postal_code"] = {}
@@ -94,7 +99,7 @@ def flat_v1(flat_id, config, db):
 
     :return: The flat object in a JSON ``data`` dict.
     """
-    postal_codes = flatisfy.data.load_data("postal_codes", config)
+    postal_codes = flatisfy.data.load_data(PostalCode, config)
 
     flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
 
@@ -104,11 +109,15 @@ def flat_v1(flat_id, config, db):
     flat = flat.json_api_repr()
 
     if flat["flatisfy_postal_code"]:
-        postal_code_data = postal_codes[flat["flatisfy_postal_code"]]
+        postal_code_data = next(
+            x
+            for x in postal_codes
+            if x.postal_code == flat["flatisfy_postal_code"]
+        )
         flat["flatisfy_postal_code"] = {
             "postal_code": flat["flatisfy_postal_code"],
-            "name": postal_code_data["nom"],
-            "gps": postal_code_data["gps"]
+            "name": postal_code_data["name"],
+            "gps": (postal_code_data["lat"], postal_code_data["lng"])
         }
     else:
         flat["flatisfy_postal_code"] = {}
@@ -231,7 +240,7 @@ def search_v1(db, config):
 
     :return: The matching flat objects in a JSON ``data`` dict.
     """
-    postal_codes = flatisfy.data.load_data("postal_codes", config)
+    postal_codes = flatisfy.data.load_data(PostalCode, config)
 
     try:
         query = json.load(bottle.request.body)["query"]
@@ -246,11 +255,15 @@ def search_v1(db, config):
 
     for flat in flats:
         if flat["flatisfy_postal_code"]:
-            postal_code_data = postal_codes[flat["flatisfy_postal_code"]]
+            postal_code_data = next(
+                x
+                for x in postal_codes
+                if x.postal_code == flat["flatisfy_postal_code"]
+            )
             flat["flatisfy_postal_code"] = {
                 "postal_code": flat["flatisfy_postal_code"],
-                "name": postal_code_data["nom"],
-                "gps": postal_code_data["gps"]
+                "name": postal_code_data["name"],
+                "gps": (postal_code_data["lat"], postal_code_data["lng"])
             }
         else:
             flat["flatisfy_postal_code"] = {}

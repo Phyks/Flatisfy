@@ -11,7 +11,7 @@ from contextlib import contextmanager
 from sqlalchemy import event, create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
 import flatisfy.models.flat  # noqa: F401
 from flatisfy.database.base import BASE

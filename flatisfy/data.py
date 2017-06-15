@@ -5,17 +5,16 @@ the source opendata files.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-import collections
-import json
 import logging
-import os
-
 
 import flatisfy.exceptions
 
+from flatisfy import database
+from flatisfy import data_files
+from flatisfy.models.postal_code import PostalCode
+from flatisfy.models.public_transport import PublicTransport
 
 LOGGER = logging.getLogger(__name__)
-MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Try to load lru_cache
 try:
@@ -24,7 +23,8 @@ except ImportError:
     try:
         from functools32 import lru_cache
     except ImportError:
-        lru_cache = lambda maxsize=None: lambda func: func
+        def lru_cache(maxsize=None):
+            return lambda func: func
         LOGGER.warning(
             "`functools.lru_cache` is not available on your system. Consider "
             "installing `functools32` Python module if using Python2 for "
@@ -32,156 +32,59 @@ except ImportError:
         )
 
 
-def _preprocess_ratp(output_dir):
-    """
-    Build RATP file from the RATP data.
-
-    :param output_dir: Directory in which the output file should reside.
-    :return: ``True`` on successful build, ``False`` otherwise.
-    """
-    ratp_data_raw = []
-    # Load opendata file
-    try:
-        with open(os.path.join(MODULE_DIR, "data_files/ratp.json"), "r") as fh:
-            ratp_data_raw = json.load(fh)
-    except (IOError, ValueError):
-        LOGGER.error("Invalid raw RATP opendata file.")
-        return False
-
-    # Process it
-    ratp_data = collections.defaultdict(list)
-    for item in ratp_data_raw:
-        stop_name = item["fields"]["stop_name"].lower()
-        ratp_data[stop_name].append({
-            "gps": item["fields"]["coord"],
-            "name": item["fields"]["stop_name"]
-        })
-
-    # Output it
-    with open(os.path.join(output_dir, "ratp.json"), "w") as fh:
-        json.dump(ratp_data, fh)
-
-    return True
-
-
-def _preprocess_laposte(output_dir):
-    """
-    Build JSON files from the postal codes data.
-
-    :param output_dir: Directory in which the output file should reside.
-    :return: ``True`` on successful build, ``False`` otherwise.
-    """
-    raw_laposte_data = []
-    # Load opendata file
-    try:
-        with open(
-            os.path.join(MODULE_DIR, "data_files/laposte.json"), "r"
-        ) as fh:
-            raw_laposte_data = json.load(fh)
-    except (IOError, ValueError):
-        LOGGER.error("Invalid raw LaPoste opendata file.")
-        return False
-
-    # Build postal codes to other infos file
-    postal_codes_data = {}
-    for item in raw_laposte_data:
-        try:
-            postal_codes_data[item["fields"]["code_postal"]] = {
-                "gps": item["fields"]["coordonnees_gps"],
-                "nom": item["fields"]["nom_de_la_commune"].title()
-            }
-        except KeyError:
-            LOGGER.info("Missing data for postal code %s, skipping it.",
-                        item["fields"]["code_postal"])
-    with open(os.path.join(output_dir, "postal_codes.json"), "w") as fh:
-        json.dump(postal_codes_data, fh)
-
-    # Build city name to postal codes and other infos file
-    cities_data = {}
-    for item in raw_laposte_data:
-        try:
-            cities_data[item["fields"]["nom_de_la_commune"].title()] = {
-                "gps": item["fields"]["coordonnees_gps"],
-                "postal_code": item["fields"]["code_postal"]
-            }
-        except KeyError:
-            LOGGER.info("Missing data for city %s, skipping it.",
-                        item["fields"]["nom_de_la_commune"])
-    with open(os.path.join(output_dir, "cities.json"), "w") as fh:
-        json.dump(cities_data, fh)
-
-    return True
-
-
-DATA_FILES = {
-    "ratp.json": {
-        "preprocess": _preprocess_ratp,
-        "output": ["ratp.json"]
-    },
-    "laposte.json": {
-        "preprocess": _preprocess_laposte,
-        "output": ["cities.json", "postal_codes.json"]
-    },
-}
-
-
 def preprocess_data(config, force=False):
     """
-    Ensures that all the necessary data files have been built from the raw
+    Ensures that all the necessary data have been inserted in db from the raw
     opendata files.
 
     :params config: A config dictionary.
     :params force: Whether to force rebuild or not.
     """
-    LOGGER.debug("Data directory is %s.", config["data_directory"])
-    opendata_directory = os.path.join(config["data_directory"], "opendata")
-    try:
-        LOGGER.info("Ensuring the data directory exists.")
-        os.makedirs(opendata_directory)
-        LOGGER.debug("Created opendata directory at %s.", opendata_directory)
-    except OSError:
-        LOGGER.debug("Opendata directory already existed, doing nothing.")
-
-    # Build all the necessary data files
-    for data_file in DATA_FILES:
-        # Check if already built
-        is_built = all(
-            os.path.isfile(
-                os.path.join(opendata_directory, output)
-            ) for output in DATA_FILES[data_file]["output"]
+    # Check if a build is required
+    get_session = database.init_db(config["database"], config["search_index"])
+    with get_session() as session:
+        is_built = (
+            session.query(PublicTransport).count() > 0 and
+            session.query(PostalCode).count > 0
         )
-        if not is_built or force:
-            # Build if needed
-            LOGGER.info("Building from {} data.".format(data_file))
-            if not DATA_FILES[data_file]["preprocess"](opendata_directory):
-                raise flatisfy.exceptions.DataBuildError(
-                    "Error with {} data.".format(data_file)
-                )
+        if is_built and not force:
+            # No need to rebuild the database, skip
+            return
+        # Otherwise, purge all existing data
+        session.query(PublicTransport).delete()
+        session.query(PostalCode).delete()
+
+    # Build all opendata files
+    for preprocess in data_files.PREPROCESSING_FUNCTIONS:
+        data_objects = preprocess()
+        if not data_objects:
+            raise flatisfy.exceptions.DataBuildError(
+                "Error with %s." % preprocess.__name__
+            )
+        with get_session() as session:
+            session.add_all(data_objects)
 
 
 @lru_cache(maxsize=5)
-def load_data(data_type, config):
+def load_data(model, config):
     """
-    Load a given built data file. This function is memoized.
+    Load data of the specified model from the database. Only load data for the
+    specific areas of the postal codes in config.
 
-    :param data_type: A valid data identifier.
+    :param model: SQLAlchemy model to load.
     :param config: A config dictionary.
-    :return: The loaded data. ``None`` if the query is incorrect.
+    :returns: A list of loaded SQLAlchemy objects from the db
     """
-    opendata_directory = os.path.join(config["data_directory"], "opendata")
-    datafile_path = os.path.join(opendata_directory, "%s.json" % data_type)
-    data = {}
-    try:
-        with open(datafile_path, "r") as fh:
-            data = json.load(fh)
-    except IOError:
-        LOGGER.error("No such data file: %s.", datafile_path)
-        return None
-    except ValueError:
-        LOGGER.error("Invalid JSON data file: %s.", datafile_path)
-        return None
-
-    if not data:
-        LOGGER.warning("Loading empty data for %s.", data_type)
-
-    return data
+    get_session = database.init_db(config["database"], config["search_index"])
+    results = []
+    with get_session() as session:
+        for postal_code in config["constraints"]["postal_codes"]:
+            area = data_files.french_postal_codes_to_iso_3166(postal_code)
+            results.extend(
+                session.query(model)
+                .filter(model.area == area).all()
+            )
+        # Expunge loaded data from the session to be able to use them
+        # afterwards
+        session.expunge_all()
+    return results
