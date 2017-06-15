@@ -143,13 +143,33 @@ def _preprocess_tcl():
 
     :return: A list of ``PublicTransport`` objects to be inserted in database.
     """
-    # TODO: Tcl
-    return []
+    data_file = "tcl.json"
+    LOGGER.info("Building from %s data.", data_file)
+
+    tcl_data_raw = []
+    # Load opendata file
+    try:
+        with open(os.path.join(MODULE_DIR, data_file), "r") as fh:
+            tcl_data_raw = json.load(fh)
+    except (IOError, ValueError):
+        LOGGER.error("Invalid raw Tcl opendata file.")
+        return []
+
+    # Process it
+    tcl_data = []
+    for item in tcl_data_raw["features"]:
+        tcl_data.append(PublicTransport(
+            name=item["properties"]["nom"],
+            area="FR-ARA",
+            lat=item["geometry"]["coordinates"][0],
+            lng=item["geometry"]["coordinates"][1]
+        ))
+    return tcl_data
 
 
 # List of all the available preprocessing functions. Order can be important.
 PREPROCESSING_FUNCTIONS = [
     _preprocess_laposte,
     _preprocess_ratp,
-    #_preprocess_tcl
+    _preprocess_tcl
 ]
