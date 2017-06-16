@@ -39,7 +39,7 @@ def flats_v1(config, db):
 
     :return: The available flats objects in a JSON ``data`` dict.
     """
-    postal_codes = flatisfy.data.load_data(PostalCode, config)
+    postal_codes = flatisfy.data.load_data(PostalCode, config)  # TODO
 
     flats = [
         flat.json_api_repr()
@@ -99,7 +99,7 @@ def flat_v1(flat_id, config, db):
 
     :return: The flat object in a JSON ``data`` dict.
     """
-    postal_codes = flatisfy.data.load_data(PostalCode, config)
+    postal_codes = flatisfy.data.load_data(PostalCode, config)  # TODO
 
     flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
 
@@ -222,7 +222,7 @@ def time_to_places_v1(config):
     """
     places = {
         k: v["gps"]
-        for k, v in config["constraints"]["time_to"].items()
+        for k, v in config["constraints"]["time_to"].items()  # TODO: Constraints should be named and stored in db along flats
     }
     return {
         "data": places
@@ -240,7 +240,7 @@ def search_v1(db, config):
 
     :return: The matching flat objects in a JSON ``data`` dict.
     """
-    postal_codes = flatisfy.data.load_data(PostalCode, config)
+    postal_codes = flatisfy.data.load_data(PostalCode, config)  # TODO
 
     try:
         query = json.load(bottle.request.body)["query"]

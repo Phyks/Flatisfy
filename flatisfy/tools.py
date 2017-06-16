@@ -298,5 +298,4 @@ def get_travel_time_between(latlng_from, latlng_to, config):
             "time": time,
             "sections": sections
         }
-    else:
-        return None
+    return None

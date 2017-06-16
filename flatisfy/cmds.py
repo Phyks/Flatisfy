@@ -21,19 +21,28 @@ from flatisfy.web import app as web_app
 LOGGER = logging.getLogger(__name__)
 
 
-def filter_flats(config, flats_list, fetch_details=True):
+def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
     :param config: A config dict.
+    :param constraint_name: The constraint name that the ``flats_list`` should
+    satisfy.
     :param fetch_details: Whether additional details should be fetched between
     the two passes.
     :param flats_list: The initial list of flat objects to filter.
     :return: A dict mapping flat status and list of flat objects.
     """
-    # pylint: disable=locally-disabled,redefined-variable-type
     # Add the flatisfy metadata entry and prepare the flat objects
-    flats_list = metadata.init(flats_list)
+    flats_list = metadata.init(flats_list, constraint_name)
+
+    # Get the associated constraint from config
+    try:
+        constraint = config["constraints"][constraint_name]
+    except KeyError:
+        LOGGER.warning("Missing constraint %s. Using default one.",
+                       constraint_name)
+        constraint = config["constraints"]["default"]
 
     first_pass_result = collections.defaultdict(list)
     second_pass_result = collections.defaultdict(list)
@@ -42,6 +51,7 @@ def filter_flats(config, flats_list, fetch_details=True):
     # unwanted postings as possible
     if config["passes"] > 0:
         first_pass_result = flatisfy.filters.first_pass(flats_list,
+                                                        constraint,
                                                         config)
     else:
         first_pass_result["new"] = flats_list
@@ -56,7 +66,7 @@ def filter_flats(config, flats_list, fetch_details=True):
     # additional infos
     if config["passes"] > 1:
         second_pass_result = flatisfy.filters.second_pass(
-            first_pass_result["new"], config
+            first_pass_result["new"], constraint, config
         )
     else:
         second_pass_result["new"] = first_pass_result["new"]
@@ -84,6 +94,28 @@ def filter_flats(config, flats_list, fetch_details=True):
     }
 
 
+def filter_fetched_flats(config, fetched_flats, fetch_details=True):
+    """
+    Filter the available flats list. Then, filter it according to criteria.
+
+    :param config: A config dict.
+    :param fetch_details: Whether additional details should be fetched between
+    the two passes.
+    :param fetched_flats: The initial dict mapping constraints to the list of
+    fetched flat objects to filter.
+    :return: A dict mapping constraints to a dict mapping flat status and list
+    of flat objects.
+    """
+    for constraint_name, flats_list in fetched_flats.items():
+        fetched_flats[constraint_name] = filter_flats_list(
+            config,
+            constraint_name,
+            flats_list,
+            fetch_details
+        )
+    return fetched_flats
+
+
 def import_and_filter(config, load_from_db=False):
     """
     Fetch the available flats list. Then, filter it according to criteria.
@@ -96,18 +128,24 @@ def import_and_filter(config, load_from_db=False):
     """
     # Fetch and filter flats list
     if load_from_db:
-        flats_list = fetch.load_flats_list_from_db(config)
+        fetched_flats = fetch.load_flats_from_db(config)
     else:
-        flats_list = fetch.fetch_flats_list(config)
+        fetched_flats = fetch.fetch_flats(config)
     # Do not fetch additional details if we loaded data from the db.
-    flats_list_by_status = filter_flats(config, flats_list=flats_list,
-                                        fetch_details=(not load_from_db))
+    flats_by_status = filter_fetched_flats(config, fetched_flats=fetched_flats,
+                                           fetch_details=(not load_from_db))
     # Create database connection
     get_session = database.init_db(config["database"], config["search_index"])
 
     LOGGER.info("Merging fetched flats in database...")
+    # Flatten the flats_by_status dict
+    flatten_flats_by_status = collections.defaultdict(list)
+    for flats in flats_by_status.values():
+        for status, flats_list in flats.items():
+            flatten_flats_by_status[status].extend(flats_list)
+
     with get_session() as session:
-        for status, flats_list in flats_list_by_status.items():
+        for status, flats_list in flatten_flats_by_status.items():
             # Build SQLAlchemy Flat model objects for every available flat
             flats_objects = {
                 flat_dict["id"]: flat_model.Flat.from_dict(flat_dict)

@@ -24,6 +24,9 @@ except ImportError:
         from functools32 import lru_cache
     except ImportError:
         def lru_cache(maxsize=None):
+            """
+            Identity implementation of ``lru_cache`` for fallback.
+            """
             return lambda func: func
         LOGGER.warning(
             "`functools.lru_cache` is not available on your system. Consider "
@@ -66,19 +69,21 @@ def preprocess_data(config, force=False):
 
 
 @lru_cache(maxsize=5)
-def load_data(model, config):
+def load_data(model, constraint, config):
     """
     Load data of the specified model from the database. Only load data for the
     specific areas of the postal codes in config.
 
     :param model: SQLAlchemy model to load.
+    :param constraint: A constraint from configuration to limit the spatial
+    extension of the loaded data.
     :param config: A config dictionary.
     :returns: A list of loaded SQLAlchemy objects from the db
     """
     get_session = database.init_db(config["database"], config["search_index"])
     results = []
     with get_session() as session:
-        for postal_code in config["constraints"]["postal_codes"]:
+        for postal_code in constraint["postal_codes"]:
             area = data_files.french_postal_codes_to_iso_3166(postal_code)
             results.extend(
                 session.query(model)

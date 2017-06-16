@@ -10,11 +10,13 @@ import sys
 
 logging.basicConfig()
 
+# pylint: disable=locally-disabled,wrong-import-position
 import flatisfy.config
 from flatisfy import cmds
 from flatisfy import data
 from flatisfy import fetch
 from flatisfy import tools
+# pylint: enable=locally-disabled,wrong-import-position
 
 
 LOGGER = logging.getLogger("flatisfy")
@@ -166,31 +168,35 @@ def main():
     # Fetch command
     if args.cmd == "fetch":
         # Fetch and filter flats list
-        flats_list = fetch.fetch_flats_list(config)
-        flats_list = cmds.filter_flats(config, flats_list=flats_list,
-                                       fetch_details=True)["new"]
+        fetched_flats = fetch.fetch_flats(config)
+        fetched_flats = cmds.filter_fetched_flats(config,
+                                                  fetched_flats=fetched_flats,
+                                                  fetch_details=True)["new"]
         # Sort by cost
-        flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
+        fetched_flats = tools.sort_list_of_dicts_by(fetched_flats, "cost")
 
         print(
-            tools.pretty_json(flats_list)
+            tools.pretty_json(sum(fetched_flats.values(), []))
         )
         return
     # Filter command
     elif args.cmd == "filter":
         # Load and filter flats list
         if args.input:
-            flats_list = fetch.load_flats_list_from_file(args.input)
+            fetched_flats = fetch.load_flats_from_file(args.input, config)
 
-            flats_list = cmds.filter_flats(config, flats_list=flats_list,
-                                           fetch_details=False)["new"]
+            fetched_flats = cmds.filter_fetched_flats(
+                config,
+                fetched_flats=fetched_flats,
+                fetch_details=False
+            )["new"]
 
             # Sort by cost
-            flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
+            fetched_flats = tools.sort_list_of_dicts_by(fetched_flats, "cost")
 
             # Output to stdout
             print(
-                tools.pretty_json(flats_list)
+                tools.pretty_json(sum(fetched_flats.values(), []))
             )
         else:
             cmds.import_and_filter(config, load_from_db=True)

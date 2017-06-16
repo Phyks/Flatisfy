@@ -19,13 +19,14 @@ from flatisfy.models.public_transport import PublicTransport
 LOGGER = logging.getLogger(__name__)
 
 
-def init(flats_list):
+def init(flats_list, constraint):
     """
     Create a flatisfy key containing a dict of metadata fetched by flatisfy for
     each flat in the list. Also perform some basic transform on flat objects to
     prepare for the metadata fetching.
 
     :param flats_list: A list of flats dict.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
     :return: The updated list
     """
     for flat in flats_list:
@@ -41,6 +42,8 @@ def init(flats_list):
         # Create merged_ids key
         if "merged_ids" not in flat:
             flat["merged_ids"] = [flat["id"]]
+        if "constraint" not in flat:
+            flat["constraint"] = constraint
 
     return flats_list
 
@@ -119,11 +122,12 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
     return matches
 
 
-def guess_postal_code(flats_list, config, distance_threshold=20000):
+def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
     """
     Try to guess the postal code from the location of the flats.
 
     :param flats_list: A list of flats dict.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
     :param distance_threshold: Maximum distance in meters between the
     constraint postal codes (from config) and the one found by this function,
@@ -132,7 +136,7 @@ def guess_postal_code(flats_list, config, distance_threshold=20000):
     :return: An updated list of flats dict with guessed postal code.
     """
     opendata = {
-        "postal_codes": data.load_data(PostalCode, config)
+        "postal_codes": data.load_data(PostalCode, constraint, config)
     }
 
     for flat in flats_list:
@@ -200,10 +204,10 @@ def guess_postal_code(flats_list, config, distance_threshold=20000):
                     next(
                         (x.lat, x.lng)
                         for x in opendata["postal_codes"]
-                        if x.postal_code == constraint
+                        if x.postal_code == constraint_postal_code
                     )
                 )
-                for constraint in config["constraints"]["postal_codes"]
+                for constraint_postal_code in constraint["postal_codes"]
             )
 
             if distance > distance_threshold:
@@ -229,21 +233,21 @@ def guess_postal_code(flats_list, config, distance_threshold=20000):
     return flats_list
 
 
-def guess_stations(flats_list, config, distance_threshold=1500):
+def guess_stations(flats_list, constraint, config, distance_threshold=1500):
     """
     Try to match the station field with a list of available stations nearby.
 
     :param flats_list: A list of flats dict.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
     :param distance_threshold: Maximum distance (in meters) between the center
     of the postal code and the station to consider it ok.
 
     :return: An updated list of flats dict with guessed nearby stations.
     """
-    # TODO: opendata["stations"]
     opendata = {
-        "postal_codes": data.load_data(PostalCode, config),
-        "stations": data.load_data(PublicTransport, config)
+        "postal_codes": data.load_data(PostalCode, constraint, config),
+        "stations": data.load_data(PublicTransport, constraint, config)
     }
 
     for flat in flats_list:
@@ -343,12 +347,13 @@ def guess_stations(flats_list, config, distance_threshold=1500):
     return flats_list
 
 
-def compute_travel_times(flats_list, config):
+def compute_travel_times(flats_list, constraint, config):
     """
     Compute the travel time between each flat and the points listed in the
     constraints.
 
     :param flats_list: A list of flats dict.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
 
     :return: An updated list of flats dict with computed travel times.
@@ -371,7 +376,7 @@ def compute_travel_times(flats_list, config):
 
         # For each place, loop over the stations close to the flat, and find
         # the minimum travel time.
-        for place_name, place in config["constraints"]["time_to"].items():
+        for place_name, place in constraint["time_to"].items():
             time_to_place = None
             for station in flat["flatisfy"]["matched_stations"]:
                 time_from_station = tools.get_travel_time_between(

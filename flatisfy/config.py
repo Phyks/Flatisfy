@@ -23,17 +23,19 @@ from flatisfy import tools
 DEFAULT_CONFIG = {
     # Constraints to match
     "constraints": {
-        "type": None,  # RENT, SALE, SHARING
-        "house_types": [],  # List of house types, must be in APART, HOUSE,
-                            # PARKING, LAND, OTHER or UNKNOWN
-        "postal_codes": [],  # List of postal codes
-        "area": (None, None),  # (min, max) in m^2
-        "cost": (None, None),  # (min, max) in currency unit
-        "rooms": (None, None),  # (min, max)
-        "bedrooms": (None, None),  # (min, max)
-        "time_to": {}  # Dict mapping names to {"gps": [lat, lng],
-                       #                        "time": (min, max) }
-                       # Time is in seconds
+        "default": {
+            "type": None,  # RENT, SALE, SHARING
+            "house_types": [],  # List of house types, must be in APART, HOUSE,
+                                # PARKING, LAND, OTHER or UNKNOWN
+            "postal_codes": [],  # List of postal codes
+            "area": (None, None),  # (min, max) in m^2
+            "cost": (None, None),  # (min, max) in currency unit
+            "rooms": (None, None),  # (min, max)
+            "bedrooms": (None, None),  # (min, max)
+            "time_to": {}  # Dict mapping names to {"gps": [lat, lng],
+                           #                        "time": (min, max) }
+                           # Time is in seconds
+        }
     },
     # Navitia API key
     "navitia_api_key": None,
@@ -94,41 +96,44 @@ def validate_config(config):
         # and use long lines whenever needed, in order to have the full assert
         # message in the log output.
         # pylint: disable=locally-disabled,line-too-long
-        assert "type" in config["constraints"]
-        assert isinstance(config["constraints"]["type"], str)
-        assert config["constraints"]["type"].upper() in ["RENT",
-                                                         "SALE", "SHARING"]
 
-        assert "house_types" in config["constraints"]
-        assert config["constraints"]["house_types"]
-        for house_type in config["constraints"]["house_types"]:
-            assert house_type.upper() in ["APART", "HOUSE", "PARKING", "LAND",
-                                          "OTHER", "UNKNOWN"]
+        # Ensure default constraint is here
+        assert "default" in config["constraints"]
+        # Ensure constraints are ok
+        for constraint in config["constraints"].values():
+            assert "type" in constraint
+            assert isinstance(constraint["type"], str)
+            assert constraint["type"].upper() in ["RENT", "SALE", "SHARING"]
 
-        assert "postal_codes" in config["constraints"]
-        assert config["constraints"]["postal_codes"]
+            assert "house_types" in constraint
+            assert constraint["house_types"]
+            for house_type in constraint["house_types"]:
+                assert house_type.upper() in ["APART", "HOUSE", "PARKING", "LAND", "OTHER", "UNKNOWN"]  # noqa: E501
 
-        assert "area" in config["constraints"]
-        _check_constraints_bounds(config["constraints"]["area"])
+            assert "postal_codes" in constraint
+            assert constraint["postal_codes"]
 
-        assert "cost" in config["constraints"]
-        _check_constraints_bounds(config["constraints"]["cost"])
+            assert "area" in constraint
+            _check_constraints_bounds(constraint["area"])
 
-        assert "rooms" in config["constraints"]
-        _check_constraints_bounds(config["constraints"]["rooms"])
+            assert "cost" in constraint
+            _check_constraints_bounds(constraint["cost"])
 
-        assert "bedrooms" in config["constraints"]
-        _check_constraints_bounds(config["constraints"]["bedrooms"])
+            assert "rooms" in constraint
+            _check_constraints_bounds(constraint["rooms"])
 
-        assert "time_to" in config["constraints"]
-        assert isinstance(config["constraints"]["time_to"], dict)
-        for name, item in config["constraints"]["time_to"].items():
-            assert isinstance(name, str)
-            assert "gps" in item
-            assert isinstance(item["gps"], list)
-            assert len(item["gps"]) == 2
-            assert "time" in item
-            _check_constraints_bounds(item["time"])
+            assert "bedrooms" in constraint
+            _check_constraints_bounds(constraint["bedrooms"])
+
+            assert "time_to" in constraint
+            assert isinstance(constraint["time_to"], dict)
+            for name, item in constraint["time_to"].items():
+                assert isinstance(name, str)
+                assert "gps" in item
+                assert isinstance(item["gps"], list)
+                assert len(item["gps"]) == 2
+                assert "time" in item
+                _check_constraints_bounds(item["time"])
 
         assert config["passes"] in [0, 1, 2, 3]
         assert config["max_entries"] is None or (isinstance(config["max_entries"], int) and config["max_entries"] > 0)  # noqa: E501
