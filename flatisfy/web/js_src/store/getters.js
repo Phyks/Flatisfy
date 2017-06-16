@@ -54,5 +54,18 @@ export default {
         return markers
     },
 
-    allTimeToPlaces: state => state.timeToPlaces
+    allTimeToPlaces: state => {
+        let places = {}
+        Object.keys(state.timeToPlaces).forEach(constraint => {
+            let constraintTimeToPlaces = state.timeToPlaces[constraint]
+            Object.keys(constraintTimeToPlaces).forEach(name =>
+                places[name] = constraintTimeToPlaces[name]
+            )
+        })
+        return places
+    },
+
+    timeToPlaces: (state, getters) => (constraint_name) => {
+        return state.timeToPlaces[constraint_name]
+    },
 }

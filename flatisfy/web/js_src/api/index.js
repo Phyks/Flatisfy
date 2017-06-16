@@ -107,7 +107,7 @@ export const updateFlatNotation = function (flatId, newNotation, callback) {
 }
 
 export const getTimeToPlaces = function (callback) {
-    fetch('/api/v1/time_to/places', { credentials: 'same-origin' })
+    fetch('/api/v1/time_to_places', { credentials: 'same-origin' })
     .then(function (response) {
         return response.json()
     }).then(function (json) {

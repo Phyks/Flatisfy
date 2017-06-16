@@ -109,6 +109,9 @@ class Flat(BASE):
             flat_dict["flatisfy_time_to"] = (
                 flat_dict["flatisfy"].get("time_to", {})
             )
+            flat_dict["flatisfy_constraint"] = (
+                flat_dict["flatisfy"].get("constraint", "default")
+            )
             del flat_dict["flatisfy"]
 
         # Handle utilities field

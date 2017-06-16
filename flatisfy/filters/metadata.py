@@ -33,6 +33,8 @@ def init(flats_list, constraint):
         # Init flatisfy key
         if "flatisfy" not in flat:
             flat["flatisfy"] = {}
+        if "constraint" not in flat["flatisfy"]:
+            flat["flatisfy"]["constraint"] = constraint
         # Move url key to urls
         if "urls" not in flat:
             if "url" in flat:
@@ -42,8 +44,6 @@ def init(flats_list, constraint):
         # Create merged_ids key
         if "merged_ids" not in flat:
             flat["merged_ids"] = [flat["id"]]
-        if "constraint" not in flat:
-            flat["constraint"] = constraint
 
     return flats_list
 
