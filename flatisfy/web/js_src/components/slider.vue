@@ -114,8 +114,8 @@ export default {
 .modal-content {
     margin: auto;
     display: block;
-    height: 80%;
-    max-width: 700px;
+    max-height: 80%;
+    max-width: 100%;
 }
 
 .close {
