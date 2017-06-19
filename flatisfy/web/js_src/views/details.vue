@@ -222,11 +222,11 @@ export default {
         flatMarkers () {
             return this.$store.getters.flatsMarkers(this.$router, flat => flat.id === this.$route.params.id)
         },
-        timeToPlaces () {
-            return this.$store.getters.allTimeToPlaces
-        },
         flat () {
             return this.$store.getters.flat(this.$route.params.id)
+        },
+        timeToPlaces () {
+            return this.$store.getters.timeToPlaces(this.flat.flatisfy_constraint)
         },
         notation () {
             if (this.overloadNotation) {

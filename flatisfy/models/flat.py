@@ -86,6 +86,7 @@ class Flat(BASE):
     flatisfy_stations = Column(MagicJSON)
     flatisfy_postal_code = Column(String)
     flatisfy_time_to = Column(MagicJSON)
+    flatisfy_constraint = Column(String)
 
     # Status
     status = Column(Enum(FlatStatus), default=FlatStatus.new)
@@ -107,6 +108,9 @@ class Flat(BASE):
             )
             flat_dict["flatisfy_time_to"] = (
                 flat_dict["flatisfy"].get("time_to", {})
+            )
+            flat_dict["flatisfy_constraint"] = (
+                flat_dict["flatisfy"].get("constraint", "default")
             )
             del flat_dict["flatisfy"]
 

@@ -69,7 +69,8 @@ def get_app(config):
     # API v1 routes
     app.route("/api/v1/", "GET", api_routes.index_v1)
 
-    app.route("/api/v1/time_to/places", "GET", api_routes.time_to_places_v1)
+    app.route("/api/v1/time_to_places", "GET",
+              api_routes.time_to_places_v1)
 
     app.route("/api/v1/flats", "GET", api_routes.flats_v1)
     app.route("/api/v1/flats/status/:status", "GET",

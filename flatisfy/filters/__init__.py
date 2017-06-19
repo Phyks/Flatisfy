@@ -16,7 +16,7 @@ from flatisfy.filters import metadata
 LOGGER = logging.getLogger(__name__)
 
 
-def refine_with_housing_criteria(flats_list, config):
+def refine_with_housing_criteria(flats_list, constraint, config):
     """
     Filter a list of flats according to criteria.
 
@@ -25,6 +25,7 @@ def refine_with_housing_criteria(flats_list, config):
     user criteria, and avoid exposing unwanted flats.
 
     :param flats_list: A list of flats dict to filter.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
     :return: A tuple of flats to keep and flats to delete.
     """
@@ -37,7 +38,7 @@ def refine_with_housing_criteria(flats_list, config):
         postal_code = flat["flatisfy"].get("postal_code", None)
         if (
                 postal_code and
-                postal_code not in config["constraints"]["postal_codes"]
+                postal_code not in constraint["postal_codes"]
         ):
             LOGGER.info("Postal code for flat %s is out of range.", flat["id"])
             is_ok[i] = is_ok[i] and False
@@ -47,7 +48,7 @@ def refine_with_housing_criteria(flats_list, config):
             time = time["time"]
             is_within_interval = tools.is_within_interval(
                 time,
-                *(config["constraints"]["time_to"][place_name]["time"])
+                *(constraint["time_to"][place_name]["time"])
             )
             if not is_within_interval:
                 LOGGER.info("Flat %s is too far from place %s: %ds.",
@@ -56,7 +57,7 @@ def refine_with_housing_criteria(flats_list, config):
 
         # Check other fields
         for field in ["area", "cost", "rooms", "bedrooms"]:
-            interval = config["constraints"][field]
+            interval = constraint[field]
             is_within_interval = tools.is_within_interval(
                 flat.get(field, None),
                 *interval
@@ -80,7 +81,7 @@ def refine_with_housing_criteria(flats_list, config):
     )
 
 
-def first_pass(flats_list, config):
+def first_pass(flats_list, constraint, config):
     """
     First filtering pass.
 
@@ -89,6 +90,7 @@ def first_pass(flats_list, config):
     only request more data for the remaining housings.
 
     :param flats_list: A list of flats dict to filter.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
     :return: A dict mapping flat status and list of flat objects.
     """
@@ -108,11 +110,12 @@ def first_pass(flats_list, config):
     )
 
     # Guess the postal codes
-    flats_list = metadata.guess_postal_code(flats_list, config)
+    flats_list = metadata.guess_postal_code(flats_list, constraint, config)
     # Try to match with stations
-    flats_list = metadata.guess_stations(flats_list, config)
+    flats_list = metadata.guess_stations(flats_list, constraint, config)
     # Remove returned housing posts that do not match criteria
-    flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
+    flats_list, ignored_list = refine_with_housing_criteria(flats_list,
+                                                            constraint, config)
 
     return {
         "new": flats_list,
@@ -121,7 +124,7 @@ def first_pass(flats_list, config):
     }
 
 
-def second_pass(flats_list, config):
+def second_pass(flats_list, constraint, config):
     """
     Second filtering pass.
 
@@ -133,6 +136,7 @@ def second_pass(flats_list, config):
     possible from the fetched housings.
 
     :param flats_list: A list of flats dict to filter.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
     :return: A dict mapping flat status and list of flat objects.
     """
@@ -141,16 +145,17 @@ def second_pass(flats_list, config):
     # left and we already tried to find postal code and nearby stations.
 
     # Confirm postal code
-    flats_list = metadata.guess_postal_code(flats_list, config)
+    flats_list = metadata.guess_postal_code(flats_list, constraint, config)
 
     # Better match with stations (confirm and check better)
-    flats_list = metadata.guess_stations(flats_list, config)
+    flats_list = metadata.guess_stations(flats_list, constraint, config)
 
     # Compute travel time to specified points
-    flats_list = metadata.compute_travel_times(flats_list, config)
+    flats_list = metadata.compute_travel_times(flats_list, constraint, config)
 
     # Remove returned housing posts that do not match criteria
-    flats_list, ignored_list = refine_with_housing_criteria(flats_list, config)
+    flats_list, ignored_list = refine_with_housing_criteria(flats_list,
+                                                            constraint, config)
 
     return {
         "new": flats_list,

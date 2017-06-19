@@ -10,11 +10,13 @@ import sys
 
 logging.basicConfig()
 
+# pylint: disable=locally-disabled,wrong-import-position
 import flatisfy.config
 from flatisfy import cmds
 from flatisfy import data
 from flatisfy import fetch
 from flatisfy import tools
+# pylint: enable=locally-disabled,wrong-import-position
 
 
 LOGGER = logging.getLogger("flatisfy")
@@ -52,6 +54,10 @@ def parse_args(argv=None):
     parent_parser.add_argument(
         "-vv", action="store_true",
         help="Debug logging output."
+    )
+    parent_parser.add_argument(
+        "--constraints", type=str,
+        help="Comma-separated list of constraints to consider."
     )
 
     # Subcommands
@@ -143,55 +149,70 @@ def main():
                          "you run Flatisfy.")
             sys.exit(1)
 
+    # Purge command
+    if args.cmd == "purge":
+        cmds.purge_db(config)
+        return
+
     # Build data files
     try:
+        force = False
         if args.cmd == "build-data":
-            data.preprocess_data(config, force=True)
+            force = True
+
+        data.preprocess_data(config, force=force)
+        LOGGER.info("Done building data!")
+
+        if args.cmd == "build-data":
             sys.exit(0)
-        else:
-            data.preprocess_data(config)
-    except flatisfy.exceptions.DataBuildError:
+    except flatisfy.exceptions.DataBuildError as exc:
+        LOGGER.error("%s", exc)
         sys.exit(1)
 
     # Fetch command
     if args.cmd == "fetch":
         # Fetch and filter flats list
-        flats_list = fetch.fetch_flats_list(config)
-        flats_list = cmds.filter_flats(config, flats_list=flats_list,
-                                       fetch_details=True)["new"]
+        fetched_flats = fetch.fetch_flats(config)
+        fetched_flats = cmds.filter_fetched_flats(config,
+                                                  fetched_flats=fetched_flats,
+                                                  fetch_details=True)["new"]
         # Sort by cost
-        flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
+        fetched_flats = tools.sort_list_of_dicts_by(fetched_flats, "cost")
 
         print(
-            tools.pretty_json(flats_list)
+            tools.pretty_json(sum(fetched_flats.values(), []))
         )
+        return
     # Filter command
     elif args.cmd == "filter":
         # Load and filter flats list
         if args.input:
-            flats_list = fetch.load_flats_list_from_file(args.input)
+            fetched_flats = fetch.load_flats_from_file(args.input, config)
 
-            flats_list = cmds.filter_flats(config, flats_list=flats_list,
-                                           fetch_details=False)["new"]
+            fetched_flats = cmds.filter_fetched_flats(
+                config,
+                fetched_flats=fetched_flats,
+                fetch_details=False
+            )["new"]
 
             # Sort by cost
-            flats_list = tools.sort_list_of_dicts_by(flats_list, "cost")
+            fetched_flats = tools.sort_list_of_dicts_by(fetched_flats, "cost")
 
             # Output to stdout
             print(
-                tools.pretty_json(flats_list)
+                tools.pretty_json(sum(fetched_flats.values(), []))
             )
         else:
             cmds.import_and_filter(config, load_from_db=True)
+        return
     # Import command
     elif args.cmd == "import":
         cmds.import_and_filter(config, load_from_db=False)
-    # Purge command
-    elif args.cmd == "purge":
-        cmds.purge_db(config)
+        return
     # Serve command
     elif args.cmd == "serve":
         cmds.serve(config)
+        return
 
 
 if __name__ == "__main__":

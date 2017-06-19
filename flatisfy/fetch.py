@@ -4,6 +4,7 @@ This module contains all the code related to fetching and loading flats lists.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import collections
 import itertools
 import json
 import logging
@@ -225,29 +226,32 @@ class WeboobProxy(object):
             return "{}"
 
 
-def fetch_flats_list(config):
+def fetch_flats(config):
     """
     Fetch the available flats using the Flatboob / Weboob config.
 
     :param config: A config dict.
-    :return: A list of all available flats.
+    :return: A dict mapping constraint in config to all available matching
+    flats.
     """
-    flats_list = []
+    fetched_flats = {}
 
-    with WeboobProxy(config) as weboob_proxy:
-        LOGGER.info("Loading flats...")
-        queries = weboob_proxy.build_queries(config["constraints"])
-        housing_posts = []
-        for query in queries:
-            housing_posts.extend(
-                weboob_proxy.query(query, config["max_entries"])
-            )
+    for constraint_name, constraint in config["constraints"].items():
+        LOGGER.info("Loading flats for constraint %s...", constraint_name)
+        with WeboobProxy(config) as weboob_proxy:
+            queries = weboob_proxy.build_queries(constraint)
+            housing_posts = []
+            for query in queries:
+                housing_posts.extend(
+                    weboob_proxy.query(query, config["max_entries"])
+                )
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
-    flats_list = [json.loads(flat) for flat in housing_posts]
-    flats_list = [WeboobProxy.restore_decimal_fields(flat)
-                  for flat in flats_list]
-    return flats_list
+        constraint_flats_list = [json.loads(flat) for flat in housing_posts]
+        constraint_flats_list = [WeboobProxy.restore_decimal_fields(flat)
+                                 for flat in constraint_flats_list]
+        fetched_flats[constraint_name] = constraint_flats_list
+    return fetched_flats
 
 
 def fetch_details(config, flat_id):
@@ -269,12 +273,18 @@ def fetch_details(config, flat_id):
     return flat_details
 
 
-def load_flats_list_from_file(json_file):
+def load_flats_from_file(json_file, config):
     """
     Load a dumped flats list from JSON file.
 
     :param json_file: The file to load housings list from.
-    :return: A list of all the flats in the dump file.
+    :return: A dict mapping constraint in config to all available matching
+    flats.
+
+    .. note::
+        As we do not know which constraint is met by a given flat, all the
+        flats are returned for any available constraint, and they will be
+        filtered out afterwards.
     """
     flats_list = []
     try:
@@ -284,21 +294,24 @@ def load_flats_list_from_file(json_file):
         LOGGER.info("Found %d flats.", len(flats_list))
     except (IOError, ValueError):
         LOGGER.error("File %s is not a valid dump file.", json_file)
-    return flats_list
+    return {
+        constraint_name: flats_list
+        for constraint_name in config["constraints"]
+    }
 
 
-def load_flats_list_from_db(config):
+def load_flats_from_db(config):
     """
     Load flats from database.
 
     :param config: A config dict.
-    :return: A list of all the flats in the database.
+    :return: A dict mapping constraint in config to all available matching
+    flats.
     """
-    flats_list = []
     get_session = database.init_db(config["database"], config["search_index"])
 
+    loaded_flats = collections.defaultdict(list)
     with get_session() as session:
-        # TODO: Better serialization
-        flats_list = [flat.json_api_repr()
-                      for flat in session.query(flat_model.Flat).all()]
-    return flats_list
+        for flat in session.query(flat_model.Flat).all():
+            loaded_flats[flat.flatisfy_constraint].append(flat.json_api_repr())
+    return loaded_flats
