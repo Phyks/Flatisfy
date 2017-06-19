@@ -51,7 +51,9 @@ def flats_v1(config, db):
     ]
 
     for flat in flats:
-        if flat["flatisfy_postal_code"]:
+        try:
+            assert flat["flatisfy_postal_code"]
+
             postal_code_data = next(
                 x
                 for x in postal_codes.get(flat["flatisfy_constraint"],
@@ -63,7 +65,7 @@ def flats_v1(config, db):
                 "name": postal_code_data.name,
                 "gps": (postal_code_data.lat, postal_code_data.lng)
             }
-        else:
+        except (AssertionError, StopIteration):
             flat["flatisfy_postal_code"] = {}
 
     return {
@@ -115,7 +117,9 @@ def flat_v1(flat_id, config, db):
 
     flat = flat.json_api_repr()
 
-    if flat["flatisfy_postal_code"]:
+    try:
+        assert flat["flatisfy_postal_code"]
+
         postal_code_data = next(
             x
             for x in postal_codes
@@ -126,7 +130,7 @@ def flat_v1(flat_id, config, db):
             "name": postal_code_data.name,
             "gps": (postal_code_data.lat, postal_code_data.lng)
         }
-    else:
+    except (AssertionError, StopIteration):
         flat["flatisfy_postal_code"] = {}
 
     return {
@@ -267,7 +271,9 @@ def search_v1(db, config):
     ]
 
     for flat in flats:
-        if flat["flatisfy_postal_code"]:
+        try:
+            assert flat["flatisfy_postal_code"]
+
             postal_code_data = next(
                 x
                 for x in postal_codes.get(flat["flatisfy_constraint"],
@@ -276,10 +282,10 @@ def search_v1(db, config):
             )
             flat["flatisfy_postal_code"] = {
                 "postal_code": flat["flatisfy_postal_code"],
-                "name": postal_code_data["name"],
-                "gps": (postal_code_data["lat"], postal_code_data["lng"])
+                "name": postal_code_data.name,
+                "gps": (postal_code_data.lat, postal_code_data.lng)
             }
-        else:
+        except (AssertionError, StopIteration):
             flat["flatisfy_postal_code"] = {}
 
     return {
