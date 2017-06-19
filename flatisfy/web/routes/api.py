@@ -56,8 +56,7 @@ def flats_v1(config, db):
 
             postal_code_data = next(
                 x
-                for x in postal_codes.get(flat["flatisfy_constraint"],
-                                          postal_codes["default"])
+                for x in postal_codes.get(flat["flatisfy_constraint"], [])
                 if x.postal_code == flat["flatisfy_postal_code"]
             )
             flat["flatisfy_postal_code"] = {
@@ -108,10 +107,6 @@ def flat_v1(flat_id, config, db):
     """
     flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
 
-    constraint = config["constraints"].get(flat.flatisfy_constraint,
-                                           config["constraints"]["default"])
-    postal_codes = flatisfy.data.load_data(PostalCode, constraint, config)
-
     if not flat:
         return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
 
@@ -119,6 +114,11 @@ def flat_v1(flat_id, config, db):
 
     try:
         assert flat["flatisfy_postal_code"]
+
+        constraint = config["constraints"].get(flat["flatisfy_constraint"],
+                                               None)
+        assert constraint is not None
+        postal_codes = flatisfy.data.load_data(PostalCode, constraint, config)
 
         postal_code_data = next(
             x
@@ -276,8 +276,7 @@ def search_v1(db, config):
 
             postal_code_data = next(
                 x
-                for x in postal_codes.get(flat["flatisfy_constraint"],
-                                          postal_codes["default"])
+                for x in postal_codes.get(flat["flatisfy_constraint"], [])
                 if x.postal_code == flat["flatisfy_postal_code"]
             )
             flat["flatisfy_postal_code"] = {

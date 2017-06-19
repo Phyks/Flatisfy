@@ -55,6 +55,10 @@ def parse_args(argv=None):
         "-vv", action="store_true",
         help="Debug logging output."
     )
+    parent_parser.add_argument(
+        "--constraints", type=str,
+        help="Comma-separated list of constraints to consider."
+    )
 
     # Subcommands
     subparsers = parser.add_subparsers(

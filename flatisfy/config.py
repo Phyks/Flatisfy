@@ -97,9 +97,8 @@ def validate_config(config):
         # message in the log output.
         # pylint: disable=locally-disabled,line-too-long
 
-        # Ensure default constraint is here
-        assert "default" in config["constraints"]
         # Ensure constraints are ok
+        assert len(config["constraints"]) > 0
         for constraint in config["constraints"].values():
             assert "type" in constraint
             assert isinstance(constraint["type"], str)
@@ -228,6 +227,18 @@ def load_config(args=None):
             config_data["data_directory"],
             "search_index"
         )
+
+    # Handle constraints filtering
+    if args and getattr(args, "constraints", None) is not None:
+        LOGGER.info(
+            "Filtering constraints from config according to CLI argument."
+        )
+        constraints_filter = args.constraints.split(",")
+        config_data["constraints"] = {
+            k: v
+            for k, v in config_data["constraints"].items()
+            if k in constraints_filter
+        }
 
     config_validation = validate_config(config_data)
     if config_validation is True:

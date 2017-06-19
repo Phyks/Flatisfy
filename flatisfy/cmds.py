@@ -40,9 +40,15 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
     try:
         constraint = config["constraints"][constraint_name]
     except KeyError:
-        LOGGER.warning("Missing constraint %s. Using default one.",
-                       constraint_name)
-        constraint = config["constraints"]["default"]
+        LOGGER.error(
+            "Missing constraint %s. Skipping filtering for these posts.",
+            constraint_name
+        )
+        return {
+            "new": [],
+            "duplicate": [],
+            "ignored": []
+        }
 
     first_pass_result = collections.defaultdict(list)
     second_pass_result = collections.defaultdict(list)
