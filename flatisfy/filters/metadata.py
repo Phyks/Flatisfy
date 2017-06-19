@@ -212,9 +212,14 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
 
             if distance > distance_threshold:
                 LOGGER.info(
-                    ("Postal code %s found for flat %s is off-constraints. "
-                     "Min distance is %f."),
-                    postal_code, flat["id"], distance
+                    ("Postal code %s found for flat %s is off-constraints "
+                     "(distance is %dm > %dm). Let's consider it is an "
+                     "artifact match and keep the post without this postal "
+                     "code."),
+                    postal_code,
+                    flat["id"],
+                    int(distance),
+                    int(distance_threshold)
                 )
                 postal_code = None
 
