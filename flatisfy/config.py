@@ -231,7 +231,9 @@ def load_config(args=None):
     # Handle constraints filtering
     if args and getattr(args, "constraints", None) is not None:
         LOGGER.info(
-            "Filtering constraints from config according to CLI argument."
+            ("Filtering constraints from config according to CLI argument. "
+             "Using only the following constraints: %s."),
+            args.constraints.replace(",", ", ")
         )
         constraints_filter = args.constraints.split(",")
         config_data["constraints"] = {
