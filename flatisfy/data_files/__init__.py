@@ -161,8 +161,8 @@ def _preprocess_tcl():
         tcl_data.append(PublicTransport(
             name=item["properties"]["nom"],
             area="FR-ARA",
-            lat=item["geometry"]["coordinates"][0],
-            lng=item["geometry"]["coordinates"][1]
+            lat=item["geometry"]["coordinates"][1],
+            lng=item["geometry"]["coordinates"][0]
         ))
     return tcl_data
 

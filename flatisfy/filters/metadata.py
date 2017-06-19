@@ -303,9 +303,13 @@ def guess_stations(flats_list, constraint, config, distance_threshold=1500):
                             "gps": (station_data.lat, station_data.lng)
                         })
                         break
-                    LOGGER.debug(
-                        "Station %s is too far from flat %s, discarding it.",
-                        station[0], flat["id"]
+                    LOGGER.info(
+                        ("Station %s is too far from flat %s (%dm > %dm), "
+                         "discarding it."),
+                        station[0],
+                        flat["id"],
+                        int(distance),
+                        int(distance_threshold)
                     )
         else:
             LOGGER.info(
@@ -313,11 +317,20 @@ def guess_stations(flats_list, constraint, config, distance_threshold=1500):
                 flat["id"]
             )
 
-        # Store matched stations and the associated confidence
+        if not good_matched_stations:
+            # No stations found, log it and cotninue with next housing
+            LOGGER.info(
+                "No stations found for flat %s, matching %s.",
+                flat["id"],
+                flat["station"]
+            )
+            continue
+
         LOGGER.info(
-            "Found stations for flat %s: %s.",
+            "Found stations for flat %s: %s (matching %s).",
             flat["id"],
-            ", ".join(x["name"] for x in good_matched_stations)
+            ", ".join(x["name"] for x in good_matched_stations),
+            flat["station"]
         )
 
         # If some stations were already filled in and the result is different,
