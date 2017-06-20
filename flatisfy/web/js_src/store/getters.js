@@ -55,17 +55,17 @@ export default {
     },
 
     allTimeToPlaces: state => {
-        let places = {}
+        const places = {}
         Object.keys(state.timeToPlaces).forEach(constraint => {
-            let constraintTimeToPlaces = state.timeToPlaces[constraint]
-            Object.keys(constraintTimeToPlaces).forEach(name =>
+            const constraintTimeToPlaces = state.timeToPlaces[constraint]
+            Object.keys(constraintTimeToPlaces).forEach(name => {
                 places[name] = constraintTimeToPlaces[name]
-            )
+            })
         })
         return places
     },
 
-    timeToPlaces: (state, getters) => (constraint_name) => {
-        return state.timeToPlaces[constraint_name]
-    },
+    timeToPlaces: (state, getters) => (constraintName) => {
+        return state.timeToPlaces[constraintName]
+    }
 }

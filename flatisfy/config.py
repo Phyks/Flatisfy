@@ -98,7 +98,7 @@ def validate_config(config):
         # pylint: disable=locally-disabled,line-too-long
 
         # Ensure constraints are ok
-        assert len(config["constraints"]) > 0
+        assert config["constraints"]
         for constraint in config["constraints"].values():
             assert "type" in constraint
             assert isinstance(constraint["type"], str)

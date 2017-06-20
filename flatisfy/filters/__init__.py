@@ -16,7 +16,7 @@ from flatisfy.filters import metadata
 LOGGER = logging.getLogger(__name__)
 
 
-def refine_with_housing_criteria(flats_list, constraint, config):
+def refine_with_housing_criteria(flats_list, constraint):
     """
     Filter a list of flats according to criteria.
 
@@ -115,7 +115,7 @@ def first_pass(flats_list, constraint, config):
     flats_list = metadata.guess_stations(flats_list, constraint, config)
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list,
-                                                            constraint, config)
+                                                            constraint)
 
     return {
         "new": flats_list,
@@ -155,7 +155,7 @@ def second_pass(flats_list, constraint, config):
 
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list,
-                                                            constraint, config)
+                                                            constraint)
 
     return {
         "new": flats_list,

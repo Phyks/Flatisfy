@@ -26,7 +26,7 @@ def french_postal_codes_to_iso_3166(postal_code):
     # Mapping between areas (main subdivisions in French, ISO 3166-2) and
     # French departements
     # Taken from Wikipedia data.
-    AREA_TO_DEPARTEMENT = {
+    area_to_departement = {
         "FR-ARA": ["01", "03", "07", "15", "26", "38", "42", "43", "63", "69",
                    "73", "74"],
         "FR-BFC": ["21", "25", "39", "58", "70", "71", "89", "90"],
@@ -49,8 +49,8 @@ def french_postal_codes_to_iso_3166(postal_code):
     return next(
         (
             i
-            for i in AREA_TO_DEPARTEMENT
-            if departement in AREA_TO_DEPARTEMENT[i]
+            for i in area_to_departement
+            if departement in area_to_departement[i]
         ),
         None
     )

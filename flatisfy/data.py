@@ -23,7 +23,7 @@ except ImportError:
     try:
         from functools32 import lru_cache
     except ImportError:
-        def lru_cache(maxsize=None):
+        def lru_cache(maxsize=None):  # pylint: disable=unused-argument
             """
             Identity implementation of ``lru_cache`` for fallback.
             """

@@ -213,7 +213,7 @@ class WeboobProxy(object):
             housing.id = full_flat_id
 
             return json.dumps(housing, cls=WeboobEncoder)
-        except Exception as exc:
+        except Exception as exc: # pylint: disable=broad-except
             # If an error occured, just log it
             LOGGER.error(
                 "An error occured while fetching housing %s: %s",
