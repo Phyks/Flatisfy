@@ -118,7 +118,11 @@
                 <h3>{{ $t("flatsDetails.Contact") }}</h3>
                 <div class="contact">
                     <p>
-                        <a v-if="flat.phone" :href="'tel:+33' + flat.phone">{{ flat.phone }}</a>
+                        <template v-if="flat.phone">
+                            <template v-for="phoneNumber in flat.phone.split(',')">
+                                <a :href="'tel:+33' + normalizePhoneNumber(phoneNumber)">{{ phoneNumber }}</a><br/>
+                            </template>
+                        </template>
                         <template v-else>
                             {{ $t("flatsDetails.no_phone_found") }}
                         </template>
@@ -303,6 +307,12 @@ export default {
 
         handleNotationOut () {
             this.overloadNotation = null
+        },
+
+        normalizePhoneNumber (phoneNumber) {
+            phoneNumber = phoneNumber.replace(/ /g, '')
+            phoneNumber = phoneNumber.replace(/\./g, '')
+            return phoneNumber
         },
 
         capitalize: capitalize,
