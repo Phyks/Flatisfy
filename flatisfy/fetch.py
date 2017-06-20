@@ -213,16 +213,13 @@ class WeboobProxy(object):
             housing.id = full_flat_id
 
             return json.dumps(housing, cls=WeboobEncoder)
-        except CallErrors as exc:
+        except Exception as exc:
             # If an error occured, just log it
             LOGGER.error(
                 "An error occured while fetching housing %s: %s",
                 full_flat_id,
                 str(exc)
             )
-            return "{}"
-        except ValueError as exc:
-            LOGGER.error("ValueError for flat_id=%s: %s", flat_id, str(exc))
             return "{}"
 
 
