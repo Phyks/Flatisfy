@@ -49,7 +49,7 @@ export default {
             center: null,
             zoom: {
                 defaultZoom: 13,
-                minZoom: 11,
+                minZoom: 5,
                 maxZoom: 17
             },
             tiles: {
