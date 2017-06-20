@@ -91,6 +91,11 @@ explicitly mentionned otherwise.
 See the `CONTRIBUTING.md` file for more infos.
 
 
+## Support
+
+Feel free to open issues. An IRC channel is available at [irc://irc.freenode.net/flatisfy](irc://irc.freenode.net/flatisfy) as well.
+
+
 ## Thanks
 
 * [Weboob](http://weboob.org/)
