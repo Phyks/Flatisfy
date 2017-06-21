@@ -15,6 +15,6 @@ do
     cd /home/user/app
     python -m flatisfy import -v --config /flatisfy/config.json
 
-    echo "Done, sleeping for 5 minutes."
-    sleep 300
+    echo "Done, sleeping for 30 minutes."
+    sleep 1800
 done

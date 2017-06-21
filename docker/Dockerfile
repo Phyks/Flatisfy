@@ -31,7 +31,7 @@ VOLUME /flatisfy
 
 # Install Flatisfy.
 RUN cd /home/user \
-    && git clone https://git.phyks.me/bnjbvr/flatisfy/ ./app \
+    && git clone https://git.phyks.me/Phyks/flatisfy/ ./app \
     && cd ./app \
     && pip install -r requirements.txt \
     && npm install \

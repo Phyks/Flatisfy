@@ -33,7 +33,8 @@ This code is not restricted to handling flats only!
 
 ## Getting started
 
-See the [getting started guide](doc/0.getting_started.md).
+See the [getting started guide](doc/0.getting_started.md). If you want to give
+it a try quickly, you can have a look at the [Docker image](doc/2.docker.md).
 
 
 ## Documentation
