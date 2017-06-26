@@ -47,8 +47,8 @@
                         <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
                     </template>
                 </td>
-                <td>
-                    <a class="fill" :href="makeDetailsUrl(flat.id)">
+                <td class="no-padding">
+                    <router-link class="fill" :to="{name: 'details', params: {id: flat.id}}">
                         <template v-if="!showNotationColumn" v-for="n in range(flat.notation)">
                             <i class="fa fa-star" aria-hidden="true" :title="capitalize($t('status.followed'))"></i>
                         </template>
@@ -64,7 +64,7 @@
                             <br/>
                             <pre>{{ flat.notes }}</pre>
                         </template>
-                    </a>
+                    </router-link>
                 </td>
                 <td>{{ flat.area }} m²</td>
                 <td>
@@ -171,9 +171,6 @@ export default {
                 this.sortBy = field
             }
         },
-        makeDetailsUrl(flatId) {
-            return `/#/flat/${flatId}`;
-        },
         capitalize: capitalize,
         range: range
     }
@@ -218,10 +215,13 @@ pre {
     word-break: break-all;
 }
 
+.no-padding {
+    padding: 0;
+}
+
 .fill {
     display: block;
-    width: 100%;
-    padding-left: 0;
-    padding-right: 0;
+    padding: 2em;
+    text-decoration: none;
 }
 </style>
