@@ -24,6 +24,7 @@ LOGGER = logging.getLogger(__name__)
 # considered as less trustable if two backends have similar info about a
 # housing.
 BACKENDS_PRECEDENCE = [
+    "foncia",
     "seloger",
     "pap",
     "leboncoin",
