@@ -16,6 +16,7 @@ import PIL.Image
 import requests
 
 from flatisfy import tools
+from flatisfy.filters.cache import ImageCache
 
 LOGGER = logging.getLogger(__name__)
 
@@ -60,8 +61,7 @@ def homogeneize_phone_number(number):
 
     return number
 
-
-def find_number_common_photos(flat1_photos, flat2_photos):
+def find_number_common_photos(photo_cache, flat1_photos, flat2_photos):
     """
     Compute the number of common photos between the two lists of photos for the
     flats.
@@ -75,13 +75,14 @@ def find_number_common_photos(flat1_photos, flat2_photos):
     :return: The found number of common photos.
     """
     n_common_photos = 0
+
     for photo1, photo2 in itertools.product(flat1_photos, flat2_photos):
         try:
-            req1 = requests.get(photo1["url"])
+            req1 = photo_cache.get(photo1["url"])
             im1 = PIL.Image.open(BytesIO(req1.content))
             hash1 = imagehash.average_hash(im1)
 
-            req2 = requests.get(photo2["url"])
+            req2 = photo_cache.get(photo2["url"])
             im2 = PIL.Image.open(BytesIO(req2.content))
             hash2 = imagehash.average_hash(im2)
 
@@ -89,6 +90,7 @@ def find_number_common_photos(flat1_photos, flat2_photos):
                 n_common_photos += 1
         except (IOError, requests.exceptions.RequestException):
             pass
+
     return n_common_photos
 
 
@@ -187,6 +189,9 @@ def deep_detect(flats_list):
     the flats objects that should be removed and considered as duplicates (they
     were already merged).
     """
+
+    photo_cache = ImageCache()
+
     LOGGER.info("Running deep duplicates detection.")
     matching_flats = collections.defaultdict(list)
     for i, flat1 in enumerate(flats_list):
@@ -250,16 +255,22 @@ def deep_detect(flats_list):
                 # They should have at least one photo in common if there
                 # are some photos
                 if flat1["photos"] and flat2["photos"]:
-                    max_number_photos = max(len(flat1["photos"]),
-                                            len(flat2["photos"]))
                     n_common_photos = find_number_common_photos(
+                        photo_cache,
                         flat1["photos"],
                         flat2["photos"]
                     )
                     assert n_common_photos > 1
-                    n_common_items += int(
-                        20 * n_common_photos / max_number_photos
-                    )
+
+                    min_number_photos = min(len(flat1["photos"]),
+                                            len(flat2["photos"]))
+
+                    # Either all the photos are the same, or there are at least
+                    # three common photos.
+                    if n_common_photos == min_number_photos:
+                        n_common_items += 15
+                    else:
+                        n_common_items += 5 * min(n_common_photos, 3)
 
                 # Minimal score to consider they are duplicates
                 assert n_common_items >= 15
@@ -280,6 +291,11 @@ def deep_detect(flats_list):
             )
             matching_flats[flat1["id"]].append(flat2["id"])
             matching_flats[flat2["id"]].append(flat1["id"])
+
+    if photo_cache.total():
+        LOGGER.debug("Photo cache: hits: %d%% / misses: %d%%.",
+                     photo_cache.hit_rate(),
+                     photo_cache.miss_rate())
 
     seen_ids = []
     duplicate_flats = []

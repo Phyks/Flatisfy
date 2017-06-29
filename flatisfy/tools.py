@@ -13,6 +13,7 @@ import json
 import logging
 import math
 import re
+import time
 
 import requests
 import unidecode
@@ -299,3 +300,16 @@ def get_travel_time_between(latlng_from, latlng_to, config):
             "sections": sections
         }
     return None
+
+
+def timeit(f):
+    """
+    A decorator that logs how much time was spent in the function.
+    """
+    def wrapped(*args, **kwargs):
+        before = time.time()
+        res = f(*args, **kwargs)
+        runtime = time.time() - before
+        LOGGER.info("%s -- Execution took %s seconds.", f.__name__, runtime)
+        return res
+    return wrapped

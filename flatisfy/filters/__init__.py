@@ -80,7 +80,7 @@ def refine_with_housing_criteria(flats_list, constraint):
         ]
     )
 
-
+@tools.timeit
 def first_pass(flats_list, constraint, config):
     """
     First filtering pass.
@@ -123,7 +123,7 @@ def first_pass(flats_list, constraint, config):
         "duplicate": duplicates_by_id + duplicates_by_urls
     }
 
-
+@tools.timeit
 def second_pass(flats_list, constraint, config):
     """
     Second filtering pass.
@@ -163,7 +163,7 @@ def second_pass(flats_list, constraint, config):
         "duplicate": []
     }
 
-
+@tools.timeit
 def third_pass(flats_list, config):
     """
     Third filtering pass.
@@ -175,6 +175,8 @@ def third_pass(flats_list, config):
     :param config: A config dict.
     :return: A dict mapping flat status and list of flat objects.
     """
+    LOGGER.info("Running third filtering pass.")
+
     # Deduplicate the list using every available data
     flats_list, duplicate_flats = duplicates.deep_detect(flats_list)
 
