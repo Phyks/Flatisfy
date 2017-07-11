@@ -37,6 +37,13 @@
                         <span class="sr-only">{{ $t("common.sort" + capitalize(sortOrder)) }}</span>
                     </span>
                 </th>
+                <th class="pointer" v-on:click="updateSortBy('sqCost')">
+                    {{ $t("flatsDetails.SquareMeterCost") }}
+                    <span v-if="sortBy === 'sqCost'">
+                        <i class="fa" :class="'fa-angle-' + sortOrder" aria-hidden="true"></i>
+                        <span class="sr-only">{{ $t("common.sort" + capitalize(sortOrder)) }}</span>
+                    </span>
+                </th>
                 <th>{{ $t("common.Actions") }}</th>
             </tr>
         </thead>
@@ -78,6 +85,9 @@
                     <template v-else-if="flat.utilities == 'excluded'">
                         {{ $t("flatsDetails.utilities_excluded") }}
                     </template>
+                </td>
+                <td>
+                    {{ flat.sqCost }} {{ flat.currency }}
                 </td>
                 <td>
                     <router-link :to="{name: 'details', params: {id: flat.id}}" :aria-label="$t('common.More_about') + ' ' + flat.id" :title="$t('common.More_about') + ' ' + flat.id">

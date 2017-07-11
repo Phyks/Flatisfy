@@ -97,6 +97,14 @@
                                 </template>
                             </td>
                         </tr>
+                        <tr>
+                            <th>
+                                {{ $t("flatsDetails.SquareMeterCost") }}
+                            </th>
+                            <td>
+                                {{ flat.sqCost }} {{ flat.currency }}
+                            </td>
+                        </tr>
                     </table>
                 </div>
                 <div>

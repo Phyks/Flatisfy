@@ -20,6 +20,10 @@ const postProcessAPIResults = function (flat) {
         })
         flat.flatisfy_time_to = momentifiedTimeTo
     }
+
+    // Fill cost per square meter.
+    flat.sqCost = Math.round(flat.cost * 100 / flat.area) / 100 | 0
+
     /* eslint-enable camelcase */
     return flat
 }
