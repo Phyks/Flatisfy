@@ -48,7 +48,7 @@ def preprocess_data(config, force=False):
     with get_session() as session:
         is_built = (
             session.query(PublicTransport).count() > 0 and
-            session.query(PostalCode).count > 0
+            session.query(PostalCode).count() > 0
         )
         if is_built and not force:
             # No need to rebuild the database, skip
