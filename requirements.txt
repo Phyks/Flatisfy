@@ -11,3 +11,4 @@ requests
 sqlalchemy
 unidecode
 whoosh
+weboob>=1.4
