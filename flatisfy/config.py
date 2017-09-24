@@ -16,7 +16,9 @@ import traceback
 
 import appdirs
 
+from flatisfy import data
 from flatisfy import tools
+from flatisfy.models.postal_code import PostalCode
 
 
 # Default configuration
@@ -106,6 +108,26 @@ def validate_config(config):
         # message in the log output.
         # pylint: disable=locally-disabled,line-too-long
 
+        assert config["passes"] in [0, 1, 2, 3]
+        assert config["max_entries"] is None or (isinstance(config["max_entries"], int) and config["max_entries"] > 0)  # noqa: E501
+
+        assert config["data_directory"] is None or isinstance(config["data_directory"], str)  # noqa: E501
+        assert os.path.isdir(config["data_directory"])
+        assert isinstance(config["search_index"], str)
+        assert config["modules_path"] is None or isinstance(config["modules_path"], str)  # noqa: E501
+
+        assert config["database"] is None or isinstance(config["database"], str)  # noqa: E501
+
+        assert isinstance(config["port"], int)
+        assert isinstance(config["host"], str)
+        assert config["webserver"] is None or isinstance(config["webserver"], str)  # noqa: E501
+        assert config["backends"] is None or isinstance(config["backends"], list)  # noqa: E501
+
+        assert isinstance(config["send_email"], bool)
+        assert config["smtp_server"] is None or isinstance(config["smtp_server"], (str, unicode))  # noqa: E501
+        assert config["smtp_port"] is None or isinstance(config["smtp_port"], int)  # noqa: E501
+        assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
+
         # Ensure constraints are ok
         assert config["constraints"]
         for constraint in config["constraints"].values():
@@ -120,6 +142,12 @@ def validate_config(config):
 
             assert "postal_codes" in constraint
             assert constraint["postal_codes"]
+            opendata_postal_codes = [
+                x.postal_code
+                for x in data.load_data(PostalCode, constraint, config)
+            ]
+            for postal_code in constraint["postal_codes"]:
+                assert postal_code in opendata_postal_codes  # noqa: E501
 
             assert "area" in constraint
             _check_constraints_bounds(constraint["area"])
@@ -142,26 +170,6 @@ def validate_config(config):
                 assert len(item["gps"]) == 2
                 assert "time" in item
                 _check_constraints_bounds(item["time"])
-
-        assert config["passes"] in [0, 1, 2, 3]
-        assert config["max_entries"] is None or (isinstance(config["max_entries"], int) and config["max_entries"] > 0)  # noqa: E501
-
-        assert config["data_directory"] is None or isinstance(config["data_directory"], str)  # noqa: E501
-        assert os.path.isdir(config["data_directory"])
-        assert isinstance(config["search_index"], str)
-        assert config["modules_path"] is None or isinstance(config["modules_path"], str)  # noqa: E501
-
-        assert config["database"] is None or isinstance(config["database"], str)  # noqa: E501
-
-        assert isinstance(config["port"], int)
-        assert isinstance(config["host"], str)
-        assert config["webserver"] is None or isinstance(config["webserver"], str)  # noqa: E501
-        assert config["backends"] is None or isinstance(config["backends"], list)  # noqa: E501
-
-        assert isinstance(config["send_email"], bool)
-        assert config["smtp_server"] is None or isinstance(config["smtp_server"], (str, unicode))
-        assert config["smtp_port"] is None or isinstance(config["smtp_port"], int)
-        assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
 
         return True
     except (AssertionError, KeyError):
