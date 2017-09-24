@@ -13,6 +13,7 @@ from flatisfy import database
 from flatisfy import data_files
 from flatisfy.models.postal_code import PostalCode
 from flatisfy.models.public_transport import PublicTransport
+from flatisfy.tools import hash_dict
 
 LOGGER = logging.getLogger(__name__)
 
@@ -68,6 +69,7 @@ def preprocess_data(config, force=False):
             session.add_all(data_objects)
 
 
+@hash_dict
 @lru_cache(maxsize=5)
 def load_data(model, constraint, config):
     """

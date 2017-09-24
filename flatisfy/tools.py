@@ -18,11 +18,50 @@ import time
 import requests
 import unidecode
 
+try:
+    from functools import wraps
+except ImportError:
+    try:
+        from functools32 import wraps
+    except ImportError:
+        def wraps(func):
+            """
+            Identity implementation of ``wraps`` for fallback.
+            """
+            return lambda func: func
+
 
 LOGGER = logging.getLogger(__name__)
 
 # Constants
 NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
+
+
+def hash_dict(func):
+    """
+    Decorator to use on functions accepting dict parameters, to transform them
+    into immutable dicts and be able to use lru_cache.
+
+    From https://stackoverflow.com/a/44776960.
+    """
+    class HDict(dict):
+        """
+        Transform mutable dictionnary into immutable. Useful to be compatible
+        with lru_cache
+        """
+        def __hash__(self):
+            return hash(json.dumps(self))
+
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        args = tuple(
+            [HDict(arg) if isinstance(arg, dict) else arg
+             for arg in args
+            ])
+        kwargs = {k: HDict(v) if isinstance(v, dict) else v
+                  for k, v in kwargs.items()}
+        return func(*args, **kwargs)
+    return wrapped
 
 
 class DateAwareJSONEncoder(json.JSONEncoder):
