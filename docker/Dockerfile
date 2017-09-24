@@ -38,6 +38,7 @@ RUN cd /home/user \
     && npm run build:prod
 
 RUN chown user:user -R /home/user
+RUN mkdir -p /home/user/.local/share/flatisfy
 
 COPY ./docker_run.sh /home/user/run.sh
 RUN chmod +x /home/user/run.sh
