@@ -175,12 +175,15 @@ def main():
         fetched_flats = fetch.fetch_flats(config)
         fetched_flats = cmds.filter_fetched_flats(config,
                                                   fetched_flats=fetched_flats,
-                                                  fetch_details=True)["new"]
+                                                  fetch_details=True)
         # Sort by cost
-        fetched_flats = tools.sort_list_of_dicts_by(fetched_flats, "cost")
+        fetched_flats = {
+            k: tools.sort_list_of_dicts_by(v["new"], "cost")
+            for k, v in fetched_flats.items()
+        }
 
         print(
-            tools.pretty_json(sum(fetched_flats.values(), []))
+            tools.pretty_json(fetched_flats)
         )
         return
     # Filter command
@@ -193,14 +196,17 @@ def main():
                 config,
                 fetched_flats=fetched_flats,
                 fetch_details=False
-            )["new"]
+            )
 
             # Sort by cost
-            fetched_flats = tools.sort_list_of_dicts_by(fetched_flats, "cost")
+            fetched_flats = {
+                k: tools.sort_list_of_dicts_by(v["new"], "cost")
+                for k, v in fetched_flats.items()
+            }
 
             # Output to stdout
             print(
-                tools.pretty_json(sum(fetched_flats.values(), []))
+                tools.pretty_json(fetched_flats)
             )
         else:
             cmds.import_and_filter(config, load_from_db=True)
