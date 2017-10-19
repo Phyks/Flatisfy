@@ -142,7 +142,11 @@ def main():
         sys.exit(0)
     else:
         # Load config
-        config = flatisfy.config.load_config(args)
+        if args.cmd == "build-data":
+            # Data not yet built, do not use it in config checks
+            config = flatisfy.config.load_config(args, check_with_data=False)
+        else:
+            config = flatisfy.config.load_config(args, check_with_data=True)
         if config is None:
             LOGGER.error("Invalid configuration. Exiting. "
                          "Run init-config before if this is the first time "

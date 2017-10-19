@@ -78,11 +78,13 @@ DEFAULT_CONFIG = {
 LOGGER = logging.getLogger(__name__)
 
 
-def validate_config(config):
+def validate_config(config, check_with_data):
     """
     Check that the config passed as argument is a valid configuration.
 
     :param config: A config dictionary to fetch.
+    :param check_with_data: Whether we should use the available OpenData to
+    check the config values.
     :return: ``True`` if the configuration is valid, ``False`` otherwise.
     """
     def _check_constraints_bounds(bounds):
@@ -142,12 +144,13 @@ def validate_config(config):
 
             assert "postal_codes" in constraint
             assert constraint["postal_codes"]
-            opendata_postal_codes = [
-                x.postal_code
-                for x in data.load_data(PostalCode, constraint, config)
-            ]
-            for postal_code in constraint["postal_codes"]:
-                assert postal_code in opendata_postal_codes  # noqa: E501
+            if check_with_data:
+                opendata_postal_codes = [
+                    x.postal_code
+                    for x in data.load_data(PostalCode, constraint, config)
+                ]
+                for postal_code in constraint["postal_codes"]:
+                    assert postal_code in opendata_postal_codes  # noqa: E501
 
             assert "area" in constraint
             _check_constraints_bounds(constraint["area"])
@@ -177,11 +180,13 @@ def validate_config(config):
         return traceback.extract_tb(exc_traceback)[-1][-1]
 
 
-def load_config(args=None):
+def load_config(args=None, check_with_data=True):
     """
     Load the configuration from file.
 
     :param args: An argparse args structure.
+    :param check_with_data: Whether we should use the available OpenData to
+    check the config values. Defaults to ``True``.
     :return: The loaded config dict.
     """
     LOGGER.info("Initializing configuration...")
@@ -269,7 +274,7 @@ def load_config(args=None):
         if config_data["website_url"][-1] != '/':
             config_data["website_url"] += '/'
 
-    config_validation = validate_config(config_data)
+    config_validation = validate_config(config_data, check_with_data)
     if config_validation is True:
         LOGGER.info("Config has been fully initialized.")
         return config_data
