@@ -126,7 +126,7 @@ def validate_config(config, check_with_data):
         assert config["backends"] is None or isinstance(config["backends"], list)  # noqa: E501
 
         assert isinstance(config["send_email"], bool)
-        assert config["smtp_server"] is None or isinstance(config["smtp_server"], (str, unicode))  # noqa: E501
+        assert config["smtp_server"] is None or isinstance(config["smtp_server"], str)  # noqa: E501
         assert config["smtp_port"] is None or isinstance(config["smtp_port"], int)  # noqa: E501
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
 

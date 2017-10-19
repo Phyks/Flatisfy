@@ -4,6 +4,7 @@ Email notifications.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+from builtins import str
 
 import logging
 import smtplib
@@ -72,11 +73,11 @@ def send_notification(config, flats):
     website_url = config["website_url"]
 
     for flat in flats:
-        title = unicode(flat.title)
-        flat_id = unicode(flat.id)
-        area = unicode(flat.area)
-        cost = unicode(flat.cost)
-        currency = unicode(flat.currency)
+        title = str(flat.title)
+        flat_id = str(flat.id)
+        area = str(flat.area)
+        cost = str(flat.cost)
+        currency = str(flat.currency)
 
         txt += (
             '- {}: {}#/flat/{} (area: {}, cost: {} {})\n'.format(
