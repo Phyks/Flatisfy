@@ -95,7 +95,7 @@ class WeboobProxy(object):
         """
         Build Weboob ``weboob.capabilities.housing.Query`` objects from the
         constraints defined in the configuration. Each query has at most 3
-        postal codes, to comply with housing websites limitations.
+        cities, to comply with housing websites limitations.
 
         :param constraints_dict: A dictionary of constraints, as defined in the
         config.
@@ -103,24 +103,23 @@ class WeboobProxy(object):
         objects. Returns ``None`` if an error occurred.
         """
         queries = []
-        for postal_codes in tools.batch(constraints_dict["postal_codes"], 3):
-            query = Query()
-            query.cities = []
-            for postal_code in postal_codes:
-                matching_cities = []
-                try:
-                    for city in self.webnip.do("search_city", postal_code):
-                        matching_cities.append(city)
-                except CallErrors as exc:
-                    # If an error occured, just log it
-                    LOGGER.error(
-                        (
-                            "An error occured while building query for "
-                            "postal code %s: %s"
-                        ),
-                        postal_code,
-                        str(exc)
-                    )
+
+        # First, find all matching cities for the postal codes in constraints
+        matching_cities = []
+        for postal_code in constraints_dict["postal_codes"]:
+            try:
+                for city in self.webnip.do("search_city", postal_code):
+                    matching_cities.append(city)
+            except CallErrors as exc:
+                # If an error occured, just log it
+                LOGGER.error(
+                    (
+                        "An error occured while building query for "
+                        "postal code %s: %s"
+                    ),
+                    postal_code,
+                    str(exc)
+                )
 
                 if not matching_cities:
                     # If postal code gave no match, warn the user
@@ -129,9 +128,10 @@ class WeboobProxy(object):
                         postal_code
                     )
 
-                # Append the matched cities to the query
-                for city in matching_cities:
-                    query.cities.append(city)
+        # Then, build queries by grouping cities by at most 3
+        for cities_batch in tools.batch(matching_cities, 3):
+            query = Query()
+            query.cities = list(cities_batch)
 
             try:
                 query.house_types = [
