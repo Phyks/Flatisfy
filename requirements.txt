@@ -11,4 +11,5 @@ requests
 sqlalchemy
 unidecode
 whoosh
-weboob>=1.4
+https://git.weboob.org/weboob/devel/repository/archive.zip?ref=master
+https://git.weboob.org/weboob/modules/repository/archive.zip?ref=master
