@@ -128,6 +128,15 @@ class WeboobProxy(object):
                         postal_code
                     )
 
+        # Remove "TOUTES COMMUNES" entry which are duplicates of the individual
+        # cities entries in Logicimmo module.
+        matching_cities = [
+            city
+            for city in matching_cities
+            if not (city.backend == 'logicimmo' and
+                    city.name.startswith('TOUTES COMMUNES'))
+        ]
+
         # Then, build queries by grouping cities by at most 3
         for cities_batch in tools.batch(matching_cities, 3):
             query = Query()
