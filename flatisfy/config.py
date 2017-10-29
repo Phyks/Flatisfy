@@ -91,6 +91,7 @@ def validate_config(config, check_with_data):
         """
         Check the bounds for numeric constraints.
         """
+        assert isinstance(bounds, list)
         assert len(bounds) == 2
         assert all(
             x is None or
