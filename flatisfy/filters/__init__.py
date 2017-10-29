@@ -67,6 +67,12 @@ def refine_with_housing_criteria(flats_list, constraint):
                             field.capitalize(), flat["id"])
             is_ok[i] = is_ok[i] and is_within_interval
 
+        # Check number of pictures
+        print(constraint['minimum_pictures'], len(flat['photos']))
+        if not (constraint['minimum_pictures'] <= len(flat['photos'])):
+            is_ok[i] = False
+
+
     return (
         [
             flat
