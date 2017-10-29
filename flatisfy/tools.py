@@ -18,18 +18,6 @@ import time
 import requests
 import unidecode
 
-try:
-    from functools import wraps
-except ImportError:
-    try:
-        from functools32 import wraps
-    except ImportError:
-        def wraps(func):
-            """
-            Identity implementation of ``wraps`` for fallback.
-            """
-            return lambda func: func
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -52,14 +40,20 @@ def hash_dict(func):
         def __hash__(self):
             return hash(json.dumps(self))
 
-    @wraps(func)
     def wrapped(*args, **kwargs):
+        """
+        The wrapped function
+        """
         args = tuple(
-            [HDict(arg) if isinstance(arg, dict) else arg
-             for arg in args
-            ])
-        kwargs = {k: HDict(v) if isinstance(v, dict) else v
-                  for k, v in kwargs.items()}
+            [
+                HDict(arg) if isinstance(arg, dict) else arg
+                for arg in args
+            ]
+        )
+        kwargs = {
+            k: HDict(v) if isinstance(v, dict) else v
+            for k, v in kwargs.items()
+        }
         return func(*args, **kwargs)
     return wrapped
 
@@ -281,7 +275,7 @@ def get_travel_time_between(latlng_from, latlng_to, config):
     .. note :: Uses the Navitia API. Requires a ``navitia_api_key`` field to be
     filled-in in the ``config``.
     """
-    time = None
+    travel_time = None
 
     # Check that Navitia API key is available
     if config["navitia_api_key"]:
@@ -300,7 +294,7 @@ def get_travel_time_between(latlng_from, latlng_to, config):
             req.raise_for_status()
 
             journeys = req.json()["journeys"][0]
-            time = journeys["durations"]["total"]
+            travel_time = journeys["durations"]["total"]
             sections = []
             for section in journeys["sections"]:
                 if section["type"] == "public_transport":
@@ -333,22 +327,25 @@ def get_travel_time_between(latlng_from, latlng_to, config):
             "No API key available for travel time lookup. Please provide "
             "a Navitia API key. Skipping travel time lookup."
         )
-    if time:
+    if travel_time:
         return {
-            "time": time,
+            "time": travel_time,
             "sections": sections
         }
     return None
 
 
-def timeit(f):
+def timeit(func):
     """
     A decorator that logs how much time was spent in the function.
     """
     def wrapped(*args, **kwargs):
+        """
+        The wrapped function
+        """
         before = time.time()
-        res = f(*args, **kwargs)
+        res = func(*args, **kwargs)
         runtime = time.time() - before
-        LOGGER.info("%s -- Execution took %s seconds.", f.__name__, runtime)
+        LOGGER.info("%s -- Execution took %s seconds.", func.__name__, runtime)
         return res
     return wrapped

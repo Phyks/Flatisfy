@@ -5,10 +5,10 @@ This modules defines an SQLAlchemy ORM model for a flat.
 # pylint: disable=locally-disabled,invalid-name,too-few-public-methods
 from __future__ import absolute_import, print_function, unicode_literals
 
+import enum
 import logging
 
 import arrow
-import enum
 
 from sqlalchemy import (
     Column, DateTime, Enum, Float, SmallInteger, String, Text

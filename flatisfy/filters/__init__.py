@@ -231,7 +231,7 @@ def second_pass(flats_list, constraint, config):
     }
 
 @tools.timeit
-def third_pass(flats_list, config):
+def third_pass(flats_list):
     """
     Third filtering pass.
 
@@ -239,7 +239,6 @@ def third_pass(flats_list, config):
     flats.
 
     :param flats_list: A list of flats dict to filter.
-    :param config: A config dict.
     :return: A dict mapping flat status and list of flat objects.
     """
     LOGGER.info("Running third filtering pass.")
