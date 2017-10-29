@@ -80,12 +80,15 @@ def refine_with_housing_criteria(flats_list, constraint):
     )
 
 
-def refine_with_minimum_nb_photos(flats_list, constraint):
+def refine_with_details_criteria(flats_list, constraint):
     """
-    Filter a list of flats according to the minimum number of photos criterion.
+    Filter a list of flats according to the criteria which require the full
+    details to be fetched. These include minimum number of photos and terms
+    that should appear in description.
 
     .. note :: This has to be done in a separate function and not with the
-    other criterias as photos are only fetched in the second pass.
+    other criterias as photos and full description are only fetched in the
+    second pass.
 
     :param flats_list: A list of flats dict to filter.
     :param constraint: The constraint that the ``flats_list`` should satisfy.
@@ -108,6 +111,20 @@ def refine_with_minimum_nb_photos(flats_list, constraint):
                 flat["id"],
                 len(flat['photos']),
                 constraint['minimum_nb_photos']
+            )
+            is_ok[i] = False
+
+        has_terms_in_description = True
+        if constraint["description_should_contain"]:
+            has_terms_in_description = all(
+                term in flat['text']
+                for term in constraint["description_should_contain"]
+            )
+        if not has_terms_in_description:
+            LOGGER.info(
+                ("Description for flat %s does not contain all the required "
+                 "terms."),
+                flat["id"]
             )
             is_ok[i] = False
 
@@ -202,9 +219,10 @@ def second_pass(flats_list, constraint, config):
     flats_list, ignored_list = refine_with_housing_criteria(flats_list,
                                                             constraint)
 
-    # Remove return housing posts which do not have enough photos
-    flats_list, ignored_list = refine_with_minimum_nb_photos(flats_list,
-                                                             constraint)
+    # Remove returned housing posts which do not match criteria relying on
+    # fetched details.
+    flats_list, ignored_list = refine_with_details_criteria(flats_list,
+                                                            constraint)
 
     return {
         "new": flats_list,

@@ -35,6 +35,7 @@ DEFAULT_CONFIG = {
             "rooms": (None, None),  # (min, max)
             "bedrooms": (None, None),  # (min, max)
             "minimum_nb_photos": None,  # min number of photos
+            "description_should_contain": [],  # list of terms
             "time_to": {}  # Dict mapping names to {"gps": [lat, lng],
                            #                        "time": (min, max) }
                            # Time is in seconds
@@ -143,6 +144,12 @@ def validate_config(config, check_with_data):
             if constraint["minimum_nb_photos"]:
                 assert isinstance(constraint["minimum_nb_photos"], int)
                 assert constraint["minimum_nb_photos"] >= 0
+
+            assert "description_should_contain" in constraint
+            assert isinstance(constraint["description_should_contain"], list)
+            if constraint["description_should_contain"]:
+                for term in constraint["description_should_contain"]:
+                    assert isinstance(term, str)
 
             assert "house_types" in constraint
             assert constraint["house_types"]
