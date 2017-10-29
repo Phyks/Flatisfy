@@ -1,0 +1,18 @@
+before_script:
+  - "pip install -r requirements.txt"
+  - "pip install pylint"
+  - "curl -sL https://deb.nodesource.com/setup_6.x | bash -"
+  - "apt-get install -y nodejs"
+  - "npm install"
+
+lint:2.7:
+  image: "python:2.7"
+  stage: "test"
+  script:
+    - "hooks/pre-commit"
+
+lint:3:
+  image: "python:3"
+  stage: "test"
+  script:
+    - "hooks/pre-commit"
