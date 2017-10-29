@@ -80,7 +80,7 @@ def refine_with_housing_criteria(flats_list, constraint):
     )
 
 
-def refine_with_minimum_photos(flats_list, constraint):
+def refine_with_minimum_nb_photos(flats_list, constraint):
     """
     Filter a list of flats according to the minimum number of photos criterion.
 
@@ -99,7 +99,7 @@ def refine_with_minimum_photos(flats_list, constraint):
         # Check number of pictures
         has_enough_photos = tools.is_within_interval(
             flat.get('photos', []),
-            constraint['minimum_photos'],
+            constraint['minimum_nb_photos'],
             None
         )
         if not has_enough_photos:
@@ -107,7 +107,7 @@ def refine_with_minimum_photos(flats_list, constraint):
                 "Flat %s only has %d photos, it should have at least %d.",
                 flat["id"],
                 len(flat['photos']),
-                constraint['minimum_photos']
+                constraint['minimum_nb_photos']
             )
             is_ok[i] = False
 
@@ -203,8 +203,8 @@ def second_pass(flats_list, constraint, config):
                                                             constraint)
 
     # Remove return housing posts which do not have enough photos
-    flats_list, ignored_list = refine_with_minimum_photos(flats_list,
-                                                          constraint)
+    flats_list, ignored_list = refine_with_minimum_nb_photos(flats_list,
+                                                             constraint)
 
     return {
         "new": flats_list,
