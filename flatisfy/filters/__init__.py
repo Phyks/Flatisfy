@@ -26,7 +26,6 @@ def refine_with_housing_criteria(flats_list, constraint):
 
     :param flats_list: A list of flats dict to filter.
     :param constraint: The constraint that the ``flats_list`` should satisfy.
-    :param config: A config dict.
     :return: A tuple of flats to keep and flats to delete.
     """
     # For each flat, the associated `is_ok` value indicate whether it should be
@@ -79,6 +78,52 @@ def refine_with_housing_criteria(flats_list, constraint):
             if not is_ok[i]
         ]
     )
+
+
+def refine_with_minimum_photos(flats_list, constraint):
+    """
+    Filter a list of flats according to the minimum number of photos criterion.
+
+    .. note :: This has to be done in a separate function and not with the
+    other criterias as photos are only fetched in the second pass.
+
+    :param flats_list: A list of flats dict to filter.
+    :param constraint: The constraint that the ``flats_list`` should satisfy.
+    :return: A tuple of flats to keep and flats to delete.
+    """
+    # For each flat, the associated `is_ok` value indicate whether it should be
+    # kept or discarded.
+    is_ok = [True for _ in flats_list]
+
+    for i, flat in enumerate(flats_list):
+        # Check number of pictures
+        has_enough_photos = tools.is_within_interval(
+            flat.get('photos', []),
+            constraint['minimum_photos'],
+            None
+        )
+        if not has_enough_photos:
+            LOGGER.info(
+                "Flat %s only has %d photos, it should have at least %d.",
+                flat["id"],
+                len(flat['photos']),
+                constraint['minimum_photos']
+            )
+            is_ok[i] = False
+
+    return (
+        [
+            flat
+            for i, flat in enumerate(flats_list)
+            if is_ok[i]
+        ],
+        [
+            flat
+            for i, flat in enumerate(flats_list)
+            if not is_ok[i]
+        ]
+    )
+
 
 @tools.timeit
 def first_pass(flats_list, constraint, config):
@@ -156,6 +201,10 @@ def second_pass(flats_list, constraint, config):
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list,
                                                             constraint)
+
+    # Remove return housing posts which do not have enough photos
+    flats_list, ignored_list = refine_with_minimum_photos(flats_list,
+                                                          constraint)
 
     return {
         "new": flats_list,

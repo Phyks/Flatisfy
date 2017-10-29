@@ -34,6 +34,7 @@ DEFAULT_CONFIG = {
             "cost": (None, None),  # (min, max) in currency unit
             "rooms": (None, None),  # (min, max)
             "bedrooms": (None, None),  # (min, max)
+            "minimum_photos": None,
             "time_to": {}  # Dict mapping names to {"gps": [lat, lng],
                            #                        "time": (min, max) }
                            # Time is in seconds
@@ -137,6 +138,11 @@ def validate_config(config, check_with_data):
             assert "type" in constraint
             assert isinstance(constraint["type"], str)
             assert constraint["type"].upper() in ["RENT", "SALE", "SHARING"]
+
+            assert "minimum_photos" in constraint
+            if constraint["minimum_photos"]:
+                assert isinstance(constraint["minimum_photos"], int)
+                assert constraint["minimum_photos"] >= 0
 
             assert "house_types" in constraint
             assert constraint["house_types"]
