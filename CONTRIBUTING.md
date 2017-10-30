@@ -1,10 +1,15 @@
 ## TL;DR
 
+We have a [code of conduct](CodeOfConduct.md), please make sure to review it
+prior to contributing.
+
 * Branch off `master`.
 * One feature per commit.
 * In case of changes request, amend your commit.
 
-You can either open issues / merge requests on [my Gitlab](https://git.phyks.me/Phyks/flatisfy/) (preferred) or on the [Github mirror](https://github.com/phyks/flatisfy).
+You can either open issues / merge requests on [my
+Gitlab](https://git.phyks.me/Phyks/flatisfy/) (preferred) or on the [Github
+mirror](https://github.com/phyks/flatisfy).
 
 
 ## Useful infos
