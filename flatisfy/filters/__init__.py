@@ -101,7 +101,7 @@ def refine_with_details_criteria(flats_list, constraint):
     for i, flat in enumerate(flats_list):
         # Check number of pictures
         has_enough_photos = tools.is_within_interval(
-            flat.get('photos', []),
+            len(flat.get('photos', [])),
             constraint['minimum_nb_photos'],
             None
         )
