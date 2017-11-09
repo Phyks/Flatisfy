@@ -147,6 +147,15 @@
                     </p>
                 </div>
 
+                <h3>{{ $t("flatsDetails.Visit") }}</h3>
+                <div class="visit">
+                    <flat-pickr
+                        :value="flatpickrValue"
+                        :config="flatpickrConfig"
+                        :placeholder="$t('flatsDetails.setDateOfVisit')"
+                    />
+                </div>
+
                 <h3>{{ $t("common.Actions") }}</h3>
 
                 <nav>
@@ -187,7 +196,10 @@
 </template>
 
 <script>
+import flatPickr from 'vue-flatpickr-component'
+import moment from 'moment'
 import 'font-awesome-webpack'
+import 'flatpickr/dist/flatpickr.css'
 
 import FlatsMap from '../components/flatsmap.vue'
 import Slider from '../components/slider.vue'
@@ -197,7 +209,8 @@ import { capitalize, range } from '../tools'
 export default {
     components: {
         FlatsMap,
-        Slider
+        Slider,
+        flatPickr
     },
 
     created () {
@@ -220,7 +233,15 @@ export default {
 
     data () {
         return {
-            'overloadNotation': null
+            // TODO: Flatpickr locale
+            'overloadNotation': null,
+            'flatpickrConfig': {
+                static: true,
+                altFormat: 'h:i K, M j, Y',
+                altInput: true,
+                enableTime: true,
+                onChange: selectedDates => this.updateFlatVisitDate(selectedDates.length > 0 ? selectedDates[0] : null),
+            },
         }
     },
 
@@ -236,6 +257,12 @@ export default {
         },
         flat () {
             return this.$store.getters.flat(this.$route.params.id)
+        },
+        'flatpickrValue' () {
+            if (this.flat && this.flat.visit_date) {
+                return this.flat.visit_date.local().format()
+            }
+            return null
         },
         timeToPlaces () {
             return this.$store.getters.timeToPlaces(this.flat.flatisfy_constraint)
@@ -301,6 +328,16 @@ export default {
             this.$store.dispatch(
                 'updateFlatNotes',
                 { flatId: this.$route.params.id, newNotes: notes }
+            )
+        },
+
+        updateFlatVisitDate (date) {
+            if (date) {
+                date = moment(date).utc().format()
+            }
+            this.$store.dispatch(
+                'updateFlatVisitDate',
+                { flatId: this.$route.params.id, newVisitDate: date }
             )
         },
 

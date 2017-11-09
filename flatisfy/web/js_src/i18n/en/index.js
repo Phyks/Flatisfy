@@ -45,6 +45,8 @@ export default {
         'Times_to': 'Times to',
         'Location': 'Location',
         'Contact': 'Contact',
+        'Visit': 'Visit',
+        'setDateOfVisit': 'Set date of visit',
         'no_phone_found': 'No phone found',
         'rooms': 'room | rooms',
         'bedrooms': 'bedroom | bedrooms'

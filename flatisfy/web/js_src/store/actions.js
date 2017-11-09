@@ -39,6 +39,12 @@ export default {
             commit(types.UPDATE_FLAT_NOTES, { flatId, newNotes })
         })
     },
+    updateFlatVisitDate ({ commit }, { flatId, newVisitDate }) {
+        commit(types.IS_LOADING)
+        api.updateFlatVisitDate(flatId, newVisitDate, response => {
+            commit(types.UPDATE_FLAT_VISIT_DATE, { flatId, newVisitDate })
+        })
+    },
     doSearch ({ commit }, { query }) {
         commit(types.IS_LOADING)
         api.doSearch(query, flats => {

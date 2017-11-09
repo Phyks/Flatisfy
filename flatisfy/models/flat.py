@@ -93,6 +93,9 @@ class Flat(BASE):
     # Status
     status = Column(Enum(FlatStatus), default=FlatStatus.new)
 
+    # Date for visit
+    visit_date = Column(DateTime)
+
     @staticmethod
     def from_dict(flat_dict):
         """

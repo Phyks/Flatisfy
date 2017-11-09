@@ -47,6 +47,13 @@ export const mutations = {
         }
         state.loading -= 1
     },
+    [types.UPDATE_FLAT_VISIT_DATE] (state, { flatId, newVisitDate }) {
+        const index = state.flats.findIndex(flat => flat.id === flatId)
+        if (index > -1) {
+            Vue.set(state.flats[index], 'visit-date', newVisitDate)
+        }
+        state.loading -= 1
+    },
     [types.RECEIVE_TIME_TO_PLACES] (state, { timeToPlaces }) {
         state.timeToPlaces = timeToPlaces
         state.loading -= 1

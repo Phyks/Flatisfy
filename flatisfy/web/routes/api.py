@@ -6,9 +6,12 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
+import datetime
 import json
 
+import arrow
 import bottle
+import vobject
 
 import flatisfy.data
 from flatisfy.models import flat as flat_model
@@ -222,6 +225,36 @@ def update_flat_notation_v1(flat_id, db):
     }
 
 
+def update_flat_visit_date_v1(flat_id, db):
+    """
+    API v1 route to update flat date of visit:
+
+        POST /api/v1/flat/:flat_id/visit_date
+        Data: {
+            "visit_date": "ISO8601 DATETIME"
+        }
+
+    :return: The new flat object in a JSON ``data`` dict.
+    """
+    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+    if not flat:
+        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
+
+    try:
+        visit_date = json.load(bottle.request.body)["visit_date"]
+        if visit_date:
+            visit_date = arrow.get(visit_date).naive
+        flat.visit_date = visit_date
+    except (arrow.parser.ParserError, ValueError, KeyError):
+        return bottle.HTTPError(400, "Invalid visit date provided.")
+
+    json_flat = flat.json_api_repr()
+
+    return {
+        "data": json_flat
+    }
+
+
 def time_to_places_v1(config):
     """
     API v1 route to fetch the details of the places to compute time to.
@@ -290,3 +323,39 @@ def search_v1(db, config):
     return {
         "data": flats
     }
+
+
+def ics_feed_v1(config, db):
+    """
+    API v1 ICS feed of visits route:
+
+        GET /api/v1/visits.ics
+
+    :return: The ICS feed for the visits.
+    """
+    flats_with_visits = db.query(flat_model.Flat).filter(
+        flat_model.Flat.visit_date.isnot(None)
+    ).all()
+
+    cal = vobject.iCalendar()
+    for flat in flats_with_visits:
+        vevent = cal.add('vevent')
+        vevent.add('dtstart').value = flat.visit_date
+        vevent.add('dtend').value = (
+            flat.visit_date + datetime.timedelta(hours=1)
+        )
+        vevent.add('summary').value = 'Visit - {}'.format(flat.title)
+
+        description = (
+            '{} (area: {}, cost: {} {})\n{}#/flat/{}\n'.format(
+                flat.title, flat.area, flat.cost, flat.currency,
+                config['website_url'], flat.id
+            )
+        )
+        description += '\n{}\n'.format(flat.text)
+        if flat.notes:
+            description += '\n{}\n'.format(flat.notes)
+
+        vevent.add('description').value = description
+
+    return cal.serialize()

@@ -27,6 +27,7 @@
     "masonry": "0.0.2",
     "moment": "^2.18.1",
     "vue": "^2.2.6",
+    "vue-flatpickr-component": "^4.0.0",
     "vue-i18n": "^6.1.1",
     "vue-images-loaded": "^1.1.2",
     "vue-router": "^2.4.0",

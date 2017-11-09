@@ -6,7 +6,10 @@ require('isomorphic-fetch')
 const postProcessAPIResults = function (flat) {
     /* eslint-disable camelcase */
     if (flat.date) {
-        flat.date = moment(flat.date)
+        flat.date = moment.utc(flat.date)
+    }
+    if (flat.visit_date) {
+        flat.visit_date = moment.utc(flat.visit_date)
     }
     if (flat.flatisfy_time_to) {
         const momentifiedTimeTo = {}
@@ -107,6 +110,24 @@ export const updateFlatNotation = function (flatId, newNotation, callback) {
         }
     ).then(callback).catch(function (ex) {
         console.error('Unable to update flat notation: ' + ex)
+    })
+}
+
+export const updateFlatVisitDate = function (flatId, newVisitDate, callback) {
+    fetch(
+        '/api/v1/flat/' + encodeURIComponent(flatId) + '/visit_date',
+        {
+            credentials: 'same-origin',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                visit_date: newVisitDate
+            })
+        }
+    ).then(callback).catch(function (ex) {
+        console.error('Unable to update flat date of visit: ' + ex)
     })
 }
 
