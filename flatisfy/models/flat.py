@@ -58,7 +58,9 @@ class Flat(BASE):
     SQLAlchemy ORM model to store a flat.
     """
     __tablename__ = "flats"
-    __searchable__ = ["title", "text", "station", "location", "details"]
+    __searchable__ = [
+        "title", "text", "station", "location", "details", "notes"
+    ]
 
     # Weboob data
     id = Column(String, primary_key=True)
