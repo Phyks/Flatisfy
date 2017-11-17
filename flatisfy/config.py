@@ -41,6 +41,9 @@ DEFAULT_CONFIG = {
                            # Time is in seconds
         }
     },
+    # Whether or not to store personal data from housing posts (phone number
+    # etc)
+    "store_personal_data": False,
     # Navitia API key
     "navitia_api_key": None,
     # Number of filtering passes to run
@@ -132,6 +135,8 @@ def validate_config(config, check_with_data):
         assert config["smtp_server"] is None or isinstance(config["smtp_server"], str)  # noqa: E501
         assert config["smtp_port"] is None or isinstance(config["smtp_port"], int)  # noqa: E501
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
+
+        assert isinstance(config["store_personal_data"], bool)
 
         # Ensure constraints are ok
         assert config["constraints"]

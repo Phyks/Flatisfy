@@ -173,12 +173,14 @@ class WeboobProxy(object):
 
         return queries
 
-    def query(self, query, max_entries=None):
+    def query(self, query, max_entries=None, store_personal_data=False):
         """
         Fetch the housings posts matching a given Weboob query.
 
         :param query: A Weboob `weboob.capabilities.housing.Query`` object.
         :param max_entries: Maximum number of entries to fetch.
+        :param store_personal_data: Whether personal data should be fetched
+        from housing posts (phone number etc).
         :return: The matching housing posts, dumped as a list of JSON objects.
         """
         housings = []
@@ -188,6 +190,8 @@ class WeboobProxy(object):
                     self.webnip.do('search_housings', query),
                     max_entries
             ):
+                if not store_personal_data:
+                    housing.phone = None
                 housings.append(json.dumps(housing, cls=WeboobEncoder))
         except CallErrors as exc:
             # If an error occured, just log it
@@ -197,12 +201,14 @@ class WeboobProxy(object):
             )
         return housings
 
-    def info(self, full_flat_id):
+    def info(self, full_flat_id, store_personal_data=False):
         """
         Get information (details) about an housing post.
 
         :param full_flat_id: A Weboob housing post id, in complete form
         (ID@BACKEND)
+        :param store_personal_data: Whether personal data should be fetched
+        from housing posts (phone number etc).
         :return: The details in JSON.
         """
         flat_id, backend_name = full_flat_id.rsplit("@", 1)
@@ -220,9 +226,12 @@ class WeboobProxy(object):
             housing = backend.get_housing(flat_id)
             # Otherwise, we miss the @backend afterwards
             housing.id = full_flat_id
+            # Eventually clear personal data
+            if not store_personal_data:
+                housing.phone = None
 
             return json.dumps(housing, cls=WeboobEncoder)
-        except Exception as exc: # pylint: disable=broad-except
+        except Exception as exc:  # pylint: disable=broad-except
             # If an error occured, just log it
             LOGGER.error(
                 "An error occured while fetching housing %s: %s",
@@ -249,7 +258,8 @@ def fetch_flats(config):
             housing_posts = []
             for query in queries:
                 housing_posts.extend(
-                    weboob_proxy.query(query, config["max_entries"])
+                    weboob_proxy.query(query, config["max_entries"],
+                                       config["store_personal_data"])
                 )
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
@@ -270,7 +280,8 @@ def fetch_details(config, flat_id):
     """
     with WeboobProxy(config) as weboob_proxy:
         LOGGER.info("Loading additional details for flat %s.", flat_id)
-        weboob_output = weboob_proxy.info(flat_id)
+        weboob_output = weboob_proxy.info(flat_id,
+                                          config["store_personal_data"])
 
     flat_details = json.loads(weboob_output)
     flat_details = WeboobProxy.restore_decimal_fields(flat_details)
