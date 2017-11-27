@@ -1,8 +1,6 @@
 FROM python:2
 MAINTAINER Phyks <phyks@phyks.me>
 
-ENV LANG C.UTF-8
-
 # Setup layout.
 RUN useradd -d /home/user -m -s /bin/bash -U user
 
@@ -39,12 +37,12 @@ RUN cd /home/user \
 RUN chown user:user -R /home/user
 RUN mkdir -p /home/user/.local/share/flatisfy
 
-COPY ./docker_run.sh /home/user/run.sh
+COPY ./run.sh /home/user/run.sh
 RUN chmod +x /home/user/run.sh
+COPY ./fetch.sh /home/user/fetch.sh
+RUN chmod +x /home/user/fetch.sh
 
 # Run server.
 USER user
-
 CMD /home/user/run.sh
-
 EXPOSE 8080
