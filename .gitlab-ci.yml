@@ -22,7 +22,7 @@ check_weboob:2.7:
   stage: "test"
   before_script:
     # Only execute on scheduled CI
-    - if [ -z "${RUN_WEBOOB_TESTS}" ]; then exit; done
+    - if [ -z "${RUN_WEBOOB_TESTS}" ]; then exit; fi
     # Install weboob deps
     - apt-get update && apt-get install -y git libffi-dev libxml2-dev libxslt-dev libyaml-dev libtiff-dev libjpeg-dev zlib1g-dev libfreetype6-dev libwebp-dev build-essential gcc g++ wget
     - pip install -U setuptools
@@ -31,5 +31,5 @@ check_weboob:2.7:
     - git clone https://git.weboob.org/weboob/devel.git weboob
     - cd weboob; pip install .
   script:
-    - if [ -z "${RUN_WEBOOB_TESTS}" ]; then exit; done
+    - if [ -z "${RUN_WEBOOB_TESTS}" ]; then exit; fi
     - python -m nose -c /dev/null -v modules/{entreparticuliers,explorimmo,foncia,leboncoin,logicimmo,pap,seloger}/test.py
