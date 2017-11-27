@@ -123,7 +123,7 @@ export const updateFlatVisitDate = function (flatId, newVisitDate, callback) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                visit_date: newVisitDate
+                visit_date: newVisitDate  // eslint-disable-line camelcase
             })
         }
     ).then(callback).catch(function (ex) {

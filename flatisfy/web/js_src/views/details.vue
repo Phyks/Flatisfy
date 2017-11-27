@@ -240,8 +240,8 @@ export default {
                 altFormat: 'h:i K, M j, Y',
                 altInput: true,
                 enableTime: true,
-                onChange: selectedDates => this.updateFlatVisitDate(selectedDates.length > 0 ? selectedDates[0] : null),
-            },
+                onChange: selectedDates => this.updateFlatVisitDate(selectedDates.length > 0 ? selectedDates[0] : null)
+            }
         }
     },
 
