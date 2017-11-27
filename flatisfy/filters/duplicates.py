@@ -16,23 +16,10 @@ import PIL.Image
 import requests
 
 from flatisfy import tools
+from flatisfy.constants import BACKENDS_BY_PRECEDENCE
 from flatisfy.filters.cache import ImageCache
 
 LOGGER = logging.getLogger(__name__)
-
-# Some backends give more infos than others. Here is the precedence we want to
-# use. First is most important one, last is the one that will always be
-# considered as less trustable if two backends have similar info about a
-# housing.
-BACKENDS_PRECEDENCE = [
-    "foncia",
-    "seloger",
-    "pap",
-    "leboncoin",
-    "explorimmo",
-    "logicimmo",
-    "entreparticuliers"
-]
 
 
 def homogeneize_phone_number(number):
@@ -145,7 +132,7 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
             # Sort matching flats by backend precedence
             matching_flats.sort(
                 key=lambda flat: next(
-                    i for (i, backend) in enumerate(BACKENDS_PRECEDENCE)
+                    i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE)
                     if flat["id"].endswith(backend)
                 ),
                 reverse=True
@@ -312,7 +299,7 @@ def deep_detect(flats_list):
                 if flat["id"] in matching_flats[flat_id]
             ],
             key=lambda flat: next(
-                i for (i, backend) in enumerate(BACKENDS_PRECEDENCE)
+                i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE)
                 if flat["id"].endswith(backend)
             ),
             reverse=True

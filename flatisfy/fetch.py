@@ -11,6 +11,7 @@ import logging
 
 from flatisfy import database
 from flatisfy import tools
+from flatisfy.constants import BACKENDS_BY_PRECEDENCE
 from flatisfy.models import flat as flat_model
 
 LOGGER = logging.getLogger(__name__)
@@ -67,8 +68,7 @@ class WeboobProxy(object):
         """
         # Default backends
         if not config["backends"]:
-            backends = ["foncia", "seloger", "pap", "leboncoin", "logicimmo",
-                        "explorimmo", "entreparticuliers"]
+            backends = BACKENDS_BY_PRECEDENCE
         else:
             backends = config["backends"]
 
