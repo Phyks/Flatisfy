@@ -13,4 +13,4 @@ echo "Fetching new housing posts..."
 /home/user/fetch.sh
 
 echo "Starting web UI..."
-python -m flatisfy serve --config /flatisfy/config.json
+python -m flatisfy serve -v --config /flatisfy/config.json
