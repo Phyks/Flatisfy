@@ -4,7 +4,7 @@ set -e
 echo "Updating Weboob..."
 cd /home/user/weboob
 git pull
-pip install .
+pip install --upgrade .
 
 echo "Fetching housing posts..."
 cd /home/user/app
