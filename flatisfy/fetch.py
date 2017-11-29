@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 try:
-    from weboob.capabilities.housing import Query
+    from weboob.capabilities.housing import Query, HOUSE_TYPES, POSTS_TYPES
     from weboob.core.bcall import CallErrors
     from weboob.core.ouiboube import WebNip
     from weboob.tools.json import WeboobEncoder
@@ -145,7 +145,7 @@ class WeboobProxy(object):
             try:
                 query.house_types = [
                     getattr(
-                        Query.HOUSE_TYPES,
+                        HOUSE_TYPES,
                         house_type.upper()
                     )
                     for house_type in constraints_dict["house_types"]
@@ -156,8 +156,8 @@ class WeboobProxy(object):
 
             try:
                 query.type = getattr(
-                    Query,
-                    "TYPE_{}".format(constraints_dict["type"].upper())
+                    POSTS_TYPES,
+                    constraints_dict["type"].upper()
                 )
             except AttributeError:
                 LOGGER.error("Invalid post type constraint.")
@@ -224,10 +224,16 @@ class WeboobProxy(object):
 
         try:
             housing = backend.get_housing(flat_id)
+            fields = [x[0] for x in housing.iter_fields()]
+            # TODO: Only laod phone in the end, after filtering
+            if not store_personal_data:
+                # Avoid making unwanted requests
+                fields = [x for x in fields if x != "phone"]
+            housing = backend.fillobj(housing, fields=fields)
             # Otherwise, we miss the @backend afterwards
             housing.id = full_flat_id
-            # Eventually clear personal data
             if not store_personal_data:
+                # Ensure personal data is cleared
                 housing.phone = None
 
             return json.dumps(housing, cls=WeboobEncoder)
