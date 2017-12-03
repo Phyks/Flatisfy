@@ -88,7 +88,7 @@ def load_data(model, constraint, config):
         areas = []
         # Get areas to fetch from, using postal codes
         for postal_code in constraint["postal_codes"]:
-            areas.append(data_files.french_postal_codes_to_iso_3166(postal_code))
+            areas.append(data_files.french_postal_codes_to_quarter(postal_code))
         # Load data for each area
         areas = list(set(areas))
         for area in areas:
