@@ -14,6 +14,5 @@ BACKENDS_BY_PRECEDENCE = [
     "pap",
     "leboncoin",
     "explorimmo",
-    "logicimmo",
-    "entreparticuliers"
+    "logicimmo"
 ]
