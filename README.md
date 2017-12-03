@@ -74,8 +74,7 @@ which covers Paris. If you want to run the script using some other location,
 you might have to change these files by matching datasets.
 
 * [LaPoste Hexasmal](https://datanova.legroupe.laposte.fr/explore/dataset/laposte_hexasmal/?disjunctive.code_commune_insee&disjunctive.nom_de_la_commune&disjunctive.code_postal&disjunctive.libell_d_acheminement&disjunctive.ligne_5) for the list of cities and postal codes in France.
-* [RATP (Paris) stations](https://data.ratp.fr/explore/dataset/positions-geographiques-des-stations-du-reseau-ratp/table/?disjunctive.stop_name&disjunctive.code_postal&disjunctive.departement) for the list of subway/tram/bus stations with their positions in Paris and nearby areas.
-* [Tcl (Lyon) stations](https://download.data.grandlyon.com/wfs/rdata?SERVICE=WFS&VERSION=2.0.0&outputformat=GEOJSON&maxfeatures=4601&request=GetFeature&typename=tcl_sytral.tclarret&SRSNAME=urn:ogc:def:crs:EPSG::4326) for the list of subway/tram/bus stations with their positions in Paris and nearby areas.
+* [Navitia public transport datasets](https://navitia.opendatasoft.com/explore/?sort=modified&refine.geographicarea=France) for the list of subway/tram/bus stations with their positions in France. These are the `stops_fr-*.txt` files, extracted from the `NTFS` datasets for each region.
 
 Both datasets are licensed under the Open Data Commons Open Database License
 (ODbL): https://opendatacommons.org/licenses/odbl/.

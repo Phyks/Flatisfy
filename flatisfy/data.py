@@ -43,6 +43,7 @@ def preprocess_data(config, force=False):
 
     :params config: A config dictionary.
     :params force: Whether to force rebuild or not.
+    :return bool: Whether data have been built or not.
     """
     # Check if a build is required
     get_session = database.init_db(config["database"], config["search_index"])
@@ -53,7 +54,7 @@ def preprocess_data(config, force=False):
         )
         if is_built and not force:
             # No need to rebuild the database, skip
-            return
+            return False
         # Otherwise, purge all existing data
         session.query(PublicTransport).delete()
         session.query(PostalCode).delete()
@@ -67,6 +68,7 @@ def preprocess_data(config, force=False):
             )
         with get_session() as session:
             session.add_all(data_objects)
+    return True
 
 
 @hash_dict
@@ -88,7 +90,7 @@ def load_data(model, constraint, config):
         areas = []
         # Get areas to fetch from, using postal codes
         for postal_code in constraint["postal_codes"]:
-            areas.append(data_files.french_postal_codes_to_iso_3166(postal_code))
+            areas.append(data_files.french_postal_codes_to_quarter(postal_code))
         # Load data for each area
         areas = list(set(areas))
         for area in areas:

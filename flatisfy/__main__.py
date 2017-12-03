@@ -164,8 +164,8 @@ def main():
         if args.cmd == "build-data":
             force = True
 
-        data.preprocess_data(config, force=force)
-        LOGGER.info("Done building data!")
+        if data.preprocess_data(config, force=force):
+            LOGGER.info("Done building data!")
 
         if args.cmd == "build-data":
             sys.exit(0)
