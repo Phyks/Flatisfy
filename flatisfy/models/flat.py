@@ -143,6 +143,8 @@ class Flat(BASE):
         flat_dict["date"] = arrow.get(flat_dict["date"]).naive
 
         flat_object = Flat()
+        # Using a __dict__.update() call to make it work even if there are
+        # extra keys in flat_dict which are not valid kwargs for Flat model.
         flat_object.__dict__.update(flat_dict)
         return flat_object
 

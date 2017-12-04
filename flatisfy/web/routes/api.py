@@ -17,7 +17,42 @@ import flatisfy.data
 from flatisfy.models import flat as flat_model
 from flatisfy.models.postal_code import PostalCode
 
-# TODO: Flat post-processing code should be factorized
+
+def _serialize_flat(flat, config):
+    """
+    Serialize a flat for JSON API.
+
+    Converts it to a JSON-representable dict and add postal code metadata.
+
+    :param flat: An SQLAlchemy Flat object.
+    :param config: A config dict.
+    :returns: A flat dict ready to be serialized.
+    """
+    flat = flat.json_api_repr()
+
+    postal_codes = {}
+    for constraint_name, constraint in config["constraints"].items():
+        postal_codes[constraint_name] = flatisfy.data.load_data(
+            PostalCode, constraint, config
+        )
+
+    try:
+        assert flat["flatisfy_postal_code"]
+
+        postal_code_data = next(
+            x
+            for x in postal_codes.get(flat["flatisfy_constraint"], [])
+            if x.postal_code == flat["flatisfy_postal_code"]
+        )
+        flat["flatisfy_postal_code"] = {
+            "postal_code": flat["flatisfy_postal_code"],
+            "name": postal_code_data.name,
+            "gps": (postal_code_data.lat, postal_code_data.lng)
+        }
+    except (AssertionError, StopIteration):
+        flat["flatisfy_postal_code"] = {}
+
+    return flat
 
 
 def index_v1():
@@ -42,40 +77,22 @@ def flats_v1(config, db):
 
     :return: The available flats objects in a JSON ``data`` dict.
     """
-    postal_codes = {}
-    for constraint_name, constraint in config["constraints"].items():
-        postal_codes[constraint_name] = flatisfy.data.load_data(
-            PostalCode, constraint, config
-        )
+    try:
+        flats = [
+            _serialize_flat(flat, config)
+            for flat in db.query(flat_model.Flat).all()
+        ]
 
-    flats = [
-        flat.json_api_repr()
-        for flat in db.query(flat_model.Flat).all()
-    ]
-
-    for flat in flats:
-        try:
-            assert flat["flatisfy_postal_code"]
-
-            postal_code_data = next(
-                x
-                for x in postal_codes.get(flat["flatisfy_constraint"], [])
-                if x.postal_code == flat["flatisfy_postal_code"]
-            )
-            flat["flatisfy_postal_code"] = {
-                "postal_code": flat["flatisfy_postal_code"],
-                "name": postal_code_data.name,
-                "gps": (postal_code_data.lat, postal_code_data.lng)
-            }
-        except (AssertionError, StopIteration):
-            flat["flatisfy_postal_code"] = {}
-
-    return {
-        "data": flats
-    }
+        return {
+            "data": flats
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
-def flats_by_status_v1(status, db):
+def flats_by_status_v1(status, config, db):
     """
     API v1 flats route with a specific status:
 
@@ -85,19 +102,23 @@ def flats_by_status_v1(status, db):
     """
     try:
         flats = [
-            flat.json_api_repr()
+            _serialize_flat(flat, config)
             for flat in (
                 db.query(flat_model.Flat)
                 .filter_by(status=getattr(flat_model.FlatStatus, status))
                 .all()
             )
         ]
+
+        return {
+            "data": flats
+        }
     except AttributeError:
         return bottle.HTTPError(400, "Invalid status provided.")
-
-    return {
-        "data": flats
-    }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
 def flat_v1(flat_id, config, db):
@@ -108,40 +129,22 @@ def flat_v1(flat_id, config, db):
 
     :return: The flat object in a JSON ``data`` dict.
     """
-    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
-
-    if not flat:
-        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
-
-    flat = flat.json_api_repr()
-
     try:
-        assert flat["flatisfy_postal_code"]
+        flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
 
-        constraint = config["constraints"].get(flat["flatisfy_constraint"],
-                                               None)
-        assert constraint is not None
-        postal_codes = flatisfy.data.load_data(PostalCode, constraint, config)
+        if not flat:
+            return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
 
-        postal_code_data = next(
-            x
-            for x in postal_codes
-            if x.postal_code == flat["flatisfy_postal_code"]
-        )
-        flat["flatisfy_postal_code"] = {
-            "postal_code": flat["flatisfy_postal_code"],
-            "name": postal_code_data.name,
-            "gps": (postal_code_data.lat, postal_code_data.lng)
+        return {
+            "data": _serialize_flat(flat, config)
         }
-    except (AssertionError, StopIteration):
-        flat["flatisfy_postal_code"] = {}
-
-    return {
-        "data": flat
-    }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
-def update_flat_status_v1(flat_id, db):
+def update_flat_status_v1(flat_id, config, db):
     """
     API v1 route to update flat status:
 
@@ -152,25 +155,28 @@ def update_flat_status_v1(flat_id, db):
 
     :return: The new flat object in a JSON ``data`` dict.
     """
-    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
-    if not flat:
-        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
-
     try:
-        flat.status = getattr(
-            flat_model.FlatStatus, json.load(bottle.request.body)["status"]
-        )
-    except (AttributeError, ValueError, KeyError):
-        return bottle.HTTPError(400, "Invalid status provided.")
+        flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+        if not flat:
+            return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
 
-    json_flat = flat.json_api_repr()
+        try:
+            flat.status = getattr(
+                flat_model.FlatStatus, json.load(bottle.request.body)["status"]
+            )
+        except (AttributeError, ValueError, KeyError):
+            return bottle.HTTPError(400, "Invalid status provided.")
 
-    return {
-        "data": json_flat
-    }
+        return {
+            "data": _serialize_flat(flat, config)
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
-def update_flat_notes_v1(flat_id, db):
+def update_flat_notes_v1(flat_id, config, db):
     """
     API v1 route to update flat notes:
 
@@ -181,23 +187,26 @@ def update_flat_notes_v1(flat_id, db):
 
     :return: The new flat object in a JSON ``data`` dict.
     """
-    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
-    if not flat:
-        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
-
     try:
-        flat.notes = json.load(bottle.request.body)["notes"]
-    except (ValueError, KeyError):
-        return bottle.HTTPError(400, "Invalid notes provided.")
+        flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+        if not flat:
+            return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
 
-    json_flat = flat.json_api_repr()
+        try:
+            flat.notes = json.load(bottle.request.body)["notes"]
+        except (ValueError, KeyError):
+            return bottle.HTTPError(400, "Invalid notes provided.")
 
-    return {
-        "data": json_flat
-    }
+        return {
+            "data": _serialize_flat(flat, config)
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
-def update_flat_notation_v1(flat_id, db):
+def update_flat_notation_v1(flat_id, config, db):
     """
     API v1 route to update flat notation:
 
@@ -208,24 +217,27 @@ def update_flat_notation_v1(flat_id, db):
 
     :return: The new flat object in a JSON ``data`` dict.
     """
-    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
-    if not flat:
-        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
-
     try:
-        flat.notation = json.load(bottle.request.body)["notation"]
-        assert flat.notation >= 0 and flat.notation <= 5
-    except (AssertionError, ValueError, KeyError):
-        return bottle.HTTPError(400, "Invalid notation provided.")
+        flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+        if not flat:
+            return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
 
-    json_flat = flat.json_api_repr()
+        try:
+            flat.notation = json.load(bottle.request.body)["notation"]
+            assert flat.notation >= 0 and flat.notation <= 5
+        except (AssertionError, ValueError, KeyError):
+            return bottle.HTTPError(400, "Invalid notation provided.")
 
-    return {
-        "data": json_flat
-    }
+        return {
+            "data": _serialize_flat(flat, config)
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
-def update_flat_visit_date_v1(flat_id, db):
+def update_flat_visit_date_v1(flat_id, config, db):
     """
     API v1 route to update flat date of visit:
 
@@ -236,23 +248,26 @@ def update_flat_visit_date_v1(flat_id, db):
 
     :return: The new flat object in a JSON ``data`` dict.
     """
-    flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
-    if not flat:
-        return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
-
     try:
-        visit_date = json.load(bottle.request.body)["visit_date"]
-        if visit_date:
-            visit_date = arrow.get(visit_date).naive
-        flat.visit_date = visit_date
-    except (arrow.parser.ParserError, ValueError, KeyError):
-        return bottle.HTTPError(400, "Invalid visit date provided.")
+        flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
+        if not flat:
+            return bottle.HTTPError(404, "No flat with id {}.".format(flat_id))
 
-    json_flat = flat.json_api_repr()
+        try:
+            visit_date = json.load(bottle.request.body)["visit_date"]
+            if visit_date:
+                visit_date = arrow.get(visit_date).naive
+            flat.visit_date = visit_date
+        except (arrow.parser.ParserError, ValueError, KeyError):
+            return bottle.HTTPError(400, "Invalid visit date provided.")
 
-    return {
-        "data": json_flat
-    }
+        return {
+            "data": _serialize_flat(flat, config)
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
 def time_to_places_v1(config):
@@ -264,15 +279,20 @@ def time_to_places_v1(config):
     :return: The JSON dump of the places to compute time to (dict of places
     names mapped to GPS coordinates).
     """
-    places = {}
-    for constraint_name, constraint in config["constraints"].items():
-        places[constraint_name] = {
-            k: v["gps"]
-            for k, v in constraint["time_to"].items()
+    try:
+        places = {}
+        for constraint_name, constraint in config["constraints"].items():
+            places[constraint_name] = {
+                k: v["gps"]
+                for k, v in constraint["time_to"].items()
+            }
+        return {
+            "data": places
         }
-    return {
-        "data": places
-    }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
 def search_v1(db, config):
@@ -286,43 +306,25 @@ def search_v1(db, config):
 
     :return: The matching flat objects in a JSON ``data`` dict.
     """
-    postal_codes = {}
-    for constraint_name, constraint in config["constraints"].items():
-        postal_codes[constraint_name] = flatisfy.data.load_data(
-            PostalCode, constraint, config
-        )
-
     try:
-        query = json.load(bottle.request.body)["query"]
-    except (ValueError, KeyError):
-        return bottle.HTTPError(400, "Invalid query provided.")
-
-    flats_db_query = flat_model.Flat.search_query(db, query)
-    flats = [
-        flat.json_api_repr()
-        for flat in flats_db_query
-    ]
-
-    for flat in flats:
         try:
-            assert flat["flatisfy_postal_code"]
+            query = json.load(bottle.request.body)["query"]
+        except (ValueError, KeyError):
+            return bottle.HTTPError(400, "Invalid query provided.")
 
-            postal_code_data = next(
-                x
-                for x in postal_codes.get(flat["flatisfy_constraint"], [])
-                if x.postal_code == flat["flatisfy_postal_code"]
-            )
-            flat["flatisfy_postal_code"] = {
-                "postal_code": flat["flatisfy_postal_code"],
-                "name": postal_code_data.name,
-                "gps": (postal_code_data.lat, postal_code_data.lng)
-            }
-        except (AssertionError, StopIteration):
-            flat["flatisfy_postal_code"] = {}
+        flats_db_query = flat_model.Flat.search_query(db, query)
+        flats = [
+            _serialize_flat(flat, config)
+            for flat in flats_db_query
+        ]
 
-    return {
-        "data": flats
-    }
+        return {
+            "data": flats
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
 def ics_feed_v1(config, db):
@@ -333,29 +335,32 @@ def ics_feed_v1(config, db):
 
     :return: The ICS feed for the visits.
     """
-    flats_with_visits = db.query(flat_model.Flat).filter(
-        flat_model.Flat.visit_date.isnot(None)
-    ).all()
+    try:
+        flats_with_visits = db.query(flat_model.Flat).filter(
+            flat_model.Flat.visit_date.isnot(None)
+        ).all()
 
-    cal = vobject.iCalendar()
-    for flat in flats_with_visits:
-        vevent = cal.add('vevent')
-        vevent.add('dtstart').value = flat.visit_date
-        vevent.add('dtend').value = (
-            flat.visit_date + datetime.timedelta(hours=1)
-        )
-        vevent.add('summary').value = 'Visit - {}'.format(flat.title)
-
-        description = (
-            '{} (area: {}, cost: {} {})\n{}#/flat/{}\n'.format(
-                flat.title, flat.area, flat.cost, flat.currency,
-                config['website_url'], flat.id
+        cal = vobject.iCalendar()
+        for flat in flats_with_visits:
+            vevent = cal.add('vevent')
+            vevent.add('dtstart').value = flat.visit_date
+            vevent.add('dtend').value = (
+                flat.visit_date + datetime.timedelta(hours=1)
             )
-        )
-        description += '\n{}\n'.format(flat.text)
-        if flat.notes:
-            description += '\n{}\n'.format(flat.notes)
+            vevent.add('summary').value = 'Visit - {}'.format(flat.title)
 
-        vevent.add('description').value = description
+            description = (
+                '{} (area: {}, cost: {} {})\n{}#/flat/{}\n'.format(
+                    flat.title, flat.area, flat.cost, flat.currency,
+                    config['website_url'], flat.id
+                )
+            )
+            description += '\n{}\n'.format(flat.text)
+            if flat.notes:
+                description += '\n{}\n'.format(flat.notes)
 
-    return cal.serialize()
+            vevent.add('description').value = description
+
+        return cal.serialize()
+    except:
+        return ''
