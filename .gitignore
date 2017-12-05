@@ -8,3 +8,4 @@ node_modules
 flatisfy/web/static/assets
 data/
 package-lock.json
+doc/_build

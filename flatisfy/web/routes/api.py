@@ -19,6 +19,14 @@ from flatisfy.models.postal_code import PostalCode
 
 
 def JSONError(error_code, error_str):
+    """
+    Return an HTTP error with a JSON payload.
+
+    :param error_code: HTTP error code to return.
+    :param error_str: Error as a string.
+    :returns: Set correct response parameters and returns JSON-serialized error
+        content.
+    """
     bottle.response.status = error_code
     bottle.response.content_type = "application/json"
     return json.dumps(dict(error=error_str, status_code=error_code))
@@ -63,7 +71,9 @@ def _serialize_flat(flat, config):
 
 def index_v1():
     """
-    API v1 index route:
+    API v1 index route.
+
+    Example::
 
         GET /api/v1/
     """
@@ -78,12 +88,16 @@ def index_v1():
 
 def flats_v1(config, db):
     """
-    API v1 flats route:
+    API v1 flats route.
+
+    Example::
 
         GET /api/v1/flats
 
-    .. note:: Filtering can be done through the ``filter`` GET param, according
-    to JSON API spec (http://jsonapi.org/recommendations/#filtering).
+    .. note::
+
+        Filtering can be done through the ``filter`` GET param, according
+        to JSON API spec (http://jsonapi.org/recommendations/#filtering).
 
     :return: The available flats objects in a JSON ``data`` dict.
     """
@@ -116,7 +130,9 @@ def flats_v1(config, db):
 
 def flat_v1(flat_id, config, db):
     """
-    API v1 flat route:
+    API v1 flat route.
+
+    Example::
 
         GET /api/v1/flats/:flat_id
 
@@ -137,7 +153,9 @@ def flat_v1(flat_id, config, db):
 
 def update_flat_v1(flat_id, config, db):
     """
-    API v1 route to update flat status:
+    API v1 route to update flat status.
+
+    Example::
 
         PATCH /api/v1/flat/:flat_id
         Data: {
@@ -145,8 +163,10 @@ def update_flat_v1(flat_id, config, db):
             "visit_date": "ISO8601 DATETIME"
         }
 
-    .. note:: The keys in the data sent are same keys as in ``Flat`` model. You
-    can provide any subset of them to update part of the flat infos.
+    .. note::
+
+        The keys in the data sent are same keys as in ``Flat`` model. You
+        can provide any subset of them to update part of the flat infos.
 
     :return: The new flat object in a JSON ``data`` dict.
     """
@@ -176,10 +196,12 @@ def time_to_places_v1(config):
     """
     API v1 route to fetch the details of the places to compute time to.
 
+    Example::
+
         GET /api/v1/time_to_places
 
     :return: The JSON dump of the places to compute time to (dict of places
-    names mapped to GPS coordinates).
+        names mapped to GPS coordinates).
     """
     try:
         places = {}
@@ -198,6 +220,8 @@ def time_to_places_v1(config):
 def search_v1(db, config):
     """
     API v1 route to perform a fulltext search on flats.
+
+    Example::
 
         POST /api/v1/search
         Data: {
@@ -227,7 +251,9 @@ def search_v1(db, config):
 
 def ics_feed_v1(config, db):
     """
-    API v1 ICS feed of visits route:
+    API v1 ICS feed of visits route.
+
+    Example::
 
         GET /api/v1/ics/visits.ics
 

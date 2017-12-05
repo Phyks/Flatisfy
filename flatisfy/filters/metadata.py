@@ -59,20 +59,20 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
 
     :return: Tuples of matching items and associated confidence.
 
-    .. note :: This function works by removing any fancy character from the
-    ``query`` and ``choices`` strings (replacing any non alphabetic and non
-    numeric characters by space), converting to lower case and normalizing them
-    (collapsing multiple spaces etc). It also converts any roman numerals to
-    decimal system. It then compares the string and look for the longest string
-    in ``choices`` which is a substring of ``query``. The longest one gets a
-    confidence of 100. The shorter ones get a confidence proportional to their
-    length.
+    .. note ::
+
+        This function works by removing any fancy character from the ``query``
+        and ``choices`` strings (replacing any non alphabetic and non numeric
+        characters by space), converting to lower case and normalizing them
+        (collapsing multiple spaces etc). It also converts any roman numerals
+        to decimal system. It then compares the string and look for the longest
+        string in ``choices`` which is a substring of ``query``. The longest
+        one gets a confidence of 100. The shorter ones get a confidence
+        proportional to their length.
 
     .. seealso :: flatisfy.tools.normalize_string
 
-    .. todo :: Is there a better confidence measure?
-
-    :Example:
+    Example::
 
         >>> match("Paris 14ème", ["Ris", "ris", "Paris 14"], limit=1)
         [("Paris 14", 100)
@@ -85,6 +85,7 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
             )
         [('denfert rochereau', 100), ('saint-jacques', 76)]
     """
+    # TODO: Is there a better confidence measure?
     normalized_query = tools.normalize_string(query)
     normalized_choices = [tools.normalize_string(choice) for choice in choices]
 
@@ -130,8 +131,9 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
     :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
     :param distance_threshold: Maximum distance in meters between the
-    constraint postal codes (from config) and the one found by this function,
-    to avoid bad fuzzy matching. Can be ``None`` to disable thresholding.
+        constraint postal codes (from config) and the one found by this
+        function, to avoid bad fuzzy matching. Can be ``None`` to disable
+        thresholding.
 
     :return: An updated list of flats dict with guessed postal code.
     """
@@ -246,7 +248,7 @@ def guess_stations(flats_list, constraint, config, distance_threshold=1500):
     :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
     :param distance_threshold: Maximum distance (in meters) between the center
-    of the postal code and the station to consider it ok.
+        of the postal code and the station to consider it ok.
 
     :return: An updated list of flats dict with guessed nearby stations.
     """

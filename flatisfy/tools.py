@@ -112,11 +112,13 @@ def is_within_interval(value, min_value=None, max_value=None):
     :param min_value: The lower bound.
     :param max_value: The upper bound.
     :return: ``True`` if the value is ``None``. ``True`` or ``False`` whether
-    the value is within the given interval or not.
+        the value is within the given interval or not.
 
-    .. note:: A value is always within a ``None`` bound.
+    .. note::
 
-    :Example:
+        A value is always within a ``None`` bound.
+
+    Example::
 
         >>> is_within_interval(None)
         True
@@ -147,13 +149,12 @@ def normalize_string(string):
     """
     Normalize the given string for matching.
 
-    .. todo :: Convert romanian numerals to decimal
-
     :Example:
 
         >>> normalize_string("tétéà 14ème-XIV,  foobar")
         'tetea 14eme xiv, foobar'
     """
+    # TODO: Convert romanian numerals to decimal
     # ASCIIfy the string
     string = unidecode.unidecode(string)
 
@@ -267,13 +268,15 @@ def get_travel_time_between(latlng_from, latlng_to, config):
     by their latitude and longitude.
 
     :param latlng_from: A tuple of (latitude, longitude) for the starting
-    point.
+        point.
     :param latlng_to: A tuple of (latitude, longitude) for the destination.
     :return: A dict of the travel time in seconds and sections of the journey
-    with GeoJSON paths. Returns ``None`` if it could not fetch it.
+        with GeoJSON paths. Returns ``None`` if it could not fetch it.
 
-    .. note :: Uses the Navitia API. Requires a ``navitia_api_key`` field to be
-    filled-in in the ``config``.
+    .. note ::
+
+        Uses the Navitia API. Requires a ``navitia_api_key`` field to be
+        filled-in in the ``config``.
     """
     travel_time = None
 

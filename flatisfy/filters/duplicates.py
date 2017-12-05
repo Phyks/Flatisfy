@@ -56,9 +56,9 @@ def find_number_common_photos(photo_cache, flat1_photos, flat2_photos):
     Fetch the photos and compare them with dHash method.
 
     :param flat1_photos: First list of flat photos. Each photo should be a
-    ``dict`` with a ``url`` key.
+        ``dict`` with a ``url`` key.
     :param flat2_photos: First list of flat photos. Each photo should be a
-    ``dict`` with a ``url`` key.
+        ``dict`` with a ``url`` key.
     :return: The found number of common photos.
     """
     n_common_photos = 0
@@ -93,16 +93,16 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
 
     :param flats_list: A list of flats dicts.
     :param key: The flat dicts key on which the duplicate detection should be
-    done.
+        done.
     :param merge: Whether the found duplicates should be merged or we should
-    only keep one of them.
+        only keep one of them.
     :param should_intersect: Set to ``True`` if the values in the flat dicts
-    are lists and you want to deduplicate on non-empty intersection (typically
-    if they have a common url).
+        are lists and you want to deduplicate on non-empty intersection
+        (typically if they have a common url).
 
     :return: A tuple of the deduplicated list of flat dicts and the list of all
-    the flats objects that should be removed and considered as duplicates (they
-    were already merged).
+        the flats objects that should be removed and considered as duplicates
+        (they were already merged).
     """
     # ``seen`` is a dict mapping aggregating the flats by the deduplication
     # keys. We basically make buckets of flats for every key value. Flats in
@@ -173,8 +173,8 @@ def deep_detect(flats_list):
 
     :param flats_list: A list of flats dicts.
     :return: A tuple of the deduplicated list of flat dicts and the list of all
-    the flats objects that should be removed and considered as duplicates (they
-    were already merged).
+        the flats objects that should be removed and considered as duplicates
+        (they were already merged).
     """
 
     photo_cache = ImageCache()

@@ -16,11 +16,14 @@ class StringyJSON(types.TypeDecorator):
     From
     https://avacariu.me/articles/2016/compiling-json-as-text-for-sqlite-with-sqlalchemy.
 
-    .. note :: The associated field is immutable. That is, changes to the data
-    (typically, changing the value of a dict field) will not trigger an update
-    on the SQL side upon ``commit`` as the reference to the object will not
-    have been updated. One should force the update by forcing an update of the
-    reference (by performing a ``copy`` operation on the dict for instance).
+    .. note ::
+
+        The associated field is immutable. That is, changes to the data
+        (typically, changing the value of a dict field) will not trigger an
+        update on the SQL side upon ``commit`` as the reference to the object
+        will not have been updated. One should force the update by forcing an
+        update of the reference (by performing a ``copy`` operation on the dict
+        for instance).
     """
 
     impl = types.TEXT

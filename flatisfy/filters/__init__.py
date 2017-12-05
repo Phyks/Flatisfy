@@ -86,9 +86,11 @@ def refine_with_details_criteria(flats_list, constraint):
     details to be fetched. These include minimum number of photos and terms
     that should appear in description.
 
-    .. note :: This has to be done in a separate function and not with the
-    other criterias as photos and full description are only fetched in the
-    second pass.
+    .. note ::
+
+        This has to be done in a separate function and not with the other
+        criterias as photos and full description are only fetched in the second
+        pass.
 
     :param flats_list: A list of flats dict to filter.
     :param constraint: The constraint that the ``flats_list`` should satisfy.

@@ -98,9 +98,9 @@ class WeboobProxy(object):
         cities, to comply with housing websites limitations.
 
         :param constraints_dict: A dictionary of constraints, as defined in the
-        config.
+            config.
         :return: A list of Weboob ``weboob.capabilities.housing.Query``
-        objects. Returns ``None`` if an error occurred.
+            objects. Returns ``None`` if an error occurred.
         """
         queries = []
 
@@ -180,7 +180,7 @@ class WeboobProxy(object):
         :param query: A Weboob `weboob.capabilities.housing.Query`` object.
         :param max_entries: Maximum number of entries to fetch.
         :param store_personal_data: Whether personal data should be fetched
-        from housing posts (phone number etc).
+            from housing posts (phone number etc).
         :return: The matching housing posts, dumped as a list of JSON objects.
         """
         housings = []
@@ -206,9 +206,9 @@ class WeboobProxy(object):
         Get information (details) about an housing post.
 
         :param full_flat_id: A Weboob housing post id, in complete form
-        (ID@BACKEND)
+            (ID@BACKEND)
         :param store_personal_data: Whether personal data should be fetched
-        from housing posts (phone number etc).
+            from housing posts (phone number etc).
         :return: The details in JSON.
         """
         flat_id, backend_name = full_flat_id.rsplit("@", 1)
@@ -247,7 +247,7 @@ def fetch_flats(config):
 
     :param config: A config dict.
     :return: A dict mapping constraint in config to all available matching
-    flats.
+        flats.
     """
     fetched_flats = {}
 
@@ -296,9 +296,10 @@ def load_flats_from_file(json_file, config):
 
     :param json_file: The file to load housings list from.
     :return: A dict mapping constraint in config to all available matching
-    flats.
+        flats.
 
     .. note::
+
         As we do not know which constraint is met by a given flat, all the
         flats are returned for any available constraint, and they will be
         filtered out afterwards.
@@ -323,7 +324,7 @@ def load_flats_from_db(config):
 
     :param config: A config dict.
     :return: A dict mapping constraint in config to all available matching
-    flats.
+        flats.
     """
     get_session = database.init_db(config["database"], config["search_index"])
 

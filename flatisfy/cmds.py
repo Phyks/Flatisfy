@@ -28,9 +28,9 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
 
     :param config: A config dict.
     :param constraint_name: The constraint name that the ``flats_list`` should
-    satisfy.
+        satisfy.
     :param fetch_details: Whether additional details should be fetched between
-    the two passes.
+        the two passes.
     :param flats_list: The initial list of flat objects to filter.
     :return: A dict mapping flat status and list of flat objects.
     """
@@ -107,11 +107,11 @@ def filter_fetched_flats(config, fetched_flats, fetch_details=True):
 
     :param config: A config dict.
     :param fetch_details: Whether additional details should be fetched between
-    the two passes.
+        the two passes.
     :param fetched_flats: The initial dict mapping constraints to the list of
-    fetched flat objects to filter.
+        fetched flat objects to filter.
     :return: A dict mapping constraints to a dict mapping flat status and list
-    of flat objects.
+        of flat objects.
     """
     for constraint_name, flats_list in fetched_flats.items():
         fetched_flats[constraint_name] = filter_flats_list(
@@ -130,7 +130,7 @@ def import_and_filter(config, load_from_db=False):
 
     :param config: A config dict.
     :param load_from_db: Whether to load flats from database or fetch them
-    using Weboob.
+        using Weboob.
     :return: ``None``.
     """
     # Fetch and filter flats list

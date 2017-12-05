@@ -89,7 +89,7 @@ def validate_config(config, check_with_data):
 
     :param config: A config dictionary to fetch.
     :param check_with_data: Whether we should use the available OpenData to
-    check the config values.
+        check the config values.
     :return: ``True`` if the configuration is valid, ``False`` otherwise.
     """
     def _check_constraints_bounds(bounds):
@@ -206,7 +206,7 @@ def load_config(args=None, check_with_data=True):
 
     :param args: An argparse args structure.
     :param check_with_data: Whether we should use the available OpenData to
-    check the config values. Defaults to ``True``.
+        check the config values. Defaults to ``True``.
     :return: The loaded config dict.
     """
     LOGGER.info("Initializing configuration...")

@@ -35,7 +35,7 @@ def init_db(database_uri=None, search_db_uri=None):
     Initialize the database, ensuring tables exist etc.
 
     :param database_uri: An URI describing an engine to use. Defaults to
-    in-memory SQLite database.
+        in-memory SQLite database.
     :param search_db_uri: Path to the Whoosh index file to use.
     :return: A tuple of an SQLAlchemy session maker and the created engine.
     """
