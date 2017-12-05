@@ -63,6 +63,8 @@ DEFAULT_CONFIG = {
     "search_index": None,
     # Web app port
     "port": 8080,
+    # Debug mode for webserver
+    "debug": False,
     # Web app host to listen on
     "host": "127.0.0.1",
     # Web server to use to serve the webapp (see Bottle deployment doc)
@@ -126,6 +128,7 @@ def validate_config(config, check_with_data):
 
         assert config["database"] is None or isinstance(config["database"], str)  # noqa: E501
 
+        assert isinstance(config["debug"], bool)
         assert isinstance(config["port"], int)
         assert isinstance(config["host"], str)
         assert config["webserver"] is None or isinstance(config["webserver"], str)  # noqa: E501

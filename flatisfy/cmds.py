@@ -233,4 +233,5 @@ def serve(config):
         # standard logging
         server = web_app.QuietWSGIRefServer
 
-    app.run(host=config["host"], port=config["port"], server=server)
+    app.run(host=config["host"], port=config["port"], server=server,
+            debug=config["debug"])

@@ -42,7 +42,6 @@ def _serve_static_file(filename):
         )
     )
 
-
 def get_app(config):
     """
     Get a Bottle app instance with all the routes set-up.
@@ -51,7 +50,7 @@ def get_app(config):
     """
     get_session = database.init_db(config["database"], config["search_index"])
 
-    app = bottle.default_app()
+    app = bottle.Bottle()
     app.install(DatabasePlugin(get_session))
     app.install(ConfigPlugin(config))
     app.config.setdefault("canister.log_level", logging.root.level)
@@ -60,24 +59,40 @@ def get_app(config):
     app.install(canister.Canister())
     # Use DateAwareJSONEncoder to dump JSON strings
     # From http://stackoverflow.com/questions/21282040/bottle-framework-how-to-return-datetime-in-json-response#comment55718456_21282666.  pylint: disable=locally-disabled,line-too-long
-    bottle.install(
+    app.install(
         bottle.JSONPlugin(
             json_dumps=functools.partial(json.dumps, cls=DateAwareJSONEncoder)
         )
     )
 
-    # API v1 routes
-    app.route("/api/v1/", "GET", api_routes.index_v1)
+    # Enable CORS
+    @app.hook('after_request')
+    def enable_cors():
+        """
+        Add CORS headers at each request.
+        """
+        # The str() call is required as we import unicode_literal and WSGI
+        # headers list should have plain str type.
+        bottle.response.headers[str('Access-Control-Allow-Origin')] = '*'
+        bottle.response.headers[str('Access-Control-Allow-Methods')] = (
+            'PUT, GET, POST, DELETE, OPTIONS'
+        )
+        bottle.response.headers[str('Access-Control-Allow-Headers')] = (
+            'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
+        )
 
-    app.route("/api/v1/time_to_places", "GET",
+    # API v1 routes
+    app.route("/api/v1/", ["GET", "OPTIONS"], api_routes.index_v1)
+
+    app.route("/api/v1/time_to_places", ["GET", "OPTIONS"],
               api_routes.time_to_places_v1)
 
-    app.route("/api/v1/flats", "GET", api_routes.flats_v1)
-    app.route("/api/v1/flats/:flat_id", "GET", api_routes.flat_v1)
-    app.route("/api/v1/flats/:flat_id", "PATCH",
+    app.route("/api/v1/flats", ["GET", "OPTIONS"], api_routes.flats_v1)
+    app.route("/api/v1/flats/:flat_id", ["GET", "OPTIONS"], api_routes.flat_v1)
+    app.route("/api/v1/flats/:flat_id", ["PATCH", "OPTIONS"],
               api_routes.update_flat_v1)
 
-    app.route("/api/v1/ics/visits.ics", "GET",
+    app.route("/api/v1/ics/visits.ics", ["GET", "OPTIONS"],
               api_routes.ics_feed_v1)
 
     app.route("/api/v1/search", "POST", api_routes.search_v1)

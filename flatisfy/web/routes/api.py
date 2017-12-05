@@ -103,6 +103,10 @@ def flats_v1(config, db):
 
     :return: The available flats objects in a JSON ``data`` dict.
     """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return ''
+
     try:
         db_query = db.query(flat_model.Flat)
 
@@ -139,6 +143,10 @@ def flat_v1(flat_id, config, db):
 
     :return: The flat object in a JSON ``data`` dict.
     """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
     try:
         flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
 
@@ -171,6 +179,10 @@ def update_flat_v1(flat_id, config, db):
 
     :return: The new flat object in a JSON ``data`` dict.
     """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
     try:
         flat = db.query(flat_model.Flat).filter_by(id=flat_id).first()
         if not flat:
@@ -204,6 +216,10 @@ def time_to_places_v1(config):
     :return: The JSON dump of the places to compute time to (dict of places
         names mapped to GPS coordinates).
     """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
     try:
         places = {}
         for constraint_name, constraint in config["constraints"].items():
@@ -231,6 +247,10 @@ def search_v1(db, config):
 
     :return: The matching flat objects in a JSON ``data`` dict.
     """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
     try:
         try:
             query = json.load(bottle.request.body)["query"]
@@ -260,6 +280,10 @@ def ics_feed_v1(config, db):
 
     :return: The ICS feed for the visits.
     """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
     cal = vobject.iCalendar()
     try:
         flats_with_visits = db.query(flat_model.Flat).filter(
