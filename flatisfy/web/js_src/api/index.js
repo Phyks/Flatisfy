@@ -46,7 +46,7 @@ export const getFlats = function (callback) {
 
 export const getFlat = function (flatId, callback) {
     fetch(
-        '/api/v1/flat/' + encodeURIComponent(flatId),
+        '/api/v1/flats/' + encodeURIComponent(flatId),
         { credentials: 'same-origin' }
     )
     .then(function (response) {
@@ -61,10 +61,10 @@ export const getFlat = function (flatId, callback) {
 
 export const updateFlatStatus = function (flatId, newStatus, callback) {
     fetch(
-        '/api/v1/flat/' + encodeURIComponent(flatId) + '/status',
+        '/api/v1/flats/' + encodeURIComponent(flatId),
         {
             credentials: 'same-origin',
-            method: 'POST',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -79,10 +79,10 @@ export const updateFlatStatus = function (flatId, newStatus, callback) {
 
 export const updateFlatNotes = function (flatId, newNotes, callback) {
     fetch(
-        '/api/v1/flat/' + encodeURIComponent(flatId) + '/notes',
+        '/api/v1/flats/' + encodeURIComponent(flatId),
         {
             credentials: 'same-origin',
-            method: 'POST',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -97,10 +97,10 @@ export const updateFlatNotes = function (flatId, newNotes, callback) {
 
 export const updateFlatNotation = function (flatId, newNotation, callback) {
     fetch(
-        '/api/v1/flat/' + encodeURIComponent(flatId) + '/notation',
+        '/api/v1/flats/' + encodeURIComponent(flatId),
         {
             credentials: 'same-origin',
-            method: 'POST',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -115,10 +115,10 @@ export const updateFlatNotation = function (flatId, newNotation, callback) {
 
 export const updateFlatVisitDate = function (flatId, newVisitDate, callback) {
     fetch(
-        '/api/v1/flat/' + encodeURIComponent(flatId) + '/visit_date',
+        '/api/v1/flats/' + encodeURIComponent(flatId),
         {
             credentials: 'same-origin',
-            method: 'POST',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },

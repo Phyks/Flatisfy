@@ -13,6 +13,7 @@ import arrow
 from sqlalchemy import (
     Column, DateTime, Enum, Float, SmallInteger, String, Text
 )
+from sqlalchemy.orm import validates
 
 from flatisfy.database.base import BASE
 from flatisfy.database.types import MagicJSON
@@ -96,6 +97,62 @@ class Flat(BASE):
     # Date for visit
     visit_date = Column(DateTime)
 
+    @validates('utilities')
+    def validate_utilities(self, _, utilities):
+        """
+        Utilities validation method
+        """
+        if isinstance(utilities, FlatUtilities):
+            return utilities
+
+        if utilities == "C.C.":
+            return FlatUtilities.included
+        elif utilities == "H.C.":
+            return FlatUtilities.excluded
+        else:
+            return FlatUtilities.unknown
+
+    @validates("status")
+    def validate_status(self, _, status):
+        """
+        Status validation method
+        """
+        if isinstance(status, FlatStatus):
+            return status
+
+        try:
+            return getattr(FlatStatus, status)
+        except (AttributeError, TypeError):
+            LOGGER.warn("Unkown flat status %s, ignoring it.",
+                        status)
+            return self.status.default.arg
+
+    @validates("notation")
+    def validate_status(self, _, notation):
+        """
+        Notation validation method
+        """
+        try:
+            notation = int(notation)
+            assert notation >= 0 and notation <= 5
+        except (ValueError, AssertionError):
+            raise ValueError('notation should be an integer between 0 and 5')
+        return notation
+
+    @validates("date")
+    def validate_date(self, _, date):
+        """
+        Date validation method
+        """
+        return arrow.get(date).naive
+
+    @validates("visit_date")
+    def validate_visit_date(self, _, visit_date):
+        """
+        Visit date validation method
+        """
+        return arrow.get(visit_date).naive
+
     @staticmethod
     def from_dict(flat_dict):
         """
@@ -119,29 +176,6 @@ class Flat(BASE):
             )
             del flat_dict["flatisfy"]
 
-        # Handle utilities field
-        if not isinstance(flat_dict["utilities"], FlatUtilities):
-            if flat_dict["utilities"] == "C.C.":
-                flat_dict["utilities"] = FlatUtilities.included
-            elif flat_dict["utilities"] == "H.C.":
-                flat_dict["utilities"] = FlatUtilities.excluded
-            else:
-                flat_dict["utilities"] = FlatUtilities.unknown
-
-        # Handle status field
-        flat_status = flat_dict.get("status", "new")
-        if not isinstance(flat_status, FlatStatus):
-            try:
-                flat_dict["status"] = getattr(FlatStatus, flat_status)
-            except AttributeError:
-                if "status" in flat_dict:
-                    del flat_dict["status"]
-                LOGGER.warn("Unkown flat status %s, ignoring it.",
-                            flat_status)
-
-        # Handle date field
-        flat_dict["date"] = arrow.get(flat_dict["date"]).naive
-
         flat_object = Flat()
         # Using a __dict__.update() call to make it work even if there are
         # extra keys in flat_dict which are not valid kwargs for Flat model.
@@ -150,7 +184,6 @@ class Flat(BASE):
 
     def __repr__(self):
         return "<Flat(id=%s, urls=%s)>" % (self.id, self.urls)
-
 
     def json_api_repr(self):
         """

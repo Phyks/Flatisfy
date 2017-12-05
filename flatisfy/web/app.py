@@ -73,20 +73,11 @@ def get_app(config):
               api_routes.time_to_places_v1)
 
     app.route("/api/v1/flats", "GET", api_routes.flats_v1)
-    app.route("/api/v1/flats/status/:status", "GET",
-              api_routes.flats_by_status_v1)
+    app.route("/api/v1/flats/:flat_id", "GET", api_routes.flat_v1)
+    app.route("/api/v1/flats/:flat_id", "PATCH",
+              api_routes.update_flat_v1)
 
-    app.route("/api/v1/flat/:flat_id", "GET", api_routes.flat_v1)
-    app.route("/api/v1/flat/:flat_id/status", "POST",
-              api_routes.update_flat_status_v1)
-    app.route("/api/v1/flat/:flat_id/notes", "POST",
-              api_routes.update_flat_notes_v1)
-    app.route("/api/v1/flat/:flat_id/notation", "POST",
-              api_routes.update_flat_notation_v1)
-    app.route("/api/v1/flat/:flat_id/visit_date", "POST",
-              api_routes.update_flat_visit_date_v1)
-
-    app.route("/api/v1/visits.ics", "GET",
+    app.route("/api/v1/ics/visits.ics", "GET",
               api_routes.ics_feed_v1)
 
     app.route("/api/v1/search", "POST", api_routes.search_v1)
