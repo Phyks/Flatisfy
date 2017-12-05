@@ -5,10 +5,10 @@ This modules defines an SQLAlchemy ORM model for a flat.
 # pylint: disable=locally-disabled,invalid-name,too-few-public-methods
 from __future__ import absolute_import, print_function, unicode_literals
 
-import enum
 import logging
 
 import arrow
+import enum
 
 from sqlalchemy import (
     Column, DateTime, Enum, Float, SmallInteger, String, Text
@@ -109,8 +109,7 @@ class Flat(BASE):
             return FlatUtilities.included
         elif utilities == "H.C.":
             return FlatUtilities.excluded
-        else:
-            return FlatUtilities.unknown
+        return FlatUtilities.unknown
 
     @validates("status")
     def validate_status(self, _, status):
@@ -128,7 +127,7 @@ class Flat(BASE):
             return self.status.default.arg
 
     @validates("notation")
-    def validate_status(self, _, notation):
+    def validate_notation(self, _, notation):
         """
         Notation validation method
         """

@@ -18,6 +18,14 @@ from flatisfy.models.public_transport import PublicTransport
 LOGGER = logging.getLogger(__name__)
 MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 
+TRANSPORT_DATA_FILES = {
+    "FR-IDF": "stops_fr-idf.txt",
+    "FR-NW": "stops_fr-nw.txt",
+    "FR-NE": "stops_fr-ne.txt",
+    "FR-SW": "stops_fr-sw.txt",
+    "FR-SE": "stops_fr-se.txt"
+}
+
 
 def french_postal_codes_to_quarter(postal_code):
     """
@@ -129,18 +137,10 @@ def _preprocess_public_transport():
 
     :return: A list of ``PublicTransport`` objects to be inserted in database.
     """
-    DATA_FILES = {
-        "FR-IDF": "stops_fr-idf.txt",
-        "FR-NW": "stops_fr-nw.txt",
-        "FR-NE": "stops_fr-ne.txt",
-        "FR-SW": "stops_fr-sw.txt",
-        "FR-SE": "stops_fr-se.txt"
-    }
-
     public_transport_data = []
     # Load opendata file
-    for area, data_file in DATA_FILES.items():
-        LOGGER.info("Building from public transport data %s." % data_file)
+    for area, data_file in TRANSPORT_DATA_FILES.items():
+        LOGGER.info("Building from public transport data %s.", data_file)
         try:
             with io.open(os.path.join(MODULE_DIR, data_file), "r",
                          encoding='utf-8') as fh:
@@ -154,7 +154,7 @@ def _preprocess_public_transport():
                         lng=row[4]
                     ))
         except (IOError, IndexError):
-            LOGGER.error("Invalid raw opendata file: %s." % data_file)
+            LOGGER.error("Invalid raw opendata file: %s.", data_file)
             return []
 
     return public_transport_data

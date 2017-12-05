@@ -3,6 +3,8 @@ Flatisfy
 
 Flatisfy is your new companion to ease your search of a new housing :)
 
+<script src="https://liberapay.com/Phyks/widgets/button.js"></script>
+<noscript><a href="https://liberapay.com/Phyks/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a></noscript>
 
 **Note**: This software is under heavy development at the moment, and the
 database schema could change at any time. Do not consider it as being
@@ -35,6 +37,9 @@ This code is not restricted to handling flats only!
 
 See the [getting started guide](doc/0.getting_started.md). If you want to give
 it a try quickly, you can have a look at the [Docker image](doc/2.docker.md).
+
+Documentation for the whole app is available
+[online](https://doc.phyks.me/flatisfy/).
 
 
 ## Documentation
@@ -91,7 +96,14 @@ explicitly mentionned otherwise.
 See the `CONTRIBUTING.md` file for more infos.
 
 
-## Support
+## API
+
+Your Flatisfy instance is accessible through an API. API documentation is
+available
+[here](https://doc.phyks.me/flatisfy/flatisfy.web.routes.html#module-flatisfy.web.routes.api).
+
+
+## Getting help
 
 Feel free to open issues. An IRC channel is available at [irc://irc.freenode.net/flatisfy](irc://irc.freenode.net/flatisfy) as well.
 

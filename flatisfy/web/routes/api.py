@@ -17,6 +17,8 @@ import flatisfy.data
 from flatisfy.models import flat as flat_model
 from flatisfy.models.postal_code import PostalCode
 
+FILTER_RE = re.compile(r"filter\[([A-z0-9_]+)\]")
+
 
 def JSONError(error_code, error_str):
     """
@@ -105,7 +107,6 @@ def flats_v1(config, db):
         db_query = db.query(flat_model.Flat)
 
         # Handle filtering according to JSON API spec
-        FILTER_RE = re.compile(r"filter\[([A-z0-9_]+)\]")
         filters = {}
         for param in bottle.request.query:
             filter_match = FILTER_RE.match(param)
@@ -124,7 +125,7 @@ def flats_v1(config, db):
         return {
             "data": flats
         }
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
 
@@ -147,7 +148,7 @@ def flat_v1(flat_id, config, db):
         return {
             "data": _serialize_flat(flat, config)
         }
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
 
@@ -177,8 +178,8 @@ def update_flat_v1(flat_id, config, db):
 
         try:
             json_body = json.load(bottle.request.body)
-            for k, v in json_body.items():
-                setattr(flat, k, v)
+            for key, value in json_body.items():
+                setattr(flat, key, value)
         except ValueError as exc:
             return JSONError(
                 400,
@@ -188,7 +189,7 @@ def update_flat_v1(flat_id, config, db):
         return {
             "data": _serialize_flat(flat, config)
         }
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
 
@@ -213,7 +214,7 @@ def time_to_places_v1(config):
         return {
             "data": places
         }
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
 
@@ -245,7 +246,7 @@ def search_v1(db, config):
         return {
             "data": flats
         }
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
 
@@ -284,7 +285,7 @@ def ics_feed_v1(config, db):
                 description += '\n{}\n'.format(flat.notes)
 
             vevent.add('description').value = description
-    except:
+    except Exception:  # pylint: disable= broad-except
         pass
 
     return cal.serialize()
