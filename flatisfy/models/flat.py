@@ -11,7 +11,7 @@ import arrow
 import enum
 
 from sqlalchemy import (
-    Column, DateTime, Enum, Float, SmallInteger, String, Text
+    Column, DateTime, Enum, Float, SmallInteger, String, Text, inspect
 )
 from sqlalchemy.orm import validates
 
@@ -175,11 +175,9 @@ class Flat(BASE):
             )
             del flat_dict["flatisfy"]
 
-        flat_object = Flat()
-        # Using a __dict__.update() call to make it work even if there are
-        # extra keys in flat_dict which are not valid kwargs for Flat model.
-        flat_object.__dict__.update(flat_dict)
-        return flat_object
+        flat_dict = {k: v for k, v in flat_dict.items()
+                     if k in inspect(Flat).columns.keys()}
+        return Flat(**flat_dict)
 
     def __repr__(self):
         return "<Flat(id=%s, urls=%s)>" % (self.id, self.urls)
