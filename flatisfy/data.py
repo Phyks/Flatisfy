@@ -60,6 +60,7 @@ def preprocess_data(config, force=False):
         session.query(PostalCode).delete()
 
     # Build all opendata files
+    LOGGER.info("Rebuilding data...")
     for preprocess in data_files.PREPROCESSING_FUNCTIONS:
         data_objects = preprocess()
         if not data_objects:
@@ -68,6 +69,7 @@ def preprocess_data(config, force=False):
             )
         with get_session() as session:
             session.add_all(data_objects)
+    LOGGER.info("Done building data!")
     return True
 
 

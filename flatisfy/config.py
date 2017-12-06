@@ -168,6 +168,9 @@ def validate_config(config, check_with_data):
             assert constraint["postal_codes"]
             assert all(isinstance(x, str) for x in constraint["postal_codes"])
             if check_with_data:
+                # Ensure data is built into db
+                data.preprocess_data(config, force=False)
+                # Check postal codes
                 opendata_postal_codes = [
                     x.postal_code
                     for x in data.load_data(PostalCode, constraint, config)

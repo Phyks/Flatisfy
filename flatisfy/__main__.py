@@ -158,21 +158,10 @@ def main():
         cmds.purge_db(config)
         return
 
-    # Build data files
-    try:
-        force = False
-        if args.cmd == "build-data":
-            force = True
-
-        if data.preprocess_data(config, force=force):
-            LOGGER.info("Done building data!")
-
-        if args.cmd == "build-data":
-            sys.exit(0)
-    except flatisfy.exceptions.DataBuildError as exc:
-        LOGGER.error("%s", exc)
-        sys.exit(1)
-
+    # Build data files command
+    if args.cmd == "build-data":
+        data.preprocess_data(config, force=True)
+        return
     # Fetch command
     if args.cmd == "fetch":
         # Fetch and filter flats list
