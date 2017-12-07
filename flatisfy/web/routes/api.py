@@ -7,6 +7,7 @@ from __future__ import (
 )
 
 import datetime
+import itertools
 import json
 import re
 
@@ -32,6 +33,53 @@ def JSONError(error_code, error_str):
     bottle.response.status = error_code
     bottle.response.content_type = "application/json"
     return json.dumps(dict(error=error_str, status_code=error_code))
+
+
+def _JSONApiSpec(query):
+    """
+    Implementing JSON API spec for filtering, sorting and paginating results.
+
+    :param query: A Bottle query dict.
+    :return: A tuple of filters, page number, page size (items per page) and
+    sorting to apply.
+    """
+    # Handle filtering according to JSON API spec
+    filters = {}
+    for param in query:
+        filter_match = FILTER_RE.match(param)
+        if not filter_match:
+            continue
+        field = filter_match.group(1)
+        value = query[filter_match.group(0)]
+        filters[field] = value
+
+    # Handle pagination according to JSON API spec
+    page_number, page_size = 0, None
+    try:
+        if 'page[size]' in query:
+            page_size = int(query['page[size]'])
+            assert page_size > 0
+        if 'page[number]' in query:
+            page_number = int(query['page[number]'])
+            assert page_number >= 0
+    except (AssertionError, ValueError):
+        raise ValueError("Invalid pagination provided.")
+
+    # Handle sorting according to JSON API spec
+    sorting = []
+    if 'sort' in query:
+        for index in query['sort'].split(','):
+            try:
+                sort_field = getattr(flat_model.Flat, index.lstrip('-'))
+            except AttributeError:
+                raise ValueError(
+                    "Invalid sorting key provided: {}.".format(index)
+                )
+            if index.startswith('-'):
+                sort_field = sort_field.desc()
+            sorting.append(sort_field)
+
+    return filters, page_number, page_size, sorting
 
 
 def _serialize_flat(flat, config):
@@ -101,6 +149,18 @@ def flats_v1(config, db):
         Filtering can be done through the ``filter`` GET param, according
         to JSON API spec (http://jsonapi.org/recommendations/#filtering).
 
+    .. note::
+
+        By default no pagination is done. Pagination can be forced using
+        ``page[size]`` to specify a number of items per page and
+        ``page[number]`` to specify which page to return. Pages are numbered
+        starting from 0.
+
+    .. note::
+
+        Sorting can be handled through the ``sort`` GET param, according to
+        JSON API spec (http://jsonapi.org/format/#fetching-sorting).
+
     :return: The available flats objects in a JSON ``data`` dict.
     """
     if bottle.request.method == 'OPTIONS':
@@ -108,26 +168,29 @@ def flats_v1(config, db):
         return ''
 
     try:
-        db_query = db.query(flat_model.Flat)
-
-        # Handle filtering according to JSON API spec
-        filters = {}
-        for param in bottle.request.query:
-            filter_match = FILTER_RE.match(param)
-            if not filter:
-                continue
-            field = filter_match.group(1)
-            value = bottle.request.query[filter_match.group(0)]
-            filters[field] = value
-        db_query = db_query.filter_by(**filters)
+        try:
+            filters, page_number, page_size, sorting = _JSONApiSpec(
+                bottle.request.query
+            )
+        except ValueError as exc:
+            return JSONError(400, str(exc))
 
         # Build flat list
+        db_query = (
+            db.query(flat_model.Flat).filter_by(**filters).order_by(*sorting)
+        )
         flats = [
             _serialize_flat(flat, config)
-            for flat in db_query
+            for flat in itertools.islice(
+                db_query,
+                page_number * page_size if page_size else None,
+                page_number * page_size + page_size if page_size else None
+            )
         ]
         return {
-            "data": flats
+            "data": flats,
+            "page": page_number,
+            "items_per_page": page_size if page_size else len(flats)
         }
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
@@ -245,6 +308,23 @@ def search_v1(db, config):
             "query": "SOME_QUERY"
         }
 
+    .. note::
+
+        Filtering can be done through the ``filter`` GET param, according
+        to JSON API spec (http://jsonapi.org/recommendations/#filtering).
+
+    .. note::
+
+        By default no pagination is done. Pagination can be forced using
+        ``page[size]`` to specify a number of items per page and
+        ``page[number]`` to specify which page to return. Pages are numbered
+        starting from 0.
+
+    .. note::
+
+        Sorting can be handled through the ``sort`` GET param, according to
+        JSON API spec (http://jsonapi.org/format/#fetching-sorting).
+
     :return: The matching flat objects in a JSON ``data`` dict.
     """
     if bottle.request.method == 'OPTIONS':
@@ -257,14 +337,30 @@ def search_v1(db, config):
         except (ValueError, KeyError):
             return JSONError(400, "Invalid query provided.")
 
-        flats_db_query = flat_model.Flat.search_query(db, query)
+        try:
+            filters, page_number, page_size, sorting = _JSONApiSpec(
+                bottle.request.query
+            )
+        except ValueError as exc:
+            return JSONError(400, str(exc))
+
+        flats_db_query = (flat_model.Flat
+                          .search_query(db, query)
+                          .filter_by(**filters)
+                          .order_by(*sorting))
         flats = [
             _serialize_flat(flat, config)
-            for flat in flats_db_query
+            for flat in itertools.islice(
+                flats_db_query,
+                page_number * page_size if page_size else None,
+                page_number * page_size + page_size if page_size else None
+            )
         ]
 
         return {
-            "data": flats
+            "data": flats,
+            "page": page_number,
+            "items_per_page": page_size if page_size else len(flats)
         }
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
