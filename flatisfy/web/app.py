@@ -73,11 +73,11 @@ def get_app(config):
         """
         # The str() call is required as we import unicode_literal and WSGI
         # headers list should have plain str type.
-        bottle.response.headers[str('Access-Control-Allow-Origin')] = '*'
-        bottle.response.headers[str('Access-Control-Allow-Methods')] = (
-            'PUT, GET, POST, DELETE, OPTIONS'
+        bottle.response.headers[str('Access-Control-Allow-Origin')] = str('*')
+        bottle.response.headers[str('Access-Control-Allow-Methods')] = str(
+            'PUT, GET, POST, DELETE, OPTIONS, PATCH'
         )
-        bottle.response.headers[str('Access-Control-Allow-Headers')] = (
+        bottle.response.headers[str('Access-Control-Allow-Headers')] = str(
             'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
         )
 
