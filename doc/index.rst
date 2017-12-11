@@ -13,6 +13,7 @@ Welcome to Flatisfy's documentation!
     0.getting_started.md
     1.production.md
     2.docker.md
+    3.faq.md
     modules.rst
 
 
