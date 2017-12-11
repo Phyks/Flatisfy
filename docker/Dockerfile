@@ -39,10 +39,9 @@ RUN mkdir -p /home/user/.local/share/flatisfy
 
 COPY ./run.sh /home/user/run.sh
 RUN chmod +x /home/user/run.sh
-COPY ./fetch.sh /home/user/fetch.sh
-RUN chmod +x /home/user/fetch.sh
+COPY ./update_weboob.sh /home/user/update_weboob.sh
+RUN chmod +x /home/user/update_weboob.sh
 
 # Run server.
-USER user
-CMD /home/user/run.sh
 EXPOSE 8080
+CMD /home/user/run.sh

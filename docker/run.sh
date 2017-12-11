@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-echo "Setting fake values for git config..."
-git config --global user.email flatisfy@example.com
-git config --global user.name "Flatisfy Root"
+echo "Update Weboob..."
+/home/user/update_weboob.sh
 
 echo "Building data for Flatisfy..."
 cd /home/user/app
-python -m flatisfy build-data -v --config /flatisfy/config.json
+su user -c "python -m flatisfy build-data -v --config /flatisfy/config.json"
 
 echo "Fetching new housing posts..."
-/home/user/fetch.sh
+cd /home/user/app
+su user -c "python -m flatisfy import -v --config /flatisfy/config.json"
 
 echo "Starting web UI..."
-python -m flatisfy serve -v --config /flatisfy/config.json
+exec su user -c "python -m flatisfy serve -v --config /flatisfy/config.json"
