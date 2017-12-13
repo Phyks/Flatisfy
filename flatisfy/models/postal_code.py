@@ -35,3 +35,14 @@ class PostalCode(BASE):
 
     def __repr__(self):
         return "<PostalCode(id=%s)>" % self.id
+
+    def json_api_repr(self):
+        """
+        Return a dict representation of this postal code object that is JSON
+        serializable.
+        """
+        return {
+            k: v
+            for k, v in self.__dict__.items()
+            if not k.startswith("_")
+        }

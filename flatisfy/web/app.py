@@ -82,7 +82,7 @@ def get_app(config):
         )
 
     # API v1 routes
-    app.route("/api/v1/", ["GET", "OPTIONS"], api_routes.index_v1)
+    app.route("/api/v1", ["GET", "OPTIONS"], api_routes.index_v1)
 
     app.route("/api/v1/time_to_places", ["GET", "OPTIONS"],
               api_routes.time_to_places_v1)
@@ -96,6 +96,10 @@ def get_app(config):
               api_routes.ics_feed_v1)
 
     app.route("/api/v1/search", "POST", api_routes.search_v1)
+
+    app.route("/api/v1/opendata", "GET", api_routes.opendata_index_v1)
+    app.route("/api/v1/opendata/postal_codes", "GET",
+              api_routes.opendata_postal_codes_v1)
 
     # Index
     app.route("/", "GET", lambda: _serve_static_file("index.html"))

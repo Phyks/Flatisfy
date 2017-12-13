@@ -35,13 +35,16 @@ def JSONError(error_code, error_str):
     return json.dumps(dict(error=error_str, status_code=error_code))
 
 
-def _JSONApiSpec(query):
+def _JSONApiSpec(query, model, default_sorting=None):
     """
     Implementing JSON API spec for filtering, sorting and paginating results.
 
     :param query: A Bottle query dict.
+    :param model: Database model used in this query.
+    :param default_sorting: Optional field to sort on if no sort options are
+        passed through parameters.
     :return: A tuple of filters, page number, page size (items per page) and
-    sorting to apply.
+        sorting to apply.
     """
     # Handle filtering according to JSON API spec
     filters = {}
@@ -70,7 +73,7 @@ def _JSONApiSpec(query):
     if 'sort' in query:
         for index in query['sort'].split(','):
             try:
-                sort_field = getattr(flat_model.Flat, index.lstrip('-'))
+                sort_field = getattr(model, index.lstrip('-'))
             except AttributeError:
                 raise ValueError(
                     "Invalid sorting key provided: {}.".format(index)
@@ -78,6 +81,16 @@ def _JSONApiSpec(query):
             if index.startswith('-'):
                 sort_field = sort_field.desc()
             sorting.append(sort_field)
+    # Default sorting options
+    if not sorting and default_sorting:
+        try:
+            sorting.append(getattr(model, default_sorting))
+        except AttributeError:
+            raise ValueError(
+                "Invalid default sorting key provided: {}.".format(
+                    default_sorting
+                )
+            )
 
     return filters, page_number, page_size, sorting
 
@@ -128,6 +141,7 @@ def index_v1():
         GET /api/v1/
     """
     return {
+        "opendata": "/api/v1/opendata",
         "flats": "/api/v1/flats",
         "flat": "/api/v1/flat/:id",
         "search": "/api/v1/search",
@@ -170,7 +184,9 @@ def flats_v1(config, db):
     try:
         try:
             filters, page_number, page_size, sorting = _JSONApiSpec(
-                bottle.request.query
+                bottle.request.query,
+                flat_model.Flat,
+                default_sorting='cost'
             )
         except ValueError as exc:
             return JSONError(400, str(exc))
@@ -339,7 +355,9 @@ def search_v1(db, config):
 
         try:
             filters, page_number, page_size, sorting = _JSONApiSpec(
-                bottle.request.query
+                bottle.request.query,
+                flat_model.Flat,
+                default_sorting='cost'
             )
         except ValueError as exc:
             return JSONError(400, str(exc))
@@ -409,3 +427,75 @@ def ics_feed_v1(config, db):
         pass
 
     return cal.serialize()
+
+
+def opendata_index_v1():
+    """
+    API v1 data index route.
+
+    Example::
+
+        GET /api/v1/opendata
+    """
+    return {
+        "postal_codes": "/api/v1/opendata/postal_codes"
+    }
+
+
+def opendata_postal_codes_v1(db):
+    """
+    API v1 data postal codes route.
+
+    Example::
+
+        GET /api/v1/opendata/postal_codes
+
+    .. note::
+
+        Filtering can be done through the ``filter`` GET param, according
+        to JSON API spec (http://jsonapi.org/recommendations/#filtering).
+
+    .. note::
+
+        By default no pagination is done. Pagination can be forced using
+        ``page[size]`` to specify a number of items per page and
+        ``page[number]`` to specify which page to return. Pages are numbered
+        starting from 0.
+
+    .. note::
+
+        Sorting can be handled through the ``sort`` GET param, according to
+        JSON API spec (http://jsonapi.org/format/#fetching-sorting).
+
+
+    :return: The postal codes data from opendata.
+    """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
+    try:
+        try:
+            filters, page_number, page_size, sorting = _JSONApiSpec(
+                bottle.request.query,
+                PostalCode,
+                default_sorting='postal_code'
+            )
+        except ValueError as exc:
+            return JSONError(400, str(exc))
+
+        db_query = db.query(PostalCode).filter_by(**filters).order_by(*sorting)
+        postal_codes = [
+            x.json_api_repr() for x in itertools.islice(
+                db_query,
+                page_number * page_size if page_size else None,
+                page_number * page_size + page_size if page_size else None
+            )
+        ]
+        return {
+            "data": postal_codes,
+            "page": page_number,
+            "items_per_page": page_size if page_size else len(postal_codes)
+        }
+    except Exception as exc:  # pylint: disable= broad-except
+        return JSONError(500, str(exc))
