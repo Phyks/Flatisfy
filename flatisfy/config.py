@@ -44,6 +44,9 @@ DEFAULT_CONFIG = {
     # Whether or not to store personal data from housing posts (phone number
     # etc)
     "store_personal_data": False,
+    # Max distance between an housing and a found station, to avoid
+    # false-positive
+    "max_distance_housing_station": 1500,
     # Navitia API key
     "navitia_api_key": None,
     # Number of filtering passes to run
@@ -140,6 +143,7 @@ def validate_config(config, check_with_data):
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
 
         assert isinstance(config["store_personal_data"], bool)
+        assert isinstance(config["max_distance_housing_station"], int) or isinstance(config["max_distance_housing_station"], float)  # noqa: E501
 
         # Ensure constraints are ok
         assert config["constraints"]
