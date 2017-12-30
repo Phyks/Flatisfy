@@ -143,7 +143,7 @@ def validate_config(config, check_with_data):
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
 
         assert isinstance(config["store_personal_data"], bool)
-        assert isinstance(config["max_distance_housing_station"], int) or isinstance(config["max_distance_housing_station"], float)  # noqa: E501
+        assert isinstance(config["max_distance_housing_station"], (int, float))
 
         # Ensure constraints are ok
         assert config["constraints"]
