@@ -240,18 +240,17 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
     return flats_list
 
 
-def guess_stations(flats_list, constraint, config, distance_threshold=1500):
+def guess_stations(flats_list, constraint, config):
     """
     Try to match the station field with a list of available stations nearby.
 
     :param flats_list: A list of flats dict.
     :param constraint: The constraint that the ``flats_list`` should satisfy.
     :param config: A config dict.
-    :param distance_threshold: Maximum distance (in meters) between the center
-        of the postal code and the station to consider it ok.
 
     :return: An updated list of flats dict with guessed nearby stations.
     """
+    distance_threshold = config['max_distance_housing_station']
     opendata = {
         "postal_codes": data.load_data(PostalCode, constraint, config),
         "stations": data.load_data(PublicTransport, constraint, config)
