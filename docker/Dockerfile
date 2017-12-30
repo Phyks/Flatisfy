@@ -31,6 +31,7 @@ RUN cd /home/user \
     && git clone https://git.phyks.me/Phyks/flatisfy/ ./app \
     && cd ./app \
     && pip install -r requirements.txt \
+    && pip install functools32 \
     && npm install \
     && npm run build:prod
 
