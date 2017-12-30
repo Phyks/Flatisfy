@@ -190,6 +190,12 @@ def deep_detect(flats_list):
             if flat2["id"] in matching_flats[flat1["id"]]:
                 continue
 
+            if flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]:
+                # If the two flats are from the same website, consider they
+                # cannot be duplicates. See
+                # https://framagit.org/phyks/Flatisfy/issues/100.
+                continue
+
             n_common_items = 0
             try:
                 # They should have the same area, up to one unit
