@@ -19,7 +19,7 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - \
     && apt-get install -y nodejs
 
 # Install weboob's code itself.
-RUN git clone https://git.weboob.org/weboob/devel /home/user/weboob \
+RUN git clone --depth 1 https://git.weboob.org/weboob/devel /home/user/weboob \
     && cd /home/user/weboob \
     && pip install .
 
@@ -40,9 +40,14 @@ RUN mkdir -p /home/user/.local/share/flatisfy
 
 COPY ./run.sh /home/user/run.sh
 RUN chmod +x /home/user/run.sh
+
+COPY ./entrypoint.sh /home/user/entrypoint.sh
+RUN chmod +x /home/user/entrypoint.sh
+
 COPY ./update_weboob.sh /home/user/update_weboob.sh
 RUN chmod +x /home/user/update_weboob.sh
 
 # Run server.
 EXPOSE 8080
-CMD /home/user/run.sh
+ENTRYPOINT ["/home/user/entrypoint.sh"]
+CMD ["/home/user/run.sh"]
