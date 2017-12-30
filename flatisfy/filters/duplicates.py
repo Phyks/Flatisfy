@@ -190,12 +190,6 @@ def deep_detect(flats_list):
             if flat2["id"] in matching_flats[flat1["id"]]:
                 continue
 
-            if flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]:
-                # If the two flats are from the same website, consider they
-                # cannot be duplicates. See
-                # https://framagit.org/phyks/Flatisfy/issues/100.
-                continue
-
             n_common_items = 0
             try:
                 # They should have the same area, up to one unit
@@ -266,7 +260,23 @@ def deep_detect(flats_list):
                         n_common_items += 5 * min(n_common_photos, 3)
 
                 # Minimal score to consider they are duplicates
-                assert n_common_items >= 15
+                assert n_common_items >= config["duplicate_threshold"]
+
+                # If the two flats are from the same website and have a
+                # different float part, consider they cannot be duplicates. See
+                # https://framagit.org/phyks/Flatisfy/issues/100.
+                both_are_from_same_backend = (
+                    flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]
+                )
+                both_have_float_part = (
+                    (flat1["area"] % 1) > 0 and (flat2["area"] % 1) > 0
+                )
+                both_have_different_float_part = (
+                    (flat1["area"] % 1) != (flat2["area"] % 1)
+                )
+                if(both_have_float_part and both_are_from_same_backend and
+                   both_have_different_float_part):
+                    continue
             except (AssertionError, TypeError):
                 # Skip and consider as not duplicates whenever the conditions
                 # are not met

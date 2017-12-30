@@ -47,6 +47,8 @@ DEFAULT_CONFIG = {
     # Max distance between an housing and a found station, to avoid
     # false-positive
     "max_distance_housing_station": 1500,
+    # Score to consider two flats as being duplicates
+    "duplicate_threshold": 15,
     # Navitia API key
     "navitia_api_key": None,
     # Number of filtering passes to run
@@ -144,6 +146,7 @@ def validate_config(config, check_with_data):
 
         assert isinstance(config["store_personal_data"], bool)
         assert isinstance(config["max_distance_housing_station"], (int, float))
+        assert isinstance(config["duplicate_threshold"], int)
 
         # Ensure constraints are ok
         assert config["constraints"]
