@@ -1,6 +1,12 @@
 Flatisfy
 ========
 
+**PROJECT HAS MOVED** Please use
+[Framagit](https://framagit.org/phyks/Flatisfy) to create issues on the
+project. You can still create merge requests from either
+[Github](https://github.com/phyks/flatisfy) or
+[Framahit](https://framagit.org/phyks/Flatisfy).
+
 Flatisfy is your new companion to ease your search of a new housing :)
 
 <script src="https://liberapay.com/Phyks/widgets/button.js"></script>
