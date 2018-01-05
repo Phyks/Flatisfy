@@ -239,7 +239,7 @@ def deep_detect(flats_list, config):
                 flat2_phone = homogeneize_phone_number(flat2["phone"])
                 if flat1_phone and flat2_phone:
                     assert flat1_phone == flat2_phone
-                    n_common_items += 10  # Counts much more that the rest
+                    n_common_items += 10  # Counts much more than the rest
 
                 # They should have at least one photo in common if there
                 # are some photos
