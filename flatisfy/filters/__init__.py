@@ -233,7 +233,7 @@ def second_pass(flats_list, constraint, config):
     }
 
 @tools.timeit
-def third_pass(flats_list):
+def third_pass(flats_list, config):
     """
     Third filtering pass.
 
@@ -241,12 +241,13 @@ def third_pass(flats_list):
     flats.
 
     :param flats_list: A list of flats dict to filter.
+    :param config: A config dict.
     :return: A dict mapping flat status and list of flat objects.
     """
     LOGGER.info("Running third filtering pass.")
 
     # Deduplicate the list using every available data
-    flats_list, duplicate_flats = duplicates.deep_detect(flats_list)
+    flats_list, duplicate_flats = duplicates.deep_detect(flats_list, config)
 
     return {
         "new": flats_list,

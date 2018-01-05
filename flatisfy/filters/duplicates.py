@@ -48,6 +48,7 @@ def homogeneize_phone_number(number):
 
     return number
 
+
 def find_number_common_photos(photo_cache, flat1_photos, flat2_photos):
     """
     Compute the number of common photos between the two lists of photos for the
@@ -167,11 +168,12 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
     return unique_flats_list, duplicate_flats
 
 
-def deep_detect(flats_list):
+def deep_detect(flats_list, config):
     """
     Deeper detection of duplicates based on any available data.
 
     :param flats_list: A list of flats dicts.
+    :param config: A config dict.
     :return: A tuple of the deduplicated list of flat dicts and the list of all
         the flats objects that should be removed and considered as duplicates
         (they were already merged).

@@ -81,7 +81,8 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
     # Do a third pass to deduplicate better
     if config["passes"] > 2:
         third_pass_result = flatisfy.filters.third_pass(
-            second_pass_result["new"]
+            second_pass_result["new"],
+            config
         )
     else:
         third_pass_result["new"] = second_pass_result["new"]
