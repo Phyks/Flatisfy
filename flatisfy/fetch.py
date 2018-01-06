@@ -3,6 +3,7 @@
 This module contains all the code related to fetching and loading flats lists.
 """
 from __future__ import absolute_import, print_function, unicode_literals
+from builtins import str
 
 import collections
 import itertools
