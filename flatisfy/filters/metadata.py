@@ -54,7 +54,8 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
 
     :param query: The string to match.
     :param choices: The list of strings to match with.
-    :param limit: The maximum number of items to return.
+    :param limit: The maximum number of items to return. Set to ``None`` to
+        return all values above threshold.
     :param threshold: The score threshold to use.
 
     :return: Tuples of matching items and associated confidence.
@@ -102,7 +103,9 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
         ],
         key=lambda x: x[1],
         reverse=True
-    )[:limit]
+    )
+    if limit:
+        matches = matches[:limit]
 
     # Update confidence
     if matches:
@@ -173,20 +176,38 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
             postal_code = None
 
         # If not found, try to find a city
-        cities = {x.name: x for x in opendata["postal_codes"]}
         if not postal_code:
-            matched_city = fuzzy_match(
+            # Find all fuzzy-matching cities
+            matched_cities = fuzzy_match(
                 location,
-                cities.keys(),
-                limit=1
+                [x.name for x in opendata["postal_codes"]],
+                limit=None
             )
-            if matched_city:
-                # Store the matching postal code
-                matched_city = matched_city[0]
-                matched_city_name = matched_city[0]
-                postal_code = (
-                    cities[matched_city_name].postal_code
+            if matched_cities:
+                # Find associated postal codes
+                matched_postal_codes = []
+                for matched_city_name, _ in matched_cities:
+                    postal_code_objects_for_city = [
+                        x for x in opendata["postal_codes"]
+                        if x.name == matched_city_name
+                    ]
+                    matched_postal_codes.extend(
+                        pc.postal_code
+                        for pc in postal_code_objects_for_city
+                    )
+                # Try to match them with postal codes in config constraint
+                matched_postal_codes_in_config = (
+                    set(matched_postal_codes) & set(constraint["postal_codes"])
                 )
+                if matched_postal_codes_in_config:
+                    # If there are some matched postal codes which are also in
+                    # config, use them preferentially. This avoid ignoring
+                    # incorrectly some flats in cities with multiple postal
+                    # codes, see #110.
+                    postal_code = next(iter(matched_postal_codes_in_config))
+                else:
+                    # Otherwise, simply take any matched postal code.
+                    postal_code = matched_postal_codes[0]
                 LOGGER.info(
                     ("Found postal code in location field through city lookup "
                      "for flat %s: %s."),
