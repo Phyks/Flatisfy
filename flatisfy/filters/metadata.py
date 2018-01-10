@@ -262,7 +262,7 @@ def guess_stations(flats_list, constraint, config):
         if not flat_station:
             # Skip everything if empty station
             LOGGER.info(
-                "No station field for flat %s, skipping stations lookup.",
+                "No stations field for flat %s, skipping stations lookup.",
                 flat["id"]
             )
             continue
@@ -311,7 +311,7 @@ def guess_stations(flats_list, constraint, config):
                         break
                     LOGGER.info(
                         ("Station %s is too far from flat %s (%dm > %dm), "
-                         "discarding it."),
+                         "discarding this station."),
                         station[0],
                         flat["id"],
                         int(distance),
