@@ -29,6 +29,13 @@ class QuietWSGIRefServer(bottle.WSGIRefServer):
     # pylint: disable=locally-disabled,too-few-public-methods
     quiet = True
 
+    def run(self, app):
+        app.log.info(
+            'Server is now up and ready! Listening on %s:%s.' %
+            (self.host, self.port)
+        )
+        super(QuietWSGIRefServer, self).run(app)
+
 
 def _serve_static_file(filename):
     """
@@ -54,7 +61,7 @@ def get_app(config):
     app.install(DatabasePlugin(get_session))
     app.install(ConfigPlugin(config))
     app.config.setdefault("canister.log_level", logging.root.level)
-    app.config.setdefault("canister.log_path", None)
+    app.config.setdefault("canister.log_path", False)
     app.config.setdefault("canister.debug", False)
     app.install(canister.Canister())
     # Use DateAwareJSONEncoder to dump JSON strings
