@@ -162,7 +162,7 @@ def first_pass(flats_list, constraint, config):
 
     # Handle duplicates based on ids
     # Just remove them (no merge) as they should be the exact same object.
-    flats_list, duplicates_by_id = duplicates.detect(
+    flats_list, _ = duplicates.detect(
         flats_list, key="id", merge=False, should_intersect=False
     )
     # Also merge duplicates based on urls (these may come from different
@@ -184,7 +184,7 @@ def first_pass(flats_list, constraint, config):
     return {
         "new": flats_list,
         "ignored": ignored_list,
-        "duplicate": duplicates_by_id + duplicates_by_urls
+        "duplicate": duplicates_by_urls
     }
 
 @tools.timeit
