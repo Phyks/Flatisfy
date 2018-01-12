@@ -222,6 +222,7 @@ def deep_detect(flats_list, config):
 
                 # They should have the same postal code, if available
                 if (
+                        "flatisfy" in flat1 and "flatisfy" in flat2 and
                         flat1["flatisfy"].get("postal_code", None) and
                         flat2["flatisfy"].get("postal_code", None)
                 ):
