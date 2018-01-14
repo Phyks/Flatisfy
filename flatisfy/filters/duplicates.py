@@ -167,6 +167,103 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
 
     return unique_flats_list, duplicate_flats
 
+def get_duplicate_score(flat1, flat2, photo_cache):
+    n_common_items = 0
+    try:
+        # They should have the same area, up to one unit
+        assert abs(flat1["area"] - flat2["area"]) < 1
+        n_common_items += 1
+
+        # They should be at the same price, up to one unit
+        assert abs(flat1["cost"] - flat2["cost"]) < 1
+        n_common_items += 1
+
+        # They should have the same number of bedrooms if this was
+        # fetched for both
+        if flat1["bedrooms"] and flat2["bedrooms"]:
+            assert flat1["bedrooms"] == flat2["bedrooms"]
+            n_common_items += 1
+
+        # They should have the same utilities (included or excluded for
+        # both of them), if this was fetched for both
+        if flat1["utilities"] and flat2["utilities"]:
+            assert flat1["utilities"] == flat2["utilities"]
+            n_common_items += 1
+
+        # They should have the same number of rooms if it was fetched
+        # for both of them
+        if flat1["rooms"] and flat2["rooms"]:
+            assert flat1["rooms"] == flat2["rooms"]
+            n_common_items += 1
+
+        # They should have the same postal code, if available
+        if (
+                "flatisfy" in flat1 and "flatisfy" in flat2 and
+                flat1["flatisfy"].get("postal_code", None) and
+                flat2["flatisfy"].get("postal_code", None)
+        ):
+            assert (
+                flat1["flatisfy"]["postal_code"] ==
+                flat2["flatisfy"]["postal_code"]
+            )
+            n_common_items += 1
+
+        # TODO: Better text comparison (one included in the other, fuzzymatch)
+        flat1_text = tools.normalize_string(flat1.get("text", ""))
+        flat2_text = tools.normalize_string(flat2.get("text", ""))
+        if flat1_text and flat2_text and flat1_text == flat2_text:
+            n_common_items += 1
+
+        # They should have the same phone number if it was fetched for
+        # both
+        flat1_phone = homogeneize_phone_number(flat1["phone"])
+        flat2_phone = homogeneize_phone_number(flat2["phone"])
+        if flat1_phone and flat2_phone:
+            assert flat1_phone == flat2_phone
+            n_common_items += 10  # Counts much more than the rest
+
+        # They should have at least one photo in common if there
+        # are some photos
+        if flat1.get("photos", []) and flat2.get("photos", []):
+            n_common_photos = find_number_common_photos(
+                photo_cache,
+                flat1["photos"],
+                flat2["photos"]
+            )
+            assert n_common_photos > 1
+
+            min_number_photos = min(len(flat1["photos"]),
+                                    len(flat2["photos"]))
+
+            # Either all the photos are the same, or there are at least
+            # three common photos.
+            if n_common_photos == min_number_photos:
+                n_common_items += 15
+            else:
+                n_common_items += 5 * min(n_common_photos, 3)
+
+        # If the two flats are from the same website and have a
+        # different float part, consider they cannot be duplicates. See
+        # https://framagit.org/phyks/Flatisfy/issues/100.
+        both_are_from_same_backend = (
+            flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]
+        )
+        both_have_float_part = (
+            (flat1["area"] % 1) > 0 and (flat2["area"] % 1) > 0
+        )
+        both_have_equal_float_part = (
+            (flat1["area"] % 1) == (flat2["area"] % 1)
+        )
+        if both_have_float_part and both_are_from_same_backend:
+            assert both_have_equal_float_part
+    except (AssertionError, TypeError):
+        # Skip and consider as not duplicates whenever the conditions
+        # are not met
+        # TypeError occurs when an area or a cost is None, which should
+        # not be considered as duplicates
+        n_common_items = 0
+
+    return n_common_items
 
 def deep_detect(flats_list, config):
     """
@@ -192,111 +289,20 @@ def deep_detect(flats_list, config):
             if flat2["id"] in matching_flats[flat1["id"]]:
                 continue
 
-            n_common_items = 0
-            try:
-                # They should have the same area, up to one unit
-                assert abs(flat1["area"] - flat2["area"]) < 1
-                n_common_items += 1
+            n_common_items = get_duplicate_score(flat1, flat2, photo_cache)
 
-                # They should be at the same price, up to one unit
-                assert abs(flat1["cost"] - flat2["cost"]) < 1
-                n_common_items += 1
-
-                # They should have the same number of bedrooms if this was
-                # fetched for both
-                if flat1["bedrooms"] and flat2["bedrooms"]:
-                    assert flat1["bedrooms"] == flat2["bedrooms"]
-                    n_common_items += 1
-
-                # They should have the same utilities (included or excluded for
-                # both of them), if this was fetched for both
-                if flat1["utilities"] and flat2["utilities"]:
-                    assert flat1["utilities"] == flat2["utilities"]
-                    n_common_items += 1
-
-                # They should have the same number of rooms if it was fetched
-                # for both of them
-                if flat1["rooms"] and flat2["rooms"]:
-                    assert flat1["rooms"] == flat2["rooms"]
-                    n_common_items += 1
-
-                # They should have the same postal code, if available
-                if (
-                        "flatisfy" in flat1 and "flatisfy" in flat2 and
-                        flat1["flatisfy"].get("postal_code", None) and
-                        flat2["flatisfy"].get("postal_code", None)
-                ):
-                    assert (
-                        flat1["flatisfy"]["postal_code"] ==
-                        flat2["flatisfy"]["postal_code"]
-                    )
-                    n_common_items += 1
-
-                # TODO: Compare texts (one is included in another? fuzzymatch?)
-
-                # They should have the same phone number if it was fetched for
-                # both
-                flat1_phone = homogeneize_phone_number(flat1["phone"])
-                flat2_phone = homogeneize_phone_number(flat2["phone"])
-                if flat1_phone and flat2_phone:
-                    assert flat1_phone == flat2_phone
-                    n_common_items += 10  # Counts much more than the rest
-
-                # They should have at least one photo in common if there
-                # are some photos
-                if flat1["photos"] and flat2["photos"]:
-                    n_common_photos = find_number_common_photos(
-                        photo_cache,
-                        flat1["photos"],
-                        flat2["photos"]
-                    )
-                    assert n_common_photos > 1
-
-                    min_number_photos = min(len(flat1["photos"]),
-                                            len(flat2["photos"]))
-
-                    # Either all the photos are the same, or there are at least
-                    # three common photos.
-                    if n_common_photos == min_number_photos:
-                        n_common_items += 15
-                    else:
-                        n_common_items += 5 * min(n_common_photos, 3)
-
-                # Minimal score to consider they are duplicates
-                assert n_common_items >= config["duplicate_threshold"]
-
-                # If the two flats are from the same website and have a
-                # different float part, consider they cannot be duplicates. See
-                # https://framagit.org/phyks/Flatisfy/issues/100.
-                both_are_from_same_backend = (
-                    flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]
+            # Minimal score to consider they are duplicates
+            if n_common_items >= config["duplicate_threshold"]:
+                # Mark flats as duplicates
+                LOGGER.info(
+                    ("Found duplicates using deep detection: (%s, %s). "
+                     "Score is %d."),
+                    flat1["id"],
+                    flat2["id"],
+                    n_common_items
                 )
-                both_have_float_part = (
-                    (flat1["area"] % 1) > 0 and (flat2["area"] % 1) > 0
-                )
-                both_have_different_float_part = (
-                    (flat1["area"] % 1) != (flat2["area"] % 1)
-                )
-                if(both_have_float_part and both_are_from_same_backend and
-                   both_have_different_float_part):
-                    continue
-            except (AssertionError, TypeError):
-                # Skip and consider as not duplicates whenever the conditions
-                # are not met
-                # TypeError occurs when an area or a cost is None, which should
-                # not be considered as duplicates
-                continue
-
-            # Mark flats as duplicates
-            LOGGER.info(
-                ("Found duplicates using deep detection: (%s, %s). "
-                 "Score is %d."),
-                flat1["id"],
-                flat2["id"],
-                n_common_items
-            )
-            matching_flats[flat1["id"]].append(flat2["id"])
-            matching_flats[flat2["id"]].append(flat1["id"])
+                matching_flats[flat1["id"]].append(flat2["id"])
+                matching_flats[flat2["id"]].append(flat1["id"])
 
     if photo_cache.total():
         LOGGER.debug("Photo cache: hits: %d%% / misses: %d%%.",
