@@ -16,6 +16,7 @@ from flatisfy import cmds
 from flatisfy import data
 from flatisfy import fetch
 from flatisfy import tools
+from flatisfy import tests
 # pylint: enable=locally-disabled,wrong-import-position
 
 
@@ -112,6 +113,10 @@ def parse_args(argv=None):
                                          help="Serve the web app.")
     parser_serve.add_argument("--port", type=int, help="Port to bind to.")
     parser_serve.add_argument("--host", help="Host to listen on.")
+
+    # Test subcommand parser
+    subparsers.add_parser("test", parents=[parent_parser],
+                          help="Unit testing.")
 
     return parser.parse_args(argv)
 
@@ -211,6 +216,10 @@ def main():
     # Serve command
     elif args.cmd == "serve":
         cmds.serve(config)
+        return
+    # Tests command
+    elif args.cmd == "test":
+        tests.run(config)
         return
 
 

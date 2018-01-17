@@ -1,0 +1,73 @@
+{
+  "id": "127028739@seloger",
+  "url": "http://www.seloger.com/annonces/achat/appartement/rennes-35/centre/127028739.htm?p=",
+  "title": "Appartement 3 pièces 67m² - Rennes",
+  "area": 67,
+  "cost": 155700,
+  "price_per_meter": 2323.8805970149256,
+  "currency": "€",
+  "utilities": "",
+  "date": "2018-01-12T02:10:00",
+  "location": "17 PLACE MARECHAL JUIN Rennes (35000)",
+  "station": "",
+  "text": "Exclusivité Nexity Dans un immeuble de standing, en étage élevé avec ascenseur, Appartement Type 3 de 67 m² exposé Sud / Ouest, un séjour avec balcon et double exposition vue dégagée. Deux chambres dont une avec balcon, salle de douches, WC séparé, cave et parking en sous-sol.",
+  "phone": null,
+  "photos": [
+    {
+      "id": "0an3yarge9y446j653dewxu0jwy33pmwar47k2qym.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/0/a/n/3/0an3yarge9y446j653dewxu0jwy33pmwar47k2qym.jpg",
+      "data": null
+    },
+    {
+      "id": "1qnz6hpffcrd1c71htbooubgb7s57d82ie1v0zyf2.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/1/q/n/z/1qnz6hpffcrd1c71htbooubgb7s57d82ie1v0zyf2.jpg",
+      "data": null
+    },
+    {
+      "id": "16bv8yqgytefa1fq57hyk6e0y6ox8t2mh8wj2dgxq.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/1/6/b/v/16bv8yqgytefa1fq57hyk6e0y6ox8t2mh8wj2dgxq.jpg",
+      "data": null
+    },
+    {
+      "id": "1o23blwk87ew95e3vcq5ygyk10z2hy82fzo5j6hha.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/1/o/2/3/1o23blwk87ew95e3vcq5ygyk10z2hy82fzo5j6hha.jpg",
+      "data": null
+    },
+    {
+      "id": "20vuxbdp160sot4ccryf6g7g4rwxrkhz3b3tmq7zy.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/2/0/v/u/20vuxbdp160sot4ccryf6g7g4rwxrkhz3b3tmq7zy.jpg",
+      "data": null
+    },
+    {
+      "id": "00d9bpezie95lqtfmoccqg1ddrld2m64c2mcod5ha.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/0/0/d/9/00d9bpezie95lqtfmoccqg1ddrld2m64c2mcod5ha.jpg",
+      "data": null
+    },
+    {
+      "id": "0lhqf881qm2j03hz5581d8ggplp1xwwchb2rtoqgu.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/0/l/h/q/0lhqf881qm2j03hz5581d8ggplp1xwwchb2rtoqgu.jpg",
+      "data": null
+    },
+    {
+      "id": "0chwbagbf8tc0qf9sd3wryzl4gm7hkswcnrtnx2bi.jpg",
+      "url": "https://v.seloger.com/s/width/800/visuels/0/c/h/w/0chwbagbf8tc0qf9sd3wryzl4gm7hkswcnrtnx2bi.jpg",
+      "data": null
+    }
+  ],
+  "rooms": 3,
+  "bedrooms": 2,
+  "details": {
+    "Vue": "",
+    "Pièces": "3",
+    "Etage": "15",
+    "Reference": "MT0136601",
+    "Chambres": "2",
+    "Cave": "",
+    "Balcon": "5 m²",
+    "Surface": "67 m²",
+    "Ascenseur": "",
+    "Etages": "30",
+    "Parking": "1",
+    "Salle de Séjour": ""
+  }
+}
