@@ -2,7 +2,7 @@ before_script:
   - "pip install -r requirements.txt"
   - "pip install pylint"
   - "curl -sL https://deb.nodesource.com/setup_6.x | bash -"
-  - "apt-get install -y nodejs"
+  - "apt-get install -y nodejs jq"
   - "npm install"
 
 lint:2.7:
@@ -16,3 +16,16 @@ lint:3:
   stage: "test"
   script:
     - "hooks/pre-commit"
+
+test:2.7:
+  image: "python:2.7"
+  stage: "test"
+  script:
+    - python -m flatisfy init-config | jq '.constraints.default.house_types = ["APART"] | .constraints.default.type = "RENT" | .constraints.default.postal_codes = ["75014"]' >! /tmp/config.json
+    - python -m flatisfy test --config /tmp/config.json
+test:3:
+  image: "python:3"
+  stage: "test"
+  script:
+    - python -m flatisfy init-config | jq '.constraints.default.house_types = ["APART"] | .constraints.default.type = "RENT" | .constraints.default.postal_codes = ["75014"]' >! /tmp/config.json
+    - python -m flatisfy test --config /tmp/config.json
