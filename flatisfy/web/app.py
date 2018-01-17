@@ -60,7 +60,7 @@ def get_app(config):
     app = bottle.Bottle()
     app.install(DatabasePlugin(get_session))
     app.install(ConfigPlugin(config))
-    app.config.setdefault("canister.log_level", logging.root.level)
+    app.config.setdefault("canister.log_level", "DISABLED")
     app.config.setdefault("canister.log_path", False)
     app.config.setdefault("canister.debug", False)
     app.install(canister.Canister())
