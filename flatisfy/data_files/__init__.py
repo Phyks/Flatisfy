@@ -8,8 +8,12 @@ import io
 import json
 import logging
 import os
+import sys
 
-from backports import csv
+if sys.version_info >= (3,0):
+    import csv
+else:
+    from backports import csv
 
 from flatisfy.models.postal_code import PostalCode
 from flatisfy.models.public_transport import PublicTransport
