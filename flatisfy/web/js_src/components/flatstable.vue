@@ -91,7 +91,7 @@
                 </td>
                 <td>
                     <router-link :to="{name: 'details', params: {id: flat.id}}" :aria-label="$t('common.More_about') + ' ' + flat.id" :title="$t('common.More_about') + ' ' + flat.id">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
+                        <i class="fa fa-eye" aria-hidden="true"></i>
                     </router-link>
                     <a :href="flat.urls[0]" :aria-label="$t('common.Original_post_for') + ' ' + flat.id" :title="$t('common.Original_post_for') + ' ' + flat.id" target="_blank">
                         <i class="fa fa-external-link" aria-hidden="true"></i>
