@@ -71,6 +71,14 @@ flatisfy.fetch module
     :undoc-members:
     :show-inheritance:
 
+flatisfy.tests module
+---------------------
+
+.. automodule:: flatisfy.tests
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 flatisfy.tools module
 ---------------------
 

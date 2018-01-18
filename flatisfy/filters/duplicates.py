@@ -167,7 +167,17 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
 
     return unique_flats_list, duplicate_flats
 
+
 def get_duplicate_score(flat1, flat2, photo_cache):
+    """
+    Compute the duplicate score between two flats. The higher the score, the
+    more likely the two flats to be duplicates.
+
+    :param flat1: First flat dict.
+    :param flat2: Second flat dict.
+    :param photo_cache: An instance of ``ImageCache`` to use to cache images.
+    :return: The duplicate score as ``int``.
+    """
     n_common_items = 0
     try:
         # They should have the same area, up to one unit
@@ -264,6 +274,7 @@ def get_duplicate_score(flat1, flat2, photo_cache):
         n_common_items = 0
 
     return n_common_items
+
 
 def deep_detect(flats_list, config):
     """

@@ -21,7 +21,7 @@ from flatisfy.models.postal_code import PostalCode
 FILTER_RE = re.compile(r"filter\[([A-z0-9_]+)\]")
 
 
-def JSONError(error_code, error_str):
+def JSONError(error_code, error_str):  # pylint: disable=invalid-name
     """
     Return an HTTP error with a JSON payload.
 

@@ -3,20 +3,19 @@
 Preprocessing functions to convert input opendata files into SQLAlchemy objects
 ready to be stored in the database.
 """
-import csv
 import io
 import json
 import logging
 import os
 import sys
 
-if sys.version_info >= (3,0):
+from flatisfy.models.postal_code import PostalCode
+from flatisfy.models.public_transport import PublicTransport
+
+if sys.version_info >= (3, 0):
     import csv
 else:
     from backports import csv
-
-from flatisfy.models.postal_code import PostalCode
-from flatisfy.models.public_transport import PublicTransport
 
 
 LOGGER = logging.getLogger(__name__)

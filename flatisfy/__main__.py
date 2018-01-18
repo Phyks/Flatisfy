@@ -219,7 +219,7 @@ def main():
         return
     # Tests command
     elif args.cmd == "test":
-        tests.run(config)
+        tests.run()
         return
 
 

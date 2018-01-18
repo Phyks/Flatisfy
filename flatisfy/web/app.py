@@ -8,7 +8,6 @@ from __future__ import (
 
 import functools
 import json
-import logging
 import os
 
 import bottle

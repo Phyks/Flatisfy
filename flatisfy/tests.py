@@ -2,13 +2,14 @@
 """
 This module contains unit testing functions.
 """
-
-import random
-import logging
-import unittest
 import copy
-import os
 import json
+import logging
+import os
+import random
+import sys
+import unittest
+
 from flatisfy import tools
 from flatisfy.filters import duplicates
 from flatisfy.filters.cache import ImageCache
@@ -17,7 +18,11 @@ from flatisfy.constants import BACKENDS_BY_PRECEDENCE
 LOGGER = logging.getLogger(__name__)
 TESTS_DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/test_files/"
 
+
 class TestTexts(unittest.TestCase):
+    """
+    Checks string normalizations.
+    """
     def test_roman_numbers(self):
         """
         Checks roman numbers replacement.
@@ -52,6 +57,10 @@ class TestTexts(unittest.TestCase):
         )
 
     def test_roman_numbers_in_text(self):
+        """
+        Checks conversion of roman numbers to arabic ones in string
+        normalization.
+        """
         self.assertEqual(
             "dans le 15e arrondissement",
             tools.normalize_string("Dans le XVe arrondissement")
@@ -75,7 +84,11 @@ class TestTexts(unittest.TestCase):
             tools.normalize_string(u"éèêàüï")
         )
 
+
 class TestPhoneNumbers(unittest.TestCase):
+    """
+    Checks phone numbers normalizations.
+    """
     def test_prefix(self):
         """
         Checks phone numbers with international prefixes.
@@ -103,16 +116,23 @@ class TestPhoneNumbers(unittest.TestCase):
             duplicates.homogeneize_phone_number("06 05 04 03 02")
         )
 
-class TestDuplicates(unittest.TestCase):
-    DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS = 14
-    DUPLICATES_MIN_SCORE_WITH_PHOTOS = 15
-    IMAGE_CACHE = ImageCache()
 
-    def generate_fake_flat(self):
+class TestDuplicates(unittest.TestCase):
+    """
+    Checks duplicates detection.
+    """
+    DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS = 14  # pylint: disable=invalid-name
+    DUPLICATES_MIN_SCORE_WITH_PHOTOS = 15  # pylint: disable=invalid-name
+    IMAGE_CACHE = ImageCache()  # pylint: disable=invalid-name
+
+    @staticmethod
+    def generate_fake_flat():
         """
         Generates a fake flat post.
         """
-        backend = BACKENDS_BY_PRECEDENCE[random.randint(0, len(BACKENDS_BY_PRECEDENCE) - 1)]
+        backend = BACKENDS_BY_PRECEDENCE[
+            random.randint(0, len(BACKENDS_BY_PRECEDENCE) - 1)
+        ]
         return {
             "id": str(random.randint(100000, 199999)) + "@" + backend,
             "phone": "0607080910",
@@ -123,7 +143,8 @@ class TestDuplicates(unittest.TestCase):
             "bedrooms": random.randint(1, 4)
         }
 
-    def load_files(self, file1, file2):
+    @staticmethod
+    def load_files(file1, file2):
         """
         Load two files
 
@@ -143,8 +164,12 @@ class TestDuplicates(unittest.TestCase):
         """
         flat1 = self.generate_fake_flat()
         flat2 = copy.deepcopy(flat1)
-        score = duplicates.get_duplicate_score(flat1, flat2, TestDuplicates.IMAGE_CACHE)
-        self.assertTrue(score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
+        score = duplicates.get_duplicate_score(
+            flat1, flat2, TestDuplicates.IMAGE_CACHE
+        )
+        self.assertTrue(
+            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+        )
 
     def test_different_prices(self):
         """
@@ -154,8 +179,12 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["cost"] += 1000
 
-        score = duplicates.get_duplicate_score(flat1, flat2, TestDuplicates.IMAGE_CACHE)
-        self.assertTrue(score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
+        score = duplicates.get_duplicate_score(
+            flat1, flat2, TestDuplicates.IMAGE_CACHE
+        )
+        self.assertTrue(
+            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+        )
 
     def test_different_rooms(self):
         """
@@ -166,8 +195,12 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["rooms"] += 1
 
-        score = duplicates.get_duplicate_score(flat1, flat2, TestDuplicates.IMAGE_CACHE)
-        self.assertTrue(score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
+        score = duplicates.get_duplicate_score(
+            flat1, flat2, TestDuplicates.IMAGE_CACHE
+        )
+        self.assertTrue(
+            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+        )
 
     def test_different_areas(self):
         """
@@ -177,8 +210,12 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["area"] += 10
 
-        score = duplicates.get_duplicate_score(flat1, flat2, TestDuplicates.IMAGE_CACHE)
-        self.assertTrue(score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
+        score = duplicates.get_duplicate_score(
+            flat1, flat2, TestDuplicates.IMAGE_CACHE
+        )
+        self.assertTrue(
+            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+        )
 
     def test_different_areas_decimals(self):
         """
@@ -190,45 +227,63 @@ class TestDuplicates(unittest.TestCase):
         flat1["area"] = 50.65
         flat2["area"] = 50.37
 
-        score = duplicates.get_duplicate_score(flat1, flat2, TestDuplicates.IMAGE_CACHE)
-        self.assertTrue(score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
+        score = duplicates.get_duplicate_score(
+            flat1, flat2, TestDuplicates.IMAGE_CACHE
+        )
+        self.assertTrue(
+            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+        )
 
     def test_different_phones(self):
         """
-        Two flats with different phone numbers should not be detected as duplicates.
+        Two flats with different phone numbers should not be detected as
+        duplicates.
         """
         flat1 = self.generate_fake_flat()
         flat2 = copy.deepcopy(flat1)
         flat2["phone"] = "0708091011"
 
-        score = duplicates.get_duplicate_score(flat1, flat2, TestDuplicates.IMAGE_CACHE)
-        self.assertTrue(score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
+        score = duplicates.get_duplicate_score(
+            flat1, flat2, TestDuplicates.IMAGE_CACHE
+        )
+        self.assertTrue(
+            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+        )
 
     def test_real_duplicates(self):
         """
-        Two flats with same price, area and rooms quantity should be detected as
-        duplicates.
+        Two flats with same price, area and rooms quantity should be detected
+        as duplicates.
         """
         flats = self.load_files(
             "127028739@seloger",
             "14428129@explorimmo"
         )
 
-        score = duplicates.get_duplicate_score(flats[0], flats[1], TestDuplicates.IMAGE_CACHE)
-        self.assertTrue(score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS)
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1], TestDuplicates.IMAGE_CACHE
+        )
+        self.assertTrue(
+            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
+        )
 
-def run(config):
+
+def run():
     """
     Run all the tests
-
-    :param config: A config dict.
     """
     LOGGER.info("Running tests…")
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestTexts)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    try:
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestTexts)
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
+        assert result.wasSuccessful()
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestPhoneNumbers)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestPhoneNumbers)
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
+        assert result.wasSuccessful()
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDuplicates)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestDuplicates)
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
+        assert result.wasSuccessful()
+    except AssertionError:
+        sys.exit(1)

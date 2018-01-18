@@ -24,14 +24,22 @@ LOGGER = logging.getLogger(__name__)
 # Constants
 NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
 
-class RomanNumbers():
+
+class RomanNumbers(object):
     """
     Utilities to check and convert roman numbers.
-    Part of the convertions are based on
+
+    Part of the conversions is based on
     https://gist.github.com/riverrun/ac91218bb1678b857c12
     """
-    
-    def check_valid(self, roman):
+    @staticmethod
+    def check_valid(roman):
+        """
+        Check whether a roman literal is a valid roman literal.
+
+        :param roman: A roman literal, as string.
+        :returns: ``True`` if it is a valid roman literal, ``False`` otherwise.
+        """
         if not re.match('^[MDCLXVI]+$', roman):
             return False
 
@@ -42,24 +50,56 @@ class RomanNumbers():
         # TODO: check M does not appear after any other, etc.
         return True
 
-    def convert_to_arabic(self, roman):
-        if not self.check_valid(roman):
+    @staticmethod
+    def convert_to_arabic(roman):
+        """
+        Convert a roman literal to arabic one.
+
+        :param roman: A roman number, as string.
+        :returns: The corresponding arabic one, as string.
+        """
+        if not RomanNumbers.check_valid(roman):
             return roman
 
-        keys = ['IV', 'IX', 'XL', 'XC', 'CD', 'CM', 'I', 'V', 'X', 'L', 'C', 'D', 'M']
-        to_arabic = {'IV': '4', 'IX': '9', 'XL': '40', 'XC': '90', 'CD': '400', 'CM': '900',
-                'I': '1', 'V': '5', 'X': '10', 'L': '50', 'C': '100', 'D': '500', 'M': '1000'}
+        keys = [
+            'IV', 'IX', 'XL', 'XC', 'CD', 'CM', 'I', 'V',
+            'X', 'L', 'C', 'D', 'M'
+        ]
+        to_arabic = {
+            'IV': '4',
+            'IX': '9',
+            'XL': '40',
+            'XC': '90',
+            'CD': '400',
+            'CM': '900',
+            'I': '1',
+            'V': '5',
+            'X': '10',
+            'L': '50',
+            'C': '100',
+            'D': '500',
+            'M': '1000'
+        }
         for key in keys:
             if key in roman:
                 roman = roman.replace(key, ' {}'.format(to_arabic.get(key)))
         return str(sum(int(num) for num in roman.split()))
 
-    def convert_to_arabic_in_text(self, text):
+    @staticmethod
+    def convert_to_arabic_in_text(text):
+        """
+        Convert roman literals to arabic one in a text.
+
+        :param text: Some text to convert roman literals from.
+        :returns: The corresponding text with roman literals converted to
+            arabic.
+        """
         return re.sub(
-            '(?<![\S])+([MDCLXVI]+)(?=[eè\s$])',
-            lambda matchobj: self.convert_to_arabic(matchobj.group(0)),
+            r'(?<![\S])+([MDCLXVI]+)(?=[eè\s$])',
+            lambda matchobj: RomanNumbers.convert_to_arabic(matchobj.group(0)),
             text
         )
+
 
 def hash_dict(func):
     """
@@ -190,7 +230,6 @@ def normalize_string(string):
         >>> normalize_string("tétéà 14ème-XIV,  foobar")
         'tetea 14eme xiv, foobar'
     """
-    # TODO: Convert romanian numerals to decimal
     # ASCIIfy the string
     string = unidecode.unidecode(string)
 
