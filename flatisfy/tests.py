@@ -22,9 +22,39 @@ class TestTexts(unittest.TestCase):
         """
         Checks roman numbers replacement.
         """
+        tester = tools.RomanNumbers()
+        self.assertTrue(tester.check_valid("XIV"))
+        self.assertTrue(not tester.check_valid("ABC"))
+
         self.assertEqual(
             "14",
-            tools.normalize_string("XIV")
+            tester.convert_to_arabic("XIV")
+        )
+
+        self.assertEqual(
+            "1987",
+            tester.convert_to_arabic("MCMLXXXVII")
+        )
+
+        self.assertEqual(
+            "Dans le 15e arrondissement",
+            tester.convert_to_arabic_in_text("Dans le XVe arrondissement")
+        )
+
+        self.assertEqual(
+            "20eme arr.",
+            tester.convert_to_arabic_in_text("XXeme arr.")
+        )
+
+        self.assertEqual(
+            "A AIX EN PROVENCE",
+            tester.convert_to_arabic_in_text("A AIX EN PROVENCE")
+        )
+
+    def test_roman_numbers_in_text(self):
+        self.assertEqual(
+            "dans le 15e arrondissement",
+            tools.normalize_string("Dans le XVe arrondissement")
         )
 
     def test_multiple_whitespaces(self):
@@ -32,8 +62,8 @@ class TestTexts(unittest.TestCase):
         Checks whitespaces are collapsed.
         """
         self.assertEqual(
-            "avec   ascenseur",
-            tools.normalize_string("avec ascenseur")
+            "avec ascenseur",
+            tools.normalize_string("avec   ascenseur")
         )
 
     def test_accents(self):
@@ -41,8 +71,8 @@ class TestTexts(unittest.TestCase):
         Checks accents are replaced.
         """
         self.assertEqual(
-            "éèêàüï",
-            tools.normalize_string("eeeaui")
+            "eeeaui",
+            tools.normalize_string(u"éèêàüï")
         )
 
 class TestPhoneNumbers(unittest.TestCase):
