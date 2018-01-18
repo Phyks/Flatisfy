@@ -25,6 +25,12 @@ LOGGER = logging.getLogger(__name__)
 NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
 
 class RomanNumbers():
+    """
+    Utilities to check and convert roman numbers.
+    Part of the convertions are based on
+    https://gist.github.com/riverrun/ac91218bb1678b857c12
+    """
+    
     def check_valid(self, roman):
         if not re.match('^[MDCLXVI]+$', roman):
             return False
