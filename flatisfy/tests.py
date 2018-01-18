@@ -56,6 +56,11 @@ class TestTexts(unittest.TestCase):
             tester.convert_to_arabic_in_text("A AIX EN PROVENCE")
         )
 
+        self.assertEqual(
+            "Montigny Le Bretonneux",
+            tester.convert_to_arabic_in_text("Montigny Le Bretonneux")
+        )
+
     def test_roman_numbers_in_text(self):
         """
         Checks conversion of roman numbers to arabic ones in string

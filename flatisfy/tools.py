@@ -238,8 +238,8 @@ def normalize_string(string):
     string = re.sub(r"[^a-zA-Z0-9,;:]", " ", string)
 
     # Convert roman numbers to arabic numbers
-    converter = RomanNumbers()
-    string = converter.convert_to_arabic_in_text(string)
+    # TODO: Fix this :)
+    # string = RomanNumbers.convert_to_arabic_in_text(string)
 
     # Convert to lowercase
     string = string.lower()
