@@ -62,8 +62,8 @@ class TestTexts(unittest.TestCase):
         Checks whitespaces are collapsed.
         """
         self.assertEqual(
-            "avec   ascenseur",
-            tools.normalize_string("avec ascenseur")
+            "avec ascenseur",
+            tools.normalize_string("avec   ascenseur")
         )
 
     def test_accents(self):
@@ -71,8 +71,8 @@ class TestTexts(unittest.TestCase):
         Checks accents are replaced.
         """
         self.assertEqual(
-            "éèêàüï",
-            tools.normalize_string("eeeaui")
+            "eeeaui",
+            tools.normalize_string(u"éèêàüï")
         )
 
 class TestPhoneNumbers(unittest.TestCase):
