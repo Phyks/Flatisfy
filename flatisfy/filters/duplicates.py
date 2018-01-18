@@ -49,7 +49,25 @@ def homogeneize_phone_number(number):
     return number
 
 
-def find_number_common_photos(photo_cache, flat1_photos, flat2_photos):
+def get_or_compute_photo_hash(photo, photo_cache):
+    """
+    Get the computed hash from the photo dict or compute it if not found.
+
+    :param photo: A photo, as a ``dict`` with (at least) a ``url`` key.
+    :param photo_cache: An instance of ``ImageCache`` to use to cache images.
+    """
+    try:
+        # Try to get the computed hash from the photo dict
+        return photo["hash"]
+    except KeyError:
+        # Otherwise, get the image and compute the hash
+        req = photo_cache.get(photo["url"])
+        image = PIL.Image.open(BytesIO(req.content))
+        photo["hash"] = imagehash.average_hash(image)
+        return photo["hash"]
+
+
+def find_number_common_photos(flat1_photos, flat2_photos, photo_cache):
     """
     Compute the number of common photos between the two lists of photos for the
     flats.
@@ -57,22 +75,18 @@ def find_number_common_photos(photo_cache, flat1_photos, flat2_photos):
     Fetch the photos and compare them with dHash method.
 
     :param flat1_photos: First list of flat photos. Each photo should be a
-        ``dict`` with a ``url`` key.
+        ``dict`` with (at least) a ``url`` key.
     :param flat2_photos: First list of flat photos. Each photo should be a
-        ``dict`` with a ``url`` key.
+        ``dict`` with (at least) a ``url`` key.
+    :param photo_cache: An instance of ``ImageCache`` to use to cache images.
     :return: The found number of common photos.
     """
     n_common_photos = 0
 
     for photo1, photo2 in itertools.product(flat1_photos, flat2_photos):
         try:
-            req1 = photo_cache.get(photo1["url"])
-            im1 = PIL.Image.open(BytesIO(req1.content))
-            hash1 = imagehash.average_hash(im1)
-
-            req2 = photo_cache.get(photo2["url"])
-            im2 = PIL.Image.open(BytesIO(req2.content))
-            hash2 = imagehash.average_hash(im2)
+            hash1 = get_or_compute_photo_hash(photo1, photo_cache)
+            hash2 = get_or_compute_photo_hash(photo2, photo_cache)
 
             if hash1 - hash2 == 0:
                 n_common_photos += 1
@@ -236,9 +250,9 @@ def get_duplicate_score(flat1, flat2, photo_cache):
         # are some photos
         if flat1.get("photos", []) and flat2.get("photos", []):
             n_common_photos = find_number_common_photos(
-                photo_cache,
                 flat1["photos"],
-                flat2["photos"]
+                flat2["photos"],
+                photo_cache
             )
             assert n_common_photos > 1
 

@@ -152,6 +152,19 @@ class Flat(BASE):
         """
         return arrow.get(visit_date).naive
 
+    @validates("photos")
+    def validate_photos(self, _, photos):
+        """
+        Photos validation method
+        """
+        for photo in photos:
+            try:
+                # Remove computed hash to avoid storing it in db
+                del photo["hash"]
+            except KeyError:
+                pass
+        return photos
+
     @staticmethod
     def from_dict(flat_dict):
         """
