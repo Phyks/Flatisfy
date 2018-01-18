@@ -24,6 +24,36 @@ LOGGER = logging.getLogger(__name__)
 # Constants
 NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
 
+class RomanNumbers():
+    def check_valid(self, roman):
+        if not re.match('^[MDCLXVI]+$', roman):
+            return False
+
+        invalid = ['IIII', 'VV', 'XXXX', 'LL', 'CCCC', 'DD', 'MMMM']
+        if any(sub in roman for sub in invalid):
+            return False
+
+        # TODO: check M does not appear after any other, etc.
+        return True
+
+    def convert_to_arabic(self, roman):
+        if not self.check_valid(roman):
+            return roman
+
+        keys = ['IV', 'IX', 'XL', 'XC', 'CD', 'CM', 'I', 'V', 'X', 'L', 'C', 'D', 'M']
+        to_arabic = {'IV': '4', 'IX': '9', 'XL': '40', 'XC': '90', 'CD': '400', 'CM': '900',
+                'I': '1', 'V': '5', 'X': '10', 'L': '50', 'C': '100', 'D': '500', 'M': '1000'}
+        for key in keys:
+            if key in roman:
+                roman = roman.replace(key, ' {}'.format(to_arabic.get(key)))
+        return str(sum(int(num) for num in roman.split()))
+
+    def convert_to_arabic_in_text(self, text):
+        return re.sub(
+            '(?<![\S])+([MDCLXVI]+)(?=[eè\s$])',
+            lambda matchobj: self.convert_to_arabic(matchobj.group(0)),
+            text
+        )
 
 def hash_dict(func):
     """
@@ -161,6 +191,10 @@ def normalize_string(string):
     # Replace any non-alphanumeric character by space
     # Keep some basic punctuation to keep syntaxic units
     string = re.sub(r"[^a-zA-Z0-9,;:]", " ", string)
+
+    # Convert roman numbers to arabic numbers
+    converter = RomanNumbers()
+    string = converter.convert_to_arabic_in_text(string)
 
     # Convert to lowercase
     string = string.lower()
