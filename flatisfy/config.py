@@ -271,7 +271,7 @@ def load_config(args=None, check_with_data=True):
     if not os.path.isdir(config_data["data_directory"]):
         LOGGER.info("Creating data directory according to config: %s",
                     config_data["data_directory"])
-        os.mkdir(config_data["data_directory"])
+        os.makedirs(config_data["data_directory"])
 
     if config_data["database"] is None:
         config_data["database"] = "sqlite:///" + os.path.join(
