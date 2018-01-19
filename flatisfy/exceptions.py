@@ -1,4 +1,4 @@
-# coding : utf-8
+# coding: utf-8
 """
 This module contains all the exceptions definitions for the Flatisfy-specific
 exceptions.

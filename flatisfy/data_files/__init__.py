@@ -1,16 +1,20 @@
-# coding : utf-8
+# coding: utf-8
 """
 Preprocessing functions to convert input opendata files into SQLAlchemy objects
 ready to be stored in the database.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 import io
 import json
 import logging
 import os
 import sys
 
+import titlecase
+
 from flatisfy.models.postal_code import PostalCode
 from flatisfy.models.public_transport import PublicTransport
+from flatisfy.tools import normalize_string
 
 if sys.version_info >= (3, 0):
     import csv
@@ -20,6 +24,12 @@ else:
 
 LOGGER = logging.getLogger(__name__)
 MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
+
+titlecase.set_small_word_list(
+    # Add French small words
+    r"l|d|un|une|et|à|a|sur|ou|le|la|de|lès|les|" +
+    titlecase.SMALL
+)
 
 TRANSPORT_DATA_FILES = {
     "FR-IDF": "stops_fr-idf.txt",
@@ -109,6 +119,9 @@ def _preprocess_laposte():
 
     # Build postal codes to other infos file
     postal_codes_data = []
+    # Keep track of seen (postal_codes, names) to avoid inserting useless
+    # duplicates (already in the OpenData file)
+    seen_postal_codes = []
     for item in raw_laposte_data:
         fields = item["fields"]
         try:
@@ -120,10 +133,19 @@ def _preprocess_laposte():
                 )
                 continue
 
+            name = normalize_string(
+                titlecase.titlecase(fields["nom_de_la_commune"]),
+                lowercase=False
+            )
+
+            if (fields["code_postal"], name) in seen_postal_codes:
+                continue
+
+            seen_postal_codes.append((fields["code_postal"], name))
             postal_codes_data.append(PostalCode(
                 area=area,
                 postal_code=fields["code_postal"],
-                name=fields["nom_de_la_commune"].title(),
+                name=name,
                 lat=fields["coordonnees_gps"][0],
                 lng=fields["coordonnees_gps"][1]
             ))

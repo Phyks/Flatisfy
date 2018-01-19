@@ -1,4 +1,4 @@
-# coding : utf-8
+# coding: utf-8
 """
 This module contains all the code related to building necessary data files from
 the source opendata files.
