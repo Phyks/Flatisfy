@@ -25,80 +25,48 @@ LOGGER = logging.getLogger(__name__)
 NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
 
 
-class RomanNumbers(object):
+def convert_arabic_to_roman(arabic):
     """
-    Utilities to check and convert roman numbers.
+    Convert an arabic literal to a roman one.
 
-    Part of the conversions is based on
-    https://gist.github.com/riverrun/ac91218bb1678b857c12
+    ..note::
+        Based on https://gist.github.com/riverrun/ac91218bb1678b857c12.
+
+    :param arabic: An arabic number, as string.
+    :returns: The corresponding roman one, as string.
     """
-    @staticmethod
-    def check_valid(roman):
-        """
-        Check whether a roman literal is a valid roman literal.
+    to_roman = {
+        1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII',
+        8: 'VIII', 9: 'IX', 10: 'X',
+        20: 'XX', 30: 'XXX', 40: 'XL', 50: 'L', 60: 'LX', 70: 'LXX',
+        80: 'LXXX', 90: 'XC',
+        100: 'C', 200: 'CC', 300: 'CCC', 400: 'CD', 500: 'D', 600: 'DC',
+        700: 'DCC', 800: 'DCCC', 900: 'CM',
+        1000: 'M', 2000: 'MM', 3000: 'MMM'
+    }
+    roman_chars_list = []
+    count = 1
+    for digit in arabic[::-1]:
+        digit = int(digit)
+        if digit != 0:
+            roman_chars_list.append(to_roman[digit * count])
+        count *= 10
+    return ''.join(roman_chars_list[::-1])
 
-        :param roman: A roman literal, as string.
-        :returns: ``True`` if it is a valid roman literal, ``False`` otherwise.
-        """
-        if not re.match('^[MDCLXVI]+$', roman):
-            return False
 
-        invalid = ['IIII', 'VV', 'XXXX', 'LL', 'CCCC', 'DD', 'MMMM']
-        if any(sub in roman for sub in invalid):
-            return False
+def convert_arabic_to_roman_in_text(text):
+    """
+    Convert roman literals to arabic one in a text.
 
-        # TODO: check M does not appear after any other, etc.
-        return True
-
-    @staticmethod
-    def convert_to_arabic(roman):
-        """
-        Convert a roman literal to arabic one.
-
-        :param roman: A roman number, as string.
-        :returns: The corresponding arabic one, as string.
-        """
-        if not RomanNumbers.check_valid(roman):
-            return roman
-
-        keys = [
-            'IV', 'IX', 'XL', 'XC', 'CD', 'CM', 'I', 'V',
-            'X', 'L', 'C', 'D', 'M'
-        ]
-        to_arabic = {
-            'IV': '4',
-            'IX': '9',
-            'XL': '40',
-            'XC': '90',
-            'CD': '400',
-            'CM': '900',
-            'I': '1',
-            'V': '5',
-            'X': '10',
-            'L': '50',
-            'C': '100',
-            'D': '500',
-            'M': '1000'
-        }
-        for key in keys:
-            if key in roman:
-                roman = roman.replace(key, ' {}'.format(to_arabic.get(key)))
-        return str(sum(int(num) for num in roman.split()))
-
-    @staticmethod
-    def convert_to_arabic_in_text(text):
-        """
-        Convert roman literals to arabic one in a text.
-
-        :param text: Some text to convert roman literals from.
-        :returns: The corresponding text with roman literals converted to
-            arabic.
-        """
-        return re.sub(
-            r'(?<![\S])+([MDCLXVI]+)(?=[eè\s$])',
-            lambda matchobj: RomanNumbers.convert_to_arabic(matchobj.group(0)),
-            text
-        )
+    :param text: Some text to convert roman literals from.
+    :returns: The corresponding text with roman literals converted to
+        arabic.
+    """
+    return re.sub(
+        r'(\d+)',
+        lambda matchobj: convert_arabic_to_roman(matchobj.group(0)),
+        text
+    )
 
 
 def hash_dict(func):
@@ -221,14 +189,24 @@ def is_within_interval(value, min_value=None, max_value=None):
     return all(checks)
 
 
-def normalize_string(string):
+def normalize_string(string, lowercase=True, convert_arabic_numerals=True):
     """
     Normalize the given string for matching.
 
-    :Example:
+    Example::
 
         >>> normalize_string("tétéà 14ème-XIV,  foobar")
+        'tetea XIVeme xiv, foobar'
+
+        >>> normalize_string("tétéà 14ème-XIV,  foobar", False)
         'tetea 14eme xiv, foobar'
+
+    :param string: The string to normalize.
+    :param lowercase: Whether to convert string to lowercase or not. Defaults
+        to ``True``.
+    :param convert_arabic_numerals: Whether to convert arabic numerals to roman
+        ones. Defaults to ``True``.
+    :return: The normalized string.
     """
     # ASCIIfy the string
     string = unidecode.unidecode(string)
@@ -237,12 +215,13 @@ def normalize_string(string):
     # Keep some basic punctuation to keep syntaxic units
     string = re.sub(r"[^a-zA-Z0-9,;:]", " ", string)
 
-    # Convert roman numbers to arabic numbers
-    # TODO: Fix this :)
-    # string = RomanNumbers.convert_to_arabic_in_text(string)
-
     # Convert to lowercase
-    string = string.lower()
+    if lowercase:
+        string = string.lower()
+
+    # Convert arabic numbers to roman numbers
+    if convert_arabic_numerals:
+        string = convert_arabic_to_roman_in_text(string)
 
     # Collapse multiple spaces, replace tabulations and newlines by space
     string = re.sub(r"\s+", " ", string)

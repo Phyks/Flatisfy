@@ -11,6 +11,7 @@ imagehash
 pillow
 requests
 sqlalchemy
+titlecase
 unidecode
 vobject
 whoosh

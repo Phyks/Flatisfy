@@ -27,38 +27,34 @@ class TestTexts(unittest.TestCase):
         """
         Checks roman numbers replacement.
         """
-        tester = tools.RomanNumbers()
-        self.assertTrue(tester.check_valid("XIV"))
-        self.assertTrue(not tester.check_valid("ABC"))
-
         self.assertEqual(
-            "14",
-            tester.convert_to_arabic("XIV")
+            "XIV",
+            tools.convert_arabic_to_roman("14")
         )
 
         self.assertEqual(
-            "1987",
-            tester.convert_to_arabic("MCMLXXXVII")
+            "MCMLXXXVII",
+            tools.convert_arabic_to_roman("1987")
         )
 
         self.assertEqual(
-            "Dans le 15e arrondissement",
-            tester.convert_to_arabic_in_text("Dans le XVe arrondissement")
+            "Dans le XVe arrondissement",
+            tools.convert_arabic_to_roman_in_text("Dans le 15e arrondissement")
         )
 
         self.assertEqual(
-            "20eme arr.",
-            tester.convert_to_arabic_in_text("XXeme arr.")
+            "XXeme arr.",
+            tools.convert_arabic_to_roman_in_text("20eme arr.")
         )
 
         self.assertEqual(
             "A AIX EN PROVENCE",
-            tester.convert_to_arabic_in_text("A AIX EN PROVENCE")
+            tools.convert_arabic_to_roman_in_text("A AIX EN PROVENCE")
         )
 
         self.assertEqual(
             "Montigny Le Bretonneux",
-            tester.convert_to_arabic_in_text("Montigny Le Bretonneux")
+            tools.convert_arabic_to_roman_in_text("Montigny Le Bretonneux")
         )
 
     def test_roman_numbers_in_text(self):
@@ -67,8 +63,8 @@ class TestTexts(unittest.TestCase):
         normalization.
         """
         self.assertEqual(
-            "dans le 15e arrondissement",
-            tools.normalize_string("Dans le XVe arrondissement")
+            "dans le XVe arrondissement",
+            tools.normalize_string("Dans le 15e arrondissement")
         )
 
     def test_multiple_whitespaces(self):
