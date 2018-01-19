@@ -13,17 +13,15 @@ class MemoryCache(object):
     """
     A cache in memory.
     """
-    def __init__(self, on_miss):
-        """
-        Constructor
 
-        :param on_miss: Function to call to retrieve item when not already
-        cached.
-        """
+    @staticmethod
+    def on_miss(key):
+        raise NotImplementedError
+
+    def __init__(self):
         self.hits = 0
         self.misses = 0
         self.map = {}
-        self.on_miss = on_miss
 
     def get(self, key):
         """
@@ -77,11 +75,8 @@ class ImageCache(MemoryCache):
     A cache for images, stored in memory.
     """
     @staticmethod
-    def retrieve_photo(url):
+    def on_miss(url):
         """
         Helper to actually retrieve photos if not already cached.
         """
         return requests.get(url)
-
-    def __init__(self):
-        super(ImageCache, self).__init__(on_miss=ImageCache.retrieve_photo)

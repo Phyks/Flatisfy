@@ -67,31 +67,51 @@ def get_or_compute_photo_hash(photo, photo_cache):
         return photo["hash"]
 
 
-def find_number_common_photos(flat1_photos, flat2_photos, photo_cache):
+def compare_photos(photo1, photo2, photo_cache, hash_threshold=10):
+    """
+    Compares two photos with average hash method.
+
+    :param photo1: First photo url.
+    :param photo2: Second photo url.
+    :param photo_cache: An instance of ``ImageCache`` to use to cache images.
+    :param hash_thresold: The hash threshold between two images. Usually two
+    different photos have a hash difference of 30.
+    :return: ``True`` if the photos are identical, else ``False``.
+    """
+    try:
+        hash1 = get_or_compute_photo_hash(photo1, photo_cache)
+        hash2 = get_or_compute_photo_hash(photo2, photo_cache)
+
+        return hash1 - hash2 < hash_threshold
+    except (IOError, requests.exceptions.RequestException):
+        return False
+
+
+def find_number_common_photos(
+    flat1_photos,
+    flat2_photos,
+    photo_cache,
+    hash_threshold=10
+):
     """
     Compute the number of common photos between the two lists of photos for the
     flats.
 
-    Fetch the photos and compare them with dHash method.
+    Fetch the photos and compare them with average hash method.
 
     :param flat1_photos: First list of flat photos. Each photo should be a
         ``dict`` with (at least) a ``url`` key.
-    :param flat2_photos: First list of flat photos. Each photo should be a
+    :param flat2_photos: Second list of flat photos. Each photo should be a
         ``dict`` with (at least) a ``url`` key.
     :param photo_cache: An instance of ``ImageCache`` to use to cache images.
+    :param hash_thresold: The hash threshold between two images.
     :return: The found number of common photos.
     """
     n_common_photos = 0
 
     for photo1, photo2 in itertools.product(flat1_photos, flat2_photos):
-        try:
-            hash1 = get_or_compute_photo_hash(photo1, photo_cache)
-            hash2 = get_or_compute_photo_hash(photo2, photo_cache)
-
-            if hash1 - hash2 == 0:
-                n_common_photos += 1
-        except (IOError, requests.exceptions.RequestException):
-            pass
+        if compare_photos(photo1, photo2, photo_cache, hash_threshold):
+            n_common_photos += 1
 
     return n_common_photos
 
@@ -182,7 +202,7 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
     return unique_flats_list, duplicate_flats
 
 
-def get_duplicate_score(flat1, flat2, photo_cache):
+def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold=10):
     """
     Compute the duplicate score between two flats. The higher the score, the
     more likely the two flats to be duplicates.
@@ -190,6 +210,7 @@ def get_duplicate_score(flat1, flat2, photo_cache):
     :param flat1: First flat dict.
     :param flat2: Second flat dict.
     :param photo_cache: An instance of ``ImageCache`` to use to cache images.
+    :param hash_thresold: The hash threshold between two images.
     :return: The duplicate score as ``int``.
     """
     n_common_items = 0
@@ -314,7 +335,12 @@ def deep_detect(flats_list, config):
             if flat2["id"] in matching_flats[flat1["id"]]:
                 continue
 
-            n_common_items = get_duplicate_score(flat1, flat2, photo_cache)
+            n_common_items = get_duplicate_score(
+                flat1,
+                flat2,
+                photo_cache,
+                config["duplicate_image_hash_threshold"]
+            )
 
             # Minimal score to consider they are duplicates
             if n_common_items >= config["duplicate_threshold"]:

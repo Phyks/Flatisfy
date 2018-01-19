@@ -10,6 +10,7 @@ future
 imagehash
 pillow
 requests
+requests_mock
 sqlalchemy
 titlecase
 unidecode

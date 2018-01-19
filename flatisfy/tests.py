@@ -9,6 +9,8 @@ import os
 import random
 import sys
 import unittest
+import requests
+import requests_mock
 
 from flatisfy import tools
 from flatisfy.filters import duplicates
@@ -17,6 +19,22 @@ from flatisfy.constants import BACKENDS_BY_PRECEDENCE
 
 LOGGER = logging.getLogger(__name__)
 TESTS_DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/test_files/"
+
+
+class LocalImageCache(ImageCache):
+    """
+    A local cache for images, stored in memory.
+    """
+    @staticmethod
+    def on_miss(path):
+        """
+        Helper to actually retrieve photos if not already cached.
+        """
+        url = "mock://flatisfy" + path
+        with requests_mock.Mocker() as mock:
+            with open(path, "rb") as fh:
+                mock.get(url, content=fh.read())
+                return requests.get(url)
 
 
 class TestTexts(unittest.TestCase):
@@ -116,6 +134,68 @@ class TestPhoneNumbers(unittest.TestCase):
             "0605040302",
             duplicates.homogeneize_phone_number("06 05 04 03 02")
         )
+
+
+class TestPhotos(unittest.TestCase):
+    IMAGE_CACHE = LocalImageCache()  # pylint: disable=invalid-name
+
+    def test_same_photo_twice(self):
+        """
+        Compares a photo against itself.
+        """
+        photo = {
+            "url": TESTS_DATA_DIR + "127028739@seloger.jpg"
+        }
+
+        self.assertTrue(duplicates.compare_photos(
+            photo,
+            photo,
+            TestPhotos.IMAGE_CACHE
+        ))
+
+    def test_different_photos(self):
+        """
+        Compares two different photos.
+        """
+        self.assertFalse(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
+            {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
+            TestPhotos.IMAGE_CACHE
+        ))
+
+        self.assertFalse(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
+            {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
+            TestPhotos.IMAGE_CACHE
+        ))
+
+    def test_matching_photos(self):
+        """
+        Compares two matching photos with different size and source.
+        """
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
+            {"url": TESTS_DATA_DIR + "14428129@explorimmo.jpg"},
+            TestPhotos.IMAGE_CACHE
+        ))
+
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
+            {"url": TESTS_DATA_DIR + "14428129-2@explorimmo.jpg"},
+            TestPhotos.IMAGE_CACHE
+        ))
+
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
+            {"url": TESTS_DATA_DIR + "14428129-3@explorimmo.jpg"},
+            TestPhotos.IMAGE_CACHE
+        ))
+
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
+            {"url": TESTS_DATA_DIR + "127028739-watermark@seloger.jpg"},
+            TestPhotos.IMAGE_CACHE
+        ))
 
 
 class TestDuplicates(unittest.TestCase):
@@ -284,6 +364,10 @@ def run():
         assert result.wasSuccessful()
 
         suite = unittest.TestLoader().loadTestsFromTestCase(TestDuplicates)
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
+        assert result.wasSuccessful()
+
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestPhotos)
         result = unittest.TextTestRunner(verbosity=2).run(suite)
         assert result.wasSuccessful()
     except AssertionError:
