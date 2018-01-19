@@ -13,7 +13,12 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
+# Import models
+import flatisfy.models.postal_code  # noqa: F401
+import flatisfy.models.public_transport  # noqa: F401
 import flatisfy.models.flat  # noqa: F401
+import flatisfy.models.constraint  # noqa: F401
+
 from flatisfy.database.base import BASE
 from flatisfy.database.whooshalchemy import IndexService
 

@@ -8,12 +8,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import enum
 
-import arrow
-
 from sqlalchemy import (
-    Column, Enum, Float, SmallInteger, String, Text, inspect
+    Column, Enum, Float, ForeignKey, Integer, SmallInteger, String, Table,
+    Text, inspect
 )
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy_utils.types.arrow import ArrowType
 from sqlalchemy_utils.types.json import JSONType
 from sqlalchemy_utils.types.scalar_list import ScalarListType
@@ -55,6 +54,14 @@ AUTOMATED_STATUSES = [
     FlatStatus.ignored
 ]
 
+stations_association_table = Table(
+    'stations_flats_association', BASE.metadata,
+    Column(
+        'public_transport_id', Integer, ForeignKey('public_transports.id')
+    ),
+    Column('flat_id', Integer, ForeignKey('flats.id'))
+)
+
 
 class Flat(BASE):
     """
@@ -72,7 +79,7 @@ class Flat(BASE):
     cost = Column(Float)
     currency = Column(String)
     utilities = Column(Enum(FlatUtilities), default=FlatUtilities.unknown)
-    date = Column(ArrowDate)
+    date = Column(ArrowType)
     details = Column(JSONType)
     location = Column(String)
     phone = Column(String)
@@ -86,18 +93,27 @@ class Flat(BASE):
     notes = Column(Text)
     notation = Column(SmallInteger, default=0)
 
-    # Flatisfy data
-    # TODO: Should be in another table with relationships
-    flatisfy_stations = Column(JSONType)
-    flatisfy_postal_code = Column(String)
+    # Flatisfy found stations
+    # TODO: What happens when one deletes a station?
+    flatisfy_stations = relationship("PublicTransport",
+                                     secondary=stations_association_table)
+    # Flatisfy found postal code
+    # TODO: What happens when one deletes a postal code?
+    flatisfy_postal_code_id = Column(Integer, ForeignKey('postal_codes.id'))
+    flatisfy_postal_code = relationship("PostalCode")
+    # Computed time to
     flatisfy_time_to = Column(JSONType)
-    flatisfy_constraint = Column(String)
+    # Constraint relationship
+    # TODO: What happens when one deletes a constraint?
+    # TODO: A flat could match multiple constraints
+    flatisfy_constraint_id = Column(Integer, ForeignKey('constraints.id'))
+    flatisfy_constraint = relationship("Constraint")
 
     # Status
     status = Column(Enum(FlatStatus), default=FlatStatus.new)
 
     # Date for visit
-    visit_date = Column(ArrowDate)
+    visit_date = Column(ArrowType)
 
     @validates('utilities')
     def validate_utilities(self, _, utilities):

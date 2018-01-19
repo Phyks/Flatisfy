@@ -7,8 +7,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 from sqlalchemy import (
-    Column, Float, Integer, String
+    Column, Float, ForeignKey, Integer, String, Table
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy_utils.types.json import JSONType
 from sqlalchemy_utils.types.scalar_list import ScalarListType
 
@@ -42,6 +43,13 @@ class PostTypes(enum.Enum):
     SHARING = 2
 
 
+association_table = Table(
+    'constraint_postal_codes_association', BASE.metadata,
+    Column('constraint_id', Integer, ForeignKey('constraints.id')),
+    Column('postal_code_id', Integer, ForeignKey('postal_codes.id'))
+)
+
+
 class Constraint(BASE):
     """
     SQLAlchemy ORM model to store a search constraint.
@@ -52,18 +60,28 @@ class Constraint(BASE):
     name = Column(String)
     type = Column(EnumListType(PostTypes, int))
     house_types = Column(EnumListType(HouseTypes, int))
-    postal_codes = Column(ScalarListType())  # TODO
+    # TODO: What happens when one delete a postal code?
+    postal_codes = relationship("PostalCode", secondary=association_table)
+
     area_min = Column(Float, default=None)  # in m^2
     area_max = Column(Float, default=None)  # in m^2
+
     cost_min = Column(Float, default=None)  # in currency unit
     cost_max = Column(Float, default=None)  # in currency unit
+
     rooms_min = Column(Integer, default=None)
     rooms_max = Column(Integer, default=None)
+
     bedrooms_min = Column(Integer, default=None)
     bedrooms_max = Column(Integer, default=None)
+
     minimum_nb_photos = Column(Integer, default=None)
     description_should_contain = Column(ScalarListType())  # list of terms
-    time_to = Column(JSONType)  # TODO
+
+    # Dict mapping names to {"gps": [lat, lng], "time": (min, max) }
+    # ``min`` and ``max`` are in seconds and can be ``null``.
+    # TODO: Use an additional time_to_places table?
+    time_to = Column(JSONType)
 
     def __repr__(self):
         return "<Constraint(id=%s, name=%s)>" % (self.id, self.name)
