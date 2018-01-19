@@ -11,12 +11,14 @@ import enum
 import arrow
 
 from sqlalchemy import (
-    Column, DateTime, Enum, Float, SmallInteger, String, Text, inspect
+    Column, Enum, Float, SmallInteger, String, Text, inspect
 )
 from sqlalchemy.orm import validates
+from sqlalchemy_utils.types.arrow import ArrowType
+from sqlalchemy_utils.types.json import JSONType
+from sqlalchemy_utils.types.scalar_list import ScalarListType
 
 from flatisfy.database.base import BASE
-from flatisfy.database.types import MagicJSON
 
 
 LOGGER = logging.getLogger(__name__)
@@ -70,32 +72,32 @@ class Flat(BASE):
     cost = Column(Float)
     currency = Column(String)
     utilities = Column(Enum(FlatUtilities), default=FlatUtilities.unknown)
-    date = Column(DateTime)
-    details = Column(MagicJSON)
+    date = Column(ArrowDate)
+    details = Column(JSONType)
     location = Column(String)
     phone = Column(String)
-    photos = Column(MagicJSON)
+    photos = Column(JSONType)
     rooms = Column(Float)
     station = Column(String)
     text = Column(Text)
     title = Column(String)
-    urls = Column(MagicJSON)
-    merged_ids = Column(MagicJSON)
+    urls = Column(ScalarListType())
+    merged_ids = Column(ScalarListType())
     notes = Column(Text)
     notation = Column(SmallInteger, default=0)
 
     # Flatisfy data
     # TODO: Should be in another table with relationships
-    flatisfy_stations = Column(MagicJSON)
+    flatisfy_stations = Column(JSONType)
     flatisfy_postal_code = Column(String)
-    flatisfy_time_to = Column(MagicJSON)
+    flatisfy_time_to = Column(JSONType)
     flatisfy_constraint = Column(String)
 
     # Status
     status = Column(Enum(FlatStatus), default=FlatStatus.new)
 
     # Date for visit
-    visit_date = Column(DateTime)
+    visit_date = Column(ArrowDate)
 
     @validates('utilities')
     def validate_utilities(self, _, utilities):
@@ -137,20 +139,6 @@ class Flat(BASE):
         except (ValueError, AssertionError):
             raise ValueError('notation should be an integer between 0 and 5')
         return notation
-
-    @validates("date")
-    def validate_date(self, _, date):
-        """
-        Date validation method
-        """
-        return arrow.get(date).naive
-
-    @validates("visit_date")
-    def validate_visit_date(self, _, visit_date):
-        """
-        Visit date validation method
-        """
-        return arrow.get(visit_date).naive
 
     @validates("photos")
     def validate_photos(self, _, photos):

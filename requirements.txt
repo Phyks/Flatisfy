@@ -12,6 +12,8 @@ pillow
 requests
 requests_mock
 sqlalchemy
+sqlalchemy-utils
+SQLAlchemy-Enum-List
 titlecase
 unidecode
 vobject
