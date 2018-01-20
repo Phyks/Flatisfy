@@ -424,9 +424,14 @@ def compute_travel_times(flats_list, constraint, config):
                     place["gps"],
                     config
                 )
-                if time_from_station and (time_from_station < time_to_place or
-                                          time_to_place is None):
-                    time_to_place = time_from_station
+                if (
+                        time_from_station and
+                        (
+                            time_from_station["time"] < time_to_place or
+                            time_to_place is None
+                        )
+                ):
+                    time_to_place = time_from_station["time"]
 
             if time_to_place:
                 LOGGER.info(
