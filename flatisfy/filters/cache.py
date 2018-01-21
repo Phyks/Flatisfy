@@ -13,9 +13,15 @@ class MemoryCache(object):
     """
     A cache in memory.
     """
-
     @staticmethod
     def on_miss(key):
+        """
+        Method to be called whenever an object is requested from the cache but
+        was not already cached. Typically, make a HTTP query to fetch it.
+
+        :param key: Key of the requested object.
+        :return: The object content.
+        """
         raise NotImplementedError
 
     def __init__(self):
