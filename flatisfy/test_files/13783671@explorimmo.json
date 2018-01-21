@@ -1,0 +1,44 @@
+{
+    "id": "13783671@explorimmo",
+    "url": "http://www.explorimmo.com/annonce-13783671.html",
+    "title": "Vente appartement 3 pi\u00e8ces 65 m2",
+    "area": 65,
+    "cost": 145275,
+    "price_per_meter": 2235,
+    "currency": "EUR",
+    "utilities": "H.C.",
+    "date": "2017-11-10T02:04:00",
+    "location": "225 RUE DE FOUGERES Rennes 35700",
+    "station": null,
+    "text": "Rennes en exclusivit\u00e9 rue de Foug\u00e8res - Grand Appartement 3 pi\u00e8ces avec Balcon\ndans une copropri\u00e9t\u00e9 avec ascenseur - Travaux \u00e0 pr\u00e9voir - 2 chambres - Cave et\ngarage\n\n",
+    "phone": null,
+    "photos": [{
+        "id": "cb10f556708c4e858c1a45ec1dfda623.jpg",
+        "url": "http://thbr.figarocms.net/images/AXuL6XMCphsRrTYttb7yR2W3CCg=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/cb10f556708c4e858c1a45ec1dfda623.jpg",
+        "data": null
+    }, {
+        "id": "e2696eacce2d487e99e88c2b945cee34.jpg",
+        "url": "http://thbr.figarocms.net/images/0Va3M6bf1eFkJJzPXC--QIc6WTo=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/e2696eacce2d487e99e88c2b945cee34.jpg",
+        "data": null
+    }],
+    "rooms": 3,
+    "bedrooms": 2,
+    "details": {
+        "available": true,
+        "heatingType": "",
+        "agency": "NEXITY LAMY, 6 avenue Jean Janvier, 35000, Rennes",
+        "bathrooms": 0,
+        "exposure": "Non pr\u00e9cis\u00e9",
+        "floor": "1",
+        "energy": "E",
+        "bedrooms": 2,
+        "greenhouseGasEmission": null,
+        "isFurnished": false,
+        "rooms": 3,
+        "fees": 0.0,
+        "creationDate": 1507712100000,
+        "agencyFees": 0.0,
+        "availabilityDate": null,
+        "guarantee": 0.0
+    }
+}

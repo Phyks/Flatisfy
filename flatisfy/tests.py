@@ -225,6 +225,11 @@ class TestPhotos(unittest.TestCase):
             TestPhotos.HASH_THRESHOLD
         ))
 
+    def test_matching_cropped_photos(self):
+        """
+        Compares two matching photos with one being cropped.
+        """
+        # Fixme: the image hash treshold should be 10 ideally
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "vertical.jpg"},
             {"url": TESTS_DATA_DIR + "vertical-cropped.jpg"},
@@ -232,6 +237,13 @@ class TestPhotos(unittest.TestCase):
             20
         ))
 
+        # Fixme: the image hash treshold should be 10 ideally
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "13783671@explorimmo.jpg"},
+            {"url": TESTS_DATA_DIR + "124910113@seloger.jpg"},
+            TestPhotos.IMAGE_CACHE,
+            20
+        ))
 
 class TestDuplicates(unittest.TestCase):
     """
@@ -394,6 +406,20 @@ class TestDuplicates(unittest.TestCase):
         flats = self.load_files(
             "128358415@seloger",
             "14818297@explorimmo"
+        )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            TestDuplicates.IMAGE_CACHE, 20
+        )
+        self.assertTrue(
+            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
+        )
+
+        # Different number of photos, and some are cropped
+        flats = self.load_files(
+            "124910113@seloger",
+            "13783671@explorimmo"
         )
 
         score = duplicates.get_duplicate_score(
