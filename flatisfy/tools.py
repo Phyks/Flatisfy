@@ -27,7 +27,8 @@ NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
 
 def convert_arabic_to_roman(arabic):
     """
-    Convert an arabic literal to a roman one.
+    Convert an arabic literal to a roman one. Limits to 39, which is a rough
+    estimate for a maximum for using roman notations in daily life.
 
     ..note::
         Based on https://gist.github.com/riverrun/ac91218bb1678b857c12.
@@ -35,14 +36,12 @@ def convert_arabic_to_roman(arabic):
     :param arabic: An arabic number, as string.
     :returns: The corresponding roman one, as string.
     """
+    if int(arabic) > 39:
+        return arabic
+
     to_roman = {
         1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII',
-        8: 'VIII', 9: 'IX', 10: 'X',
-        20: 'XX', 30: 'XXX', 40: 'XL', 50: 'L', 60: 'LX', 70: 'LXX',
-        80: 'LXXX', 90: 'XC',
-        100: 'C', 200: 'CC', 300: 'CCC', 400: 'CD', 500: 'D', 600: 'DC',
-        700: 'DCC', 800: 'DCCC', 900: 'CM',
-        1000: 'M', 2000: 'MM', 3000: 'MMM'
+        8: 'VIII', 9: 'IX', 10: 'X', 20: 'XX', 30: 'XXX'
     }
     roman_chars_list = []
     count = 1

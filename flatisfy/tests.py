@@ -51,7 +51,17 @@ class TestTexts(unittest.TestCase):
         )
 
         self.assertEqual(
-            "MCMLXXXVII",
+            "XXXIX",
+            tools.convert_arabic_to_roman("39")
+        )
+
+        self.assertEqual(
+            "40",
+            tools.convert_arabic_to_roman("40")
+        )
+
+        self.assertEqual(
+            "1987",
             tools.convert_arabic_to_roman("1987")
         )
 
@@ -83,6 +93,16 @@ class TestTexts(unittest.TestCase):
         self.assertEqual(
             "dans le XVe arrondissement",
             tools.normalize_string("Dans le 15e arrondissement")
+        )
+
+        self.assertEqual(
+            "paris XVe, 75005",
+            tools.normalize_string("Paris 15e, 75005")
+        )
+
+        self.assertEqual(
+            "paris xve, 75005",
+            tools.normalize_string("Paris XVe, 75005")
         )
 
     def test_multiple_whitespaces(self):
