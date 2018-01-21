@@ -417,26 +417,27 @@ def compute_travel_times(flats_list, constraint, config):
         # For each place, loop over the stations close to the flat, and find
         # the minimum travel time.
         for place_name, place in constraint["time_to"].items():
-            time_to_place = None
+            time_to_place_dict = None
             for station in flat["flatisfy"]["matched_stations"]:
-                time_from_station = tools.get_travel_time_between(
+                # Time from station is a dict with time and route
+                time_from_station_dict = tools.get_travel_time_between(
                     station["gps"],
                     place["gps"],
                     config
                 )
                 if (
-                        time_from_station and
-                        (
-                            time_from_station["time"] < time_to_place or
-                            time_to_place is None
-                        )
+                        time_from_station_dict and
+                        (time_from_station_dict["time"] < time_to_place_dict or
+                         time_to_place_dict is None)
                 ):
-                    time_to_place = time_from_station["time"]
+                    # If starting from this station makes the route to the
+                    # specified place shorter, update
+                    time_to_place_dict = time_from_station_dict
 
-            if time_to_place:
+            if time_to_place_dict:
                 LOGGER.info(
                     "Travel time between %s and flat %s is %ds.",
-                    place_name, flat["id"], time_to_place
+                    place_name, flat["id"], time_to_place_dict["time"]
                 )
-                flat["flatisfy"]["time_to"][place_name] = time_to_place
+                flat["flatisfy"]["time_to"][place_name] = time_to_place_dict
     return flats_list
