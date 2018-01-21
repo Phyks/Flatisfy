@@ -436,7 +436,7 @@ def compute_travel_times(flats_list, constraint, config):
             if time_to_place:
                 LOGGER.info(
                     "Travel time between %s and flat %s is %ds.",
-                    place_name, flat["id"], time_to_place["time"]
+                    place_name, flat["id"], time_to_place
                 )
                 flat["flatisfy"]["time_to"][place_name] = time_to_place
     return flats_list
