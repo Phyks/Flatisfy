@@ -225,6 +225,13 @@ class TestPhotos(unittest.TestCase):
             TestPhotos.HASH_THRESHOLD
         ))
 
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "vertical.jpg"},
+            {"url": TESTS_DATA_DIR + "vertical-cropped.jpg"},
+            TestPhotos.IMAGE_CACHE,
+            20
+        ))
+
 
 class TestDuplicates(unittest.TestCase):
     """
@@ -384,6 +391,33 @@ class TestDuplicates(unittest.TestCase):
             score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
         )
 
+        flats = self.load_files(
+            "128358415@seloger",
+            "14818297@explorimmo"
+        )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            TestDuplicates.IMAGE_CACHE, 20
+        )
+        self.assertTrue(
+            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
+        )
+
+        # Same flat, different agencies, texts and photos
+        flats = self.load_files(
+            "122509451@seloger",
+            "127963747@seloger"
+        )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+        )
+
+        self.assertTrue(
+            score >= 4
+        )
 
 def run():
     """
