@@ -1,0 +1,60 @@
+{
+    "id": "123312807@seloger",
+    "url": "http://www.seloger.com/annonces/achat/appartement/rennes-35/brequigny/123312807.htm?p=",
+    "title": "Appartement 3 pi\u00e8ces 58m\u00b2 - Rennes",
+    "area": 58,
+    "cost": 131440,
+    "price_per_meter": 2266.206896551724137931034483,
+    "currency": "\u20ac",
+    "utilities": "",
+    "date": "2018-01-20T22:35:00",
+    "location": " Rennes (35200)",
+    "station": "Cl\u00e9menceau",
+    "text": "OGIMM vous propose \u00e0 l'achat un appartement de type 3 dans une petite copropri\u00e9t\u00e9 de 4 \u00e9tages. Bien situ\u00e9, proche du boulevard Cl\u00e9menceau et des Bus C5 et C3, de la rue de Nantes, il est en tr\u00e8s bon \u00e9tat et au calme. Il est compos\u00e9 de: une entr\u00e9e avec placards, une cuisine s\u00e9par\u00e9e am\u00e9nag\u00e9e et \u00e9quip\u00e9e (possibilit\u00e9 d'ouverture), d'un balcon loggia, d'un s\u00e9jour lumineux au sud, de 2 chambres, d'une salle d'eau et d'un WC s\u00e9par\u00e9. Pr\u00e9sence d'une cave et d'un parking ext\u00e9rieur. Station de M\u00e9tro la plus proche Cl\u00e9menceau. Copropri\u00e9t\u00e9 saine et bien tenue, les charges de 1745.88e par an comprenant le chauffage (avec compteur individuel), l'eau chaude et froide, et l'entretien de l'immeuble. Copropri\u00e9t\u00e9 de 16 appartements. Actuellement lou\u00e9 650e charges comprises. A voir rapidement ! Dont 6.00 % honoraires TTC \u00e0 la charge de l'acqu\u00e9reur.",
+    "phone": null,
+    "photos": [{
+        "id": "1ir7ortudferww8to788kd38lmlnpx52ia5st7280.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/1/i/r/7/1ir7ortudferww8to788kd38lmlnpx52ia5st7280.jpg",
+        "data": null
+    }, {
+        "id": "08wbr1ivnz26gnyeofyjg02zi0d1vd1eijszcrgg0.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/0/8/w/b/08wbr1ivnz26gnyeofyjg02zi0d1vd1eijszcrgg0.jpg",
+        "data": null
+    }, {
+        "id": "0np6439w3557sclwu7b4sq7h7hntm9tizwrrtdr7k.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/0/n/p/6/0np6439w3557sclwu7b4sq7h7hntm9tizwrrtdr7k.jpg",
+        "data": null
+    }, {
+        "id": "0rc6ac2jlit0r27d1tmy2y8pqbdzps7gnzzmdds00.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/0/r/c/6/0rc6ac2jlit0r27d1tmy2y8pqbdzps7gnzzmdds00.jpg",
+        "data": null
+    }, {
+        "id": "19ebzllpk308rw1ei43a0t59fnjxohnidtvc5thq8.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/1/9/e/b/19ebzllpk308rw1ei43a0t59fnjxohnidtvc5thq8.jpg",
+        "data": null
+    }, {
+        "id": "07ize6lu9ssyv1ltjiux8gs56rgbyweai9wboor9c.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/0/7/i/z/07ize6lu9ssyv1ltjiux8gs56rgbyweai9wboor9c.jpg",
+        "data": null
+    }],
+    "rooms": 3,
+    "bedrooms": 2,
+    "details": {
+        "Cuisine": "s\u00e9par\u00e9e",
+        "Pi\u00e8ces": "3",
+        "Salle de S\u00e9jour": "",
+        "Reference": "OG9242",
+        "Chambres": "2",
+        "Salle d'eau": "1",
+        "Entr\u00e9e": "",
+        "Balcon": "1",
+        "Surface": "58 m\u00b2",
+        "Ann\u00e9e de construction": "1963",
+        "Calme": "",
+        "Etages": "4",
+        "Parking": "1",
+        "Rangements": "",
+        "Toilette": "1",
+        "Orientation": "Est, Sud"
+    }
+}

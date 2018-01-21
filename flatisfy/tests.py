@@ -419,6 +419,20 @@ class TestDuplicates(unittest.TestCase):
             score >= 4
         )
 
+        # Really similar flats, but different
+        flats = self.load_files(
+            "123312807@seloger",
+            "123314207@seloger"
+        )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+        )
+        self.assertTrue(
+            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
+        )
+
 def run():
     """
     Run all the tests
