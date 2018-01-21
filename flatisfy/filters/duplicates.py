@@ -267,27 +267,6 @@ def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold):
             assert flat1_phone == flat2_phone
             n_common_items += 10  # Counts much more than the rest
 
-        # They should have at least one photo in common if there
-        # are some photos
-        if flat1.get("photos", []) and flat2.get("photos", []):
-            n_common_photos = find_number_common_photos(
-                flat1["photos"],
-                flat2["photos"],
-                photo_cache,
-                hash_threshold
-            )
-            assert n_common_photos > 1
-
-            min_number_photos = min(len(flat1["photos"]),
-                                    len(flat2["photos"]))
-
-            # Either all the photos are the same, or there are at least
-            # three common photos.
-            if n_common_photos == min_number_photos:
-                n_common_items += 15
-            else:
-                n_common_items += 5 * min(n_common_photos, 3)
-
         # If the two flats are from the same website and have a
         # different float part, consider they cannot be duplicates. See
         # https://framagit.org/phyks/Flatisfy/issues/100.
@@ -302,6 +281,24 @@ def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold):
         )
         if both_have_float_part and both_are_from_same_backend:
             assert both_have_equal_float_part
+
+        if flat1.get("photos", []) and flat2.get("photos", []):
+            n_common_photos = find_number_common_photos(
+                flat1["photos"],
+                flat2["photos"],
+                photo_cache,
+                hash_threshold
+            )
+
+            min_number_photos = min(len(flat1["photos"]),
+                                    len(flat2["photos"]))
+
+            # Either all the photos are the same, or there are at least
+            # three common photos.
+            if n_common_photos == min_number_photos:
+                n_common_items += 15
+            else:
+                n_common_items += 5 * min(n_common_photos, 3)
     except (AssertionError, TypeError):
         # Skip and consider as not duplicates whenever the conditions
         # are not met
