@@ -86,7 +86,14 @@ class ImageCache(MemoryCache):
     """
     @staticmethod
     def compute_filename(url):
-        return hashlib.sha1(url.encode("utf-8")).hexdigest()
+        """
+        Compute filename (hash of the URL) for the cached image.
+
+        :param url: The URL of the image.
+        :return: The filename, with its extension.
+        """
+        # Always store as JPEG
+        return "%s.jpg" % hashlib.sha1(url.encode("utf-8")).hexdigest()
 
     def on_miss(self, url):
         """

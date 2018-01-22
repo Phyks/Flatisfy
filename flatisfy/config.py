@@ -277,6 +277,7 @@ def load_config(args=None, check_with_data=True):
         LOGGER.info("Creating data directory according to config: %s",
                     config_data["data_directory"])
         os.makedirs(config_data["data_directory"])
+        os.makedirs(os.path.join(config_data["data_directory"], "images"))
 
     if config_data["database"] is None:
         config_data["database"] = "sqlite:///" + os.path.join(
