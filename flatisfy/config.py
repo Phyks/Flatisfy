@@ -51,6 +51,8 @@ DEFAULT_CONFIG = {
     "duplicate_threshold": 15,
     # Score to consider two images as being duplicates through hash comparison
     "duplicate_image_hash_threshold": 10,
+    # Whether images should be downloaded and served locally
+    "serve_images_locally": True,
     # Navitia API key
     "navitia_api_key": None,
     # Number of filtering passes to run

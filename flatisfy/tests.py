@@ -9,6 +9,8 @@ import os
 import random
 import sys
 import unittest
+import tempfile
+
 import requests
 import requests_mock
 
@@ -157,8 +159,13 @@ class TestPhoneNumbers(unittest.TestCase):
 
 
 class TestPhotos(unittest.TestCase):
-    IMAGE_CACHE = LocalImageCache()  # pylint: disable=invalid-name
     HASH_THRESHOLD = 10  # pylint: disable=invalid-name
+
+    def __init__(self, *args, **kwargs):
+        self.IMAGE_CACHE = LocalImageCache(  # pylint: disable=invalid-name
+            storage_dir=tempfile.mkdtemp(prefix="flatisfy-")
+        )
+        super(TestPhotos, self).__init__(*args, **kwargs)
 
     def test_same_photo_twice(self):
         """
@@ -171,8 +178,8 @@ class TestPhotos(unittest.TestCase):
         self.assertTrue(duplicates.compare_photos(
             photo,
             photo,
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
     def test_different_photos(self):
@@ -182,15 +189,15 @@ class TestPhotos(unittest.TestCase):
         self.assertFalse(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertFalse(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
     def test_matching_photos(self):
@@ -200,29 +207,29 @@ class TestPhotos(unittest.TestCase):
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "14428129@explorimmo.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "14428129-2@explorimmo.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "14428129-3@explorimmo.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "127028739-watermark@seloger.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
 
@@ -233,7 +240,12 @@ class TestDuplicates(unittest.TestCase):
     DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS = 14  # pylint: disable=invalid-name
     DUPLICATES_MIN_SCORE_WITH_PHOTOS = 15  # pylint: disable=invalid-name
     HASH_THRESHOLD = 10  # pylint: disable=invalid-name
-    IMAGE_CACHE = ImageCache()  # pylint: disable=invalid-name
+
+    def __init__(self, *args, **kwargs):
+        self.IMAGE_CACHE = ImageCache(  # pylint: disable=invalid-name
+            storage_dir=tempfile.mkdtemp(prefix="flatisfy-")
+        )
+        super(TestDuplicates, self).__init__(*args, **kwargs)
 
     @staticmethod
     def generate_fake_flat():
@@ -276,10 +288,10 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
         self.assertTrue(
-            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+            score >= self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
         )
 
     def test_different_prices(self):
@@ -292,10 +304,10 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
         self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+            score < self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
         )
 
     def test_different_rooms(self):
@@ -309,10 +321,10 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
         self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+            score < self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
         )
 
     def test_different_areas(self):
@@ -325,10 +337,10 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
         self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+            score < self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
         )
 
     def test_different_areas_decimals(self):
@@ -343,10 +355,10 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
         self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+            score < self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
         )
 
     def test_different_phones(self):
@@ -360,10 +372,10 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
         self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
+            score < self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
         )
 
     def test_real_duplicates(self):
@@ -378,10 +390,10 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flats[0], flats[1],
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
         self.assertTrue(
-            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
+            score >= self.DUPLICATES_MIN_SCORE_WITH_PHOTOS
         )
 
 
