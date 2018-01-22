@@ -114,6 +114,15 @@ class TestTexts(unittest.TestCase):
             tools.normalize_string("avec   ascenseur")
         )
 
+    def test_whitespace_trim(self):
+        """
+        Checks that trailing and beginning whitespaces are trimmed.
+        """
+        self.assertEqual(
+            "rennes 35000",
+            tools.normalize_string("  Rennes 35000 ")
+        )
+
     def test_accents(self):
         """
         Checks accents are replaced.
