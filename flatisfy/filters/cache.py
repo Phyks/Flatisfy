@@ -1,12 +1,16 @@
 # coding: utf-8
-
 """
 Caching function for pictures.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+import hashlib
+import os
 import requests
+from io import BytesIO
+
+import PIL.Image
 
 
 class MemoryCache(object):
@@ -81,8 +85,34 @@ class ImageCache(MemoryCache):
     A cache for images, stored in memory.
     """
     @staticmethod
-    def on_miss(url):
+    def compute_filename(url):
+        """
+        Compute filename (hash of the URL) for the cached image.
+
+        :param url: The URL of the image.
+        :return: The filename, with its extension.
+        """
+        # Always store as JPEG
+        return "%s.jpg" % hashlib.sha1(url.encode("utf-8")).hexdigest()
+
+    def on_miss(self, url):
         """
         Helper to actually retrieve photos if not already cached.
         """
-        return requests.get(url)
+        filepath = os.path.join(
+            self.storage_dir,
+            self.compute_filename(url)
+        )
+        if os.path.isfile(filepath):
+            image = PIL.Image.open(filepath)
+        else:
+            image = PIL.Image.open(BytesIO(requests.get(url).content))
+            if self.storage_dir:
+                image.save(filepath, format=image.format)
+        return image
+
+    def __init__(self, storage_dir=None):
+        self.storage_dir = storage_dir
+        if self.storage_dir and not os.path.isdir(self.storage_dir):
+            os.makedirs(self.storage_dir)
+        super(ImageCache, self).__init__()

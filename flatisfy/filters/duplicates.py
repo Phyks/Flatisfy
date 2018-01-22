@@ -7,12 +7,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 import collections
 import itertools
 import logging
+import os
 import re
 
-from io import BytesIO
-
 import imagehash
-import PIL.Image
 import requests
 
 from flatisfy import tools
@@ -69,8 +67,7 @@ def get_or_compute_photo_hash(photo, photo_cache):
         return photo["hash"]
     except KeyError:
         # Otherwise, get the image and compute the hash
-        req = photo_cache.get(photo["url"])
-        image = PIL.Image.open(BytesIO(req.content))
+        image = photo_cache.get(photo["url"])
         photo["hash"] = imagehash.average_hash(image)
         return photo["hash"]
 
@@ -329,8 +326,13 @@ def deep_detect(flats_list, config):
         the flats objects that should be removed and considered as duplicates
         (they were already merged).
     """
-
-    photo_cache = ImageCache()
+    if config["serve_images_locally"]:
+        storage_dir = os.path.join(config["data_directory"], "images")
+    else:
+        storage_dir = None
+    photo_cache = ImageCache(
+        storage_dir=storage_dir
+    )
 
     LOGGER.info("Running deep duplicates detection.")
     matching_flats = collections.defaultdict(list)

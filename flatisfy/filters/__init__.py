@@ -10,6 +10,7 @@ import logging
 
 from flatisfy import tools
 from flatisfy.filters import duplicates
+from flatisfy.filters import images
 from flatisfy.filters import metadata
 
 
@@ -225,6 +226,9 @@ def second_pass(flats_list, constraint, config):
     # fetched details.
     flats_list, ignored_list = refine_with_details_criteria(flats_list,
                                                             constraint)
+
+    if config["serve_images_locally"]:
+        images.download_images(flats_list, config)
 
     return {
         "new": flats_list,

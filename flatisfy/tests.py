@@ -9,6 +9,8 @@ import os
 import random
 import sys
 import unittest
+import tempfile
+
 import requests
 import requests_mock
 
@@ -166,8 +168,13 @@ class TestPhoneNumbers(unittest.TestCase):
 
 
 class TestPhotos(unittest.TestCase):
-    IMAGE_CACHE = LocalImageCache()  # pylint: disable=invalid-name
     HASH_THRESHOLD = 10  # pylint: disable=invalid-name
+
+    def __init__(self, *args, **kwargs):
+        self.IMAGE_CACHE = LocalImageCache(  # pylint: disable=invalid-name
+            storage_dir=tempfile.mkdtemp(prefix="flatisfy-")
+        )
+        super(TestPhotos, self).__init__(*args, **kwargs)
 
     def test_same_photo_twice(self):
         """
@@ -262,7 +269,12 @@ class TestDuplicates(unittest.TestCase):
     DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS = 14  # pylint: disable=invalid-name
     DUPLICATES_MIN_SCORE_WITH_PHOTOS = 15  # pylint: disable=invalid-name
     HASH_THRESHOLD = 10  # pylint: disable=invalid-name
-    IMAGE_CACHE = ImageCache()  # pylint: disable=invalid-name
+
+    def __init__(self, *args, **kwargs):
+        self.IMAGE_CACHE = ImageCache(  # pylint: disable=invalid-name
+            storage_dir=tempfile.mkdtemp(prefix="flatisfy-")
+        )
+        super(TestDuplicates, self).__init__(*args, **kwargs)
 
     @staticmethod
     def generate_fake_flat():
