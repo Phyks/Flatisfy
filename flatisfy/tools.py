@@ -225,6 +225,9 @@ def normalize_string(string, lowercase=True, convert_arabic_numerals=True):
     # Collapse multiple spaces, replace tabulations and newlines by space
     string = re.sub(r"\s+", " ", string)
 
+    # Trim whitespaces
+    string = string.strip()
+
     return string
 
 

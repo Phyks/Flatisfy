@@ -1,0 +1,53 @@
+{
+    "id": "127963747@seloger",
+    "url": "http://www.seloger.com/annonces/achat/appartement/rennes-35/127963747.htm?p=",
+    "title": "Appartement 3 pi\u00e8ces 78m\u00b2 - Rennes",
+    "area": 78,
+    "cost": 211000,
+    "price_per_meter": 2705.128205128205128205128205,
+    "currency": "\u20ac",
+    "utilities": "",
+    "date": "2018-01-17T17:54:00",
+    "location": " Rennes (35000)",
+    "station": "",
+    "text": "ARSENAL/REDON - CIT\u00c9 JUDICIAIRE. D'une surface de 78 m\u00b2, cet appartement de type T3 est compos\u00e9 au rez-de-chauss\u00e9e comme suit: cuisine am\u00e9nag\u00e9e, deux chambres, salon/salle \u00e0 manger, salle de bain, toilettes.. La belle et lumineuse pi\u00e8ce de vie de 33 m\u00b2 vous permettra d'envisager une disposition agr\u00e9able de votre int\u00e9rieur.. Id\u00e9alement situ\u00e9 dans un secteur recherch\u00e9. Tr\u00e8s bon \u00e9tat.. Un garage situ\u00e9 en sous-sol compl\u00e8te cet appartement.. Contacter Agence ORPI au 02.23.44.37. 47.. 211000 euros Honoraires \u00e0 la charge du vendeur.",
+    "phone": null,
+    "photos": [{
+        "id": "1d9ks91ml67r2zwwcytkg3l4jh4yc8ii3y4fa64u8.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/1/d/9/k/1d9ks91ml67r2zwwcytkg3l4jh4yc8ii3y4fa64u8.jpg",
+        "data": null
+    }, {
+        "id": "0a95gv0bukbrk77mhe0h4n14j9bx2zrkfikgh7h8g.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/0/a/9/5/0a95gv0bukbrk77mhe0h4n14j9bx2zrkfikgh7h8g.jpg",
+        "data": null
+    }, {
+        "id": "1hd329lc8srsdh71o3iyo2tuv8jw9jutnctvqnv9c.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/1/h/d/3/1hd329lc8srsdh71o3iyo2tuv8jw9jutnctvqnv9c.jpg",
+        "data": null
+    }, {
+        "id": "1lf8fyr5marcjalerkc914opcc29osb23z9c9648w.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/1/l/f/8/1lf8fyr5marcjalerkc914opcc29osb23z9c9648w.jpg",
+        "data": null
+    }, {
+        "id": "1yrk6jbek3h7q3f9a3g1vy0kqc2uh7z4yckznrx8g.jpg",
+        "url": "https://v.seloger.com/s/width/800/visuels/1/y/r/k/1yrk6jbek3h7q3f9a3g1vy0kqc2uh7z4yckznrx8g.jpg",
+        "data": null
+    }],
+    "rooms": 3,
+    "bedrooms": 2,
+    "details": {
+        "Box": "1",
+        "Pi\u00e8ces": "3",
+        "Etage": "RDC",
+        "Reference": "114020E0PULC",
+        "Chambres": "2",
+        "Chauffage": "individuel",
+        "Toilette": "1",
+        "Salle de bain": "1",
+        "Ascenseur": "",
+        "Toilettes S\u00e9par\u00e9es": "",
+        "Surface": "78 m\u00b2",
+        "Salle \u00c0 Manger": "",
+        "Salle de s\u00e9jour": "33 m\u00b2"
+    }
+}

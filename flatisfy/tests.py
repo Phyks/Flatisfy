@@ -114,6 +114,15 @@ class TestTexts(unittest.TestCase):
             tools.normalize_string("avec   ascenseur")
         )
 
+    def test_whitespace_trim(self):
+        """
+        Checks that trailing and beginning whitespaces are trimmed.
+        """
+        self.assertEqual(
+            "rennes 35000",
+            tools.normalize_string("  Rennes 35000 ")
+        )
+
     def test_accents(self):
         """
         Checks accents are replaced.
@@ -171,8 +180,8 @@ class TestPhotos(unittest.TestCase):
         self.assertTrue(duplicates.compare_photos(
             photo,
             photo,
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
     def test_different_photos(self):
@@ -182,15 +191,15 @@ class TestPhotos(unittest.TestCase):
         self.assertFalse(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertFalse(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
     def test_matching_photos(self):
@@ -200,29 +209,49 @@ class TestPhotos(unittest.TestCase):
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "14428129@explorimmo.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "14428129-2@explorimmo.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "14428129-3@explorimmo.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
         ))
 
         self.assertTrue(duplicates.compare_photos(
             {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
             {"url": TESTS_DATA_DIR + "127028739-watermark@seloger.jpg"},
-            TestPhotos.IMAGE_CACHE,
-            TestPhotos.HASH_THRESHOLD
+            self.IMAGE_CACHE,
+            self.HASH_THRESHOLD
+        ))
+
+    def test_matching_cropped_photos(self):
+        """
+        Compares two matching photos with one being cropped.
+        """
+        # Fixme: the image hash treshold should be 10 ideally
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "vertical.jpg"},
+            {"url": TESTS_DATA_DIR + "vertical-cropped.jpg"},
+            self.IMAGE_CACHE,
+            20
+        ))
+
+        # Fixme: the image hash treshold should be 10 ideally
+        self.assertTrue(duplicates.compare_photos(
+            {"url": TESTS_DATA_DIR + "13783671@explorimmo.jpg"},
+            {"url": TESTS_DATA_DIR + "124910113@seloger.jpg"},
+            self.IMAGE_CACHE,
+            20
         ))
 
 
@@ -276,11 +305,9 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
-        self.assertTrue(
-            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
-        )
+        self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_prices(self):
         """
@@ -292,11 +319,9 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
-        self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
-        )
+        self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_rooms(self):
         """
@@ -309,11 +334,9 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
-        self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
-        )
+        self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_areas(self):
         """
@@ -325,11 +348,9 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
-        self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
-        )
+        self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_areas_decimals(self):
         """
@@ -343,11 +364,9 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
-        self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
-        )
+        self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_phones(self):
         """
@@ -360,11 +379,9 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flat1, flat2,
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
-        self.assertTrue(
-            score < TestDuplicates.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS
-        )
+        self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_real_duplicates(self):
         """
@@ -378,11 +395,57 @@ class TestDuplicates(unittest.TestCase):
 
         score = duplicates.get_duplicate_score(
             flats[0], flats[1],
-            TestDuplicates.IMAGE_CACHE, TestDuplicates.HASH_THRESHOLD
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
         )
-        self.assertTrue(
-            score >= TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
+        self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITH_PHOTOS)
+
+        flats = self.load_files(
+            "128358415@seloger",
+            "14818297@explorimmo"
         )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            self.IMAGE_CACHE, 20
+        )
+        self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITH_PHOTOS)
+
+        # Different number of photos, and some are cropped
+        flats = self.load_files(
+            "124910113@seloger",
+            "13783671@explorimmo"
+        )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            self.IMAGE_CACHE, 20
+        )
+        self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITH_PHOTOS)
+
+        # Same flat, different agencies, texts and photos
+        flats = self.load_files(
+            "122509451@seloger",
+            "127963747@seloger"
+        )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
+        )
+        # Fix me : should be TestDuplicates.DUPLICATES_MIN_SCORE_WITH_PHOTOS
+        self.assertGreaterEqual(score, 4)
+
+        # Really similar flats, but different
+        flats = self.load_files(
+            "123312807@seloger",
+            "123314207@seloger"
+        )
+
+        score = duplicates.get_duplicate_score(
+            flats[0], flats[1],
+            self.IMAGE_CACHE, self.HASH_THRESHOLD
+        )
+        self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITH_PHOTOS)
 
 
 def run():
