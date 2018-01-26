@@ -22,31 +22,39 @@ from flatisfy.filters.cache import ImageCache
 LOGGER = logging.getLogger(__name__)
 
 
-def homogeneize_phone_number(number):
+def homogeneize_phone_number(numbers):
     """
     Homogeneize the phone numbers, by stripping any space, dash or dot as well
     as the international prefix. Assumes it is dealing with French phone
     numbers (starting with a zero and having 10 characters).
 
-    :param number: The phone number to homogeneize.
+    :param numbers: The phone number string to homogeneize (can contain
+        multiple phone numbers).
     :return: The cleaned phone number. ``None`` if the number is not valid.
     """
-    if not number:
-        return None
-    number = number.replace(".", "")
-    number = number.replace(" ", "")
-    number = number.replace("-", "")
-    number = number.replace("(", "")
-    number = number.replace(")", "")
-    number = re.sub(r'^\+\d\d', "", number)
-
-    if not number.startswith("0"):
-        number = "0" + number
-
-    if len(number) != 10:
+    if not numbers:
         return None
 
-    return number
+    clean_numbers = []
+
+    for number in numbers.split(','):
+        number = number.strip()
+        number = number.replace(".", "")
+        number = number.replace(" ", "")
+        number = number.replace("-", "")
+        number = number.replace("(", "")
+        number = number.replace(")", "")
+        number = re.sub(r'^\+\d\d', "", number)
+
+        if not number.startswith("0"):
+            number = "0" + number
+
+        if len(number) == 10:
+            clean_numbers.append(number)
+
+    if not clean_numbers:
+        return None
+    return ", ".join(clean_numbers)
 
 
 def get_or_compute_photo_hash(photo, photo_cache):
@@ -264,8 +272,10 @@ def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold):
         flat1_phone = homogeneize_phone_number(flat1["phone"])
         flat2_phone = homogeneize_phone_number(flat2["phone"])
         if flat1_phone and flat2_phone:
-            assert flat1_phone == flat2_phone
-            n_common_items += 10  # Counts much more than the rest
+            # Use an "in" test as there could be multiple phone numbers
+            # returned by a weboob module
+            if flat1_phone in flat2_phone or flat2_phone in flat1_phone:
+                n_common_items += 4  # Counts much more than the rest
 
         # If the two flats are from the same website and have a
         # different float part, consider they cannot be duplicates. See
