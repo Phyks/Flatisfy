@@ -32,6 +32,8 @@ def download_images(flats_list, config):
         )
         for photo in flat["photos"]:
             # Download photo
-            photo_cache.get(photo["url"])
+            image = photo_cache.get(photo["url"])
             # And store the local image
-            photo["local"] = photo_cache.compute_filename(photo["url"])
+            # Only add it if fetching was successful
+            if image:
+                photo["local"] = photo_cache.compute_filename(photo["url"])

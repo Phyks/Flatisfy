@@ -265,6 +265,38 @@ class TestPhotos(unittest.TestCase):
         ))
 
 
+class TestImageCache(unittest.TestCase):
+    """
+    Checks image cache is working as expected.
+    """
+    def __init__(self, *args, **kwargs):
+        self.IMAGE_CACHE = ImageCache(  # pylint: disable=invalid-name
+            storage_dir=tempfile.mkdtemp(prefix="flatisfy-")
+        )
+        super(TestImageCache, self).__init__(*args, **kwargs)
+
+    def test_invalid_url(self):
+        """
+        Check that it returns nothing on an invalid URL.
+        """
+        # See https://framagit.org/phyks/Flatisfy/issues/116.
+        self.assertIsNone(
+            self.IMAGE_CACHE.get("https://httpbin.org/status/404")
+        )
+        self.assertIsNone(
+            self.IMAGE_CACHE.get("https://httpbin.org/status/500")
+        )
+
+    def test_invalid_data(self):
+        """
+        Check that it returns nothing on an invalid data.
+        """
+        # See https://framagit.org/phyks/Flatisfy/issues/116.
+        self.assertIsNone(
+            self.IMAGE_CACHE.get("https://httpbin.org/")
+        )
+
+
 class TestDuplicates(unittest.TestCase):
     """
     Checks duplicates detection.
@@ -469,20 +501,10 @@ def run():
     """
     LOGGER.info("Running tests…")
     try:
-        suite = unittest.TestLoader().loadTestsFromTestCase(TestTexts)
-        result = unittest.TextTestRunner(verbosity=2).run(suite)
-        assert result.wasSuccessful()
-
-        suite = unittest.TestLoader().loadTestsFromTestCase(TestPhoneNumbers)
-        result = unittest.TextTestRunner(verbosity=2).run(suite)
-        assert result.wasSuccessful()
-
-        suite = unittest.TestLoader().loadTestsFromTestCase(TestDuplicates)
-        result = unittest.TextTestRunner(verbosity=2).run(suite)
-        assert result.wasSuccessful()
-
-        suite = unittest.TestLoader().loadTestsFromTestCase(TestPhotos)
-        result = unittest.TextTestRunner(verbosity=2).run(suite)
-        assert result.wasSuccessful()
+        for testsuite in [TestTexts, TestPhoneNumbers, TestImageCache,
+                          TestDuplicates, TestPhotos]:
+            suite = unittest.TestLoader().loadTestsFromTestCase(testsuite)
+            result = unittest.TextTestRunner(verbosity=2).run(suite)
+            assert result.wasSuccessful()
     except AssertionError:
         sys.exit(1)

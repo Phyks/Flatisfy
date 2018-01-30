@@ -68,6 +68,8 @@ def get_or_compute_photo_hash(photo, photo_cache):
     except KeyError:
         # Otherwise, get the image and compute the hash
         image = photo_cache.get(photo["url"])
+        if not image:
+            return None
         photo["hash"] = imagehash.average_hash(image)
         return photo["hash"]
 
@@ -88,7 +90,7 @@ def compare_photos(photo1, photo2, photo_cache, hash_threshold):
         hash2 = get_or_compute_photo_hash(photo2, photo_cache)
 
         return hash1 - hash2 < hash_threshold
-    except (IOError, requests.exceptions.RequestException):
+    except (IOError, requests.exceptions.RequestException, TypeError):
         return False
 
 

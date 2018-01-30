@@ -106,9 +106,14 @@ class ImageCache(MemoryCache):
         if os.path.isfile(filepath):
             image = PIL.Image.open(filepath)
         else:
-            image = PIL.Image.open(BytesIO(requests.get(url).content))
-            if self.storage_dir:
-                image.save(filepath, format=image.format)
+            req = requests.get(url)
+            try:
+                req.raise_for_status()
+                image = PIL.Image.open(BytesIO(req.content))
+                if self.storage_dir:
+                    image.save(filepath, format=image.format)
+            except (requests.HTTPError, IOError):
+                return None
         return image
 
     def __init__(self, storage_dir=None):
