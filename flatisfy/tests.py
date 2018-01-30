@@ -11,6 +11,9 @@ import sys
 import unittest
 import tempfile
 
+from io import BytesIO
+
+import PIL
 import requests
 import requests_mock
 
@@ -36,7 +39,7 @@ class LocalImageCache(ImageCache):
         with requests_mock.Mocker() as mock:
             with open(path, "rb") as fh:
                 mock.get(url, content=fh.read())
-                return requests.get(url)
+                return PIL.Image.open(BytesIO(requests.get(url).content))
 
 
 class TestTexts(unittest.TestCase):
@@ -266,7 +269,7 @@ class TestDuplicates(unittest.TestCase):
     """
     Checks duplicates detection.
     """
-    DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS = 14  # pylint: disable=invalid-name
+    DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS = 8  # pylint: disable=invalid-name
     DUPLICATES_MIN_SCORE_WITH_PHOTOS = 15  # pylint: disable=invalid-name
     HASH_THRESHOLD = 10  # pylint: disable=invalid-name
 
