@@ -15,6 +15,7 @@ import sys
 import traceback
 
 import appdirs
+from weboob.capabilities.housing import POSTS_TYPES, HOUSE_TYPES
 
 from flatisfy import data
 from flatisfy import tools
@@ -155,7 +156,7 @@ def validate_config(config, check_with_data):
         for constraint in config["constraints"].values():
             assert "type" in constraint
             assert isinstance(constraint["type"], str)
-            assert constraint["type"].upper() in ["RENT", "SALE", "SHARING"]
+            assert constraint["type"].upper() in POSTS_TYPES.keys
 
             assert "minimum_nb_photos" in constraint
             if constraint["minimum_nb_photos"]:
@@ -171,7 +172,7 @@ def validate_config(config, check_with_data):
             assert "house_types" in constraint
             assert constraint["house_types"]
             for house_type in constraint["house_types"]:
-                assert house_type.upper() in ["APART", "HOUSE", "PARKING", "LAND", "OTHER", "UNKNOWN"]  # noqa: E501
+                assert house_type.upper() in HOUSE_TYPES.keys
 
             assert "postal_codes" in constraint
             assert constraint["postal_codes"]

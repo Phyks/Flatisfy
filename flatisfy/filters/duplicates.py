@@ -82,7 +82,7 @@ def compare_photos(photo1, photo2, photo_cache, hash_threshold):
     :param photo2: Second photo url.
     :param photo_cache: An instance of ``ImageCache`` to use to cache images.
     :param hash_threshold: The hash threshold between two images. Usually two
-    different photos have a hash difference of 30.
+        different photos have a hash difference of 30.
     :return: ``True`` if the photos are identical, else ``False``.
     """
     try:
