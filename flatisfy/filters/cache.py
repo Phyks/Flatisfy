@@ -104,22 +104,24 @@ class ImageCache(MemoryCache):
         if len(self.map.keys()) > self.max_items:
             self.map.popitem(last=False)
 
-        filepath = os.path.join(
-            self.storage_dir,
-            self.compute_filename(url)
-        )
-        if os.path.isfile(filepath):
-            image = PIL.Image.open(filepath)
-        else:
-            req = requests.get(url)
-            try:
-                req.raise_for_status()
-                image = PIL.Image.open(BytesIO(req.content))
-                if self.storage_dir:
-                    image.save(filepath, format=image.format)
-            except (requests.HTTPError, IOError):
-                return None
-        return image
+        # Try to load from local folder
+        if self.storage_dir:
+            filepath = os.path.join(
+                self.storage_dir,
+                self.compute_filename(url)
+            )
+            if os.path.isfile(filepath):
+                return PIL.Image.open(filepath)
+        # Otherwise, fetch it
+        req = requests.get(url)
+        try:
+            req.raise_for_status()
+            image = PIL.Image.open(BytesIO(req.content))
+            if self.storage_dir:
+                image.save(filepath, format=image.format)
+            return image
+        except (requests.HTTPError, IOError):
+            return None
 
     def __init__(self, max_items=200, storage_dir=None):
         """
