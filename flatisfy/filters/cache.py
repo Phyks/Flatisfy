@@ -5,6 +5,7 @@ Caching function for pictures.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+import collections
 import hashlib
 import os
 import requests
@@ -31,7 +32,7 @@ class MemoryCache(object):
     def __init__(self):
         self.hits = 0
         self.misses = 0
-        self.map = {}
+        self.map = collections.OrderedDict()
 
     def get(self, key):
         """
@@ -99,6 +100,10 @@ class ImageCache(MemoryCache):
         """
         Helper to actually retrieve photos if not already cached.
         """
+        # If two many items in the cache, pop one
+        if len(self.map.keys()) > self.max_items:
+            self.map.popitem(last=False)
+
         filepath = os.path.join(
             self.storage_dir,
             self.compute_filename(url)
@@ -116,7 +121,13 @@ class ImageCache(MemoryCache):
                 return None
         return image
 
-    def __init__(self, storage_dir=None):
+    def __init__(self, max_items=200, storage_dir=None):
+        """
+        :param max_items: Max number of items in the cache, to prevent Out Of
+            Memory errors.
+        :param storage_dir: Directory in which images should be stored.
+        """
+        self.max_items = max_items
         self.storage_dir = storage_dir
         if self.storage_dir and not os.path.isdir(self.storage_dir):
             os.makedirs(self.storage_dir)
