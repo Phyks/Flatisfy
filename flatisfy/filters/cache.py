@@ -5,6 +5,7 @@ Caching function for pictures.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+import collections
 import hashlib
 import os
 import requests
@@ -31,7 +32,7 @@ class MemoryCache(object):
     def __init__(self):
         self.hits = 0
         self.misses = 0
-        self.map = {}
+        self.map = collections.OrderedDict()
 
     def get(self, key):
         """
@@ -99,24 +100,36 @@ class ImageCache(MemoryCache):
         """
         Helper to actually retrieve photos if not already cached.
         """
-        filepath = os.path.join(
-            self.storage_dir,
-            self.compute_filename(url)
-        )
-        if os.path.isfile(filepath):
-            image = PIL.Image.open(filepath)
-        else:
-            req = requests.get(url)
-            try:
-                req.raise_for_status()
-                image = PIL.Image.open(BytesIO(req.content))
-                if self.storage_dir:
-                    image.save(filepath, format=image.format)
-            except (requests.HTTPError, IOError):
-                return None
-        return image
+        # If two many items in the cache, pop one
+        if len(self.map.keys()) > self.max_items:
+            self.map.popitem(last=False)
 
-    def __init__(self, storage_dir=None):
+        # Try to load from local folder
+        if self.storage_dir:
+            filepath = os.path.join(
+                self.storage_dir,
+                self.compute_filename(url)
+            )
+            if os.path.isfile(filepath):
+                return PIL.Image.open(filepath)
+        # Otherwise, fetch it
+        req = requests.get(url)
+        try:
+            req.raise_for_status()
+            image = PIL.Image.open(BytesIO(req.content))
+            if self.storage_dir:
+                image.save(filepath, format=image.format)
+            return image
+        except (requests.HTTPError, IOError):
+            return None
+
+    def __init__(self, max_items=200, storage_dir=None):
+        """
+        :param max_items: Max number of items in the cache, to prevent Out Of
+            Memory errors.
+        :param storage_dir: Directory in which images should be stored.
+        """
+        self.max_items = max_items
         self.storage_dir = storage_dir
         if self.storage_dir and not os.path.isdir(self.storage_dir):
             os.makedirs(self.storage_dir)
