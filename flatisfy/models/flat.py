@@ -157,6 +157,8 @@ class Flat(BASE):
         """
         Photos validation method
         """
+        if not photos:
+            photos = []
         for photo in photos:
             try:
                 # Remove computed hash to avoid storing it in db
