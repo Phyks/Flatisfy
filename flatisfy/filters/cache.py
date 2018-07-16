@@ -120,7 +120,7 @@ class ImageCache(MemoryCache):
             if self.storage_dir:
                 image.save(filepath, format=image.format)
             return image
-        except (requests.HTTPError, requests.exceptions.MissingSchema, IOError):
+        except (requests.HTTPError, IOError):
             return None
 
     def __init__(self, max_items=200, storage_dir=None):
