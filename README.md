@@ -19,7 +19,7 @@ and it is working fine :)
 
 <img src="doc/img/home.png" width="45%"/> <img src="doc/img/home2.png" width="45%"/>
 
-It uses [Weboob](http://weboob.org/) to get all the housing posts on most of
+It uses [WebOOB](http://weboob.org/) to get all the housing posts on most of
 the websites offering housings posts, and then offers a bunch of pipelines to
 filter and deduplicate the fetched housings.
 
@@ -116,7 +116,9 @@ Feel free to open issues. An IRC channel is available at [irc://irc.freenode.net
 
 ## Thanks
 
-* [Weboob](http://weboob.org/)
+* [WebOOB](http://weboob.org/). Note that this is actually the only and best
+  software out there to scrape housing posts online. Using it in Flatisfy does
+  not mean the authors of Flatisfy endorse WebOOB authors' views.
 * The OpenData providers listed above!
 * Navitia for their really cool public transportation API.
 * A lots of Python modules, required for this script (see `requirements.txt`).

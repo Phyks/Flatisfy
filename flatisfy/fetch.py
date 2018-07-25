@@ -29,17 +29,17 @@ except ImportError:
     raise
 
 
-class WeboobProxy(object):
+class WebOOBProxy(object):
     """
-    Wrapper around Weboob ``WebNip`` class, to fetch housing posts without
+    Wrapper around WebOOB ``WebNip`` class, to fetch housing posts without
     having to spawn a subprocess.
     """
     @staticmethod
     def version():
         """
-        Get Weboob version.
+        Get WebOOB version.
 
-        :return: The installed Weboob version.
+        :return: The installed WebOOB version.
         """
         return WebNip.VERSION
 
@@ -63,7 +63,7 @@ class WeboobProxy(object):
 
     def __init__(self, config):
         """
-        Create a Weboob handle and try to load the modules.
+        Create a WebOOB handle and try to load the modules.
 
         :param config: A config dict.
         """
@@ -94,13 +94,13 @@ class WeboobProxy(object):
 
     def build_queries(self, constraints_dict):
         """
-        Build Weboob ``weboob.capabilities.housing.Query`` objects from the
+        Build WebOOB ``weboob.capabilities.housing.Query`` objects from the
         constraints defined in the configuration. Each query has at most 3
         cities, to comply with housing websites limitations.
 
         :param constraints_dict: A dictionary of constraints, as defined in the
             config.
-        :return: A list of Weboob ``weboob.capabilities.housing.Query``
+        :return: A list of WebOOB ``weboob.capabilities.housing.Query``
             objects. Returns ``None`` if an error occurred.
         """
         queries = []
@@ -176,9 +176,9 @@ class WeboobProxy(object):
 
     def query(self, query, max_entries=None, store_personal_data=False):
         """
-        Fetch the housings posts matching a given Weboob query.
+        Fetch the housings posts matching a given WebOOB query.
 
-        :param query: A Weboob `weboob.capabilities.housing.Query`` object.
+        :param query: A WebOOB `weboob.capabilities.housing.Query`` object.
         :param max_entries: Maximum number of entries to fetch.
         :param store_personal_data: Whether personal data should be fetched
             from housing posts (phone number etc).
@@ -206,7 +206,7 @@ class WeboobProxy(object):
         """
         Get information (details) about an housing post.
 
-        :param full_flat_id: A Weboob housing post id, in complete form
+        :param full_flat_id: A WebOOB housing post id, in complete form
             (ID@BACKEND)
         :param store_personal_data: Whether personal data should be fetched
             from housing posts (phone number etc).
@@ -247,7 +247,7 @@ class WeboobProxy(object):
 
 def fetch_flats(config):
     """
-    Fetch the available flats using the Flatboob / Weboob config.
+    Fetch the available flats using the Flatboob / WebOOB config.
 
     :param config: A config dict.
     :return: A dict mapping constraint in config to all available matching
@@ -257,18 +257,18 @@ def fetch_flats(config):
 
     for constraint_name, constraint in config["constraints"].items():
         LOGGER.info("Loading flats for constraint %s...", constraint_name)
-        with WeboobProxy(config) as weboob_proxy:
-            queries = weboob_proxy.build_queries(constraint)
+        with WebOOBProxy(config) as webOOB_proxy:
+            queries = webOOB_proxy.build_queries(constraint)
             housing_posts = []
             for query in queries:
                 housing_posts.extend(
-                    weboob_proxy.query(query, config["max_entries"],
+                    webOOB_proxy.query(query, config["max_entries"],
                                        config["store_personal_data"])
                 )
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
         constraint_flats_list = [json.loads(flat) for flat in housing_posts]
-        constraint_flats_list = [WeboobProxy.restore_decimal_fields(flat)
+        constraint_flats_list = [WebOOBProxy.restore_decimal_fields(flat)
                                  for flat in constraint_flats_list]
         fetched_flats[constraint_name] = constraint_flats_list
     return fetched_flats
@@ -276,19 +276,19 @@ def fetch_flats(config):
 
 def fetch_details(config, flat_id):
     """
-    Fetch the additional details for a flat using Flatboob / Weboob.
+    Fetch the additional details for a flat using Flatboob / WebOOB.
 
     :param config: A config dict.
     :param flat_id: ID of the flat to fetch details for.
     :return: A flat dict with all the available data.
     """
-    with WeboobProxy(config) as weboob_proxy:
+    with WebOOBProxy(config) as webOOB_proxy:
         LOGGER.info("Loading additional details for flat %s.", flat_id)
-        weboob_output = weboob_proxy.info(flat_id,
+        webOOB_output = webOOB_proxy.info(flat_id,
                                           config["store_personal_data"])
 
-    flat_details = json.loads(weboob_output)
-    flat_details = WeboobProxy.restore_decimal_fields(flat_details)
+    flat_details = json.loads(webOOB_output)
+    flat_details = WebOOBProxy.restore_decimal_fields(flat_details)
     LOGGER.info("Fetched details for flat %s.", flat_id)
 
     return flat_details
