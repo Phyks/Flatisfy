@@ -185,10 +185,20 @@ class WebOOBProxy(object):
         :return: The matching housing posts, dumped as a list of JSON objects.
         """
         housings = []
+        # List the useful backends for this specific query
+        useful_backends = [x.backend for x in query.cities]
         # TODO: Handle max_entries better
         try:
             for housing in itertools.islice(
-                    self.webnip.do('search_housings', query),
+                    self.webnip.do(
+                        'search_housings',
+                        query,
+                        # Only run the call on the required backends.
+                        # Otherwise, WebOOB is doing weird stuff and returning
+                        # nonsense.
+                        backends=[x for x in self.backends
+                                  if x.name in useful_backends]
+                    ),
                     max_entries
             ):
                 if not store_personal_data:
