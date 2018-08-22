@@ -26,25 +26,18 @@ RUN git clone --depth 1 https://git.weboob.org/weboob/devel /home/user/weboob \
 RUN mkdir -p /flatisfy/data
 VOLUME /flatisfy
 
-# Install Flatisfy.
+COPY ./*.sh /home/user/
+
+# Install Flatisfy, set up directories and permissions.
 RUN cd /home/user \
-    && git clone https://git.phyks.me/Phyks/flatisfy/ ./app \
+    && git clone https://framagit.org/phyks/Flatisfy/ ./app \
     && cd ./app \
     && pip install -r requirements.txt \
     && npm install \
-    && npm run build:prod
-
-RUN chown user:user -R /home/user
-RUN mkdir -p /home/user/.local/share/flatisfy
-
-COPY ./run.sh /home/user/run.sh
-RUN chmod +x /home/user/run.sh
-
-COPY ./entrypoint.sh /home/user/entrypoint.sh
-RUN chmod +x /home/user/entrypoint.sh
-
-COPY ./update_weboob.sh /home/user/update_weboob.sh
-RUN chmod +x /home/user/update_weboob.sh
+    && npm run build:prod \
+    && mkdir -p /home/user/.local/share/flatisfy \
+    && chown user:user -R /home/user \
+    && chmod +x /home/user/*.sh
 
 # Run server.
 EXPOSE 8080
