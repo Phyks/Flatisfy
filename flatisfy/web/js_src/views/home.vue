@@ -6,7 +6,12 @@
 
         <template v-if="Object.keys(postalCodesFlatsBuckets).length > 0">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}</h3>
+                <h3>{{ postal_code_data.name || $t('common.Unknown') }}
+                    <span v-if="postal_code !== 'undefined'">
+                        ({{ postal_code }})
+                    </span>
+                    - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}
+                </h3>
                 <FlatsTable :flats="postal_code_data.flats"></FlatsTable>
             </template>
         </template>

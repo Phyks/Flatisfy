@@ -13,7 +13,8 @@ export default {
         'Close': 'Close',
         'sortUp': 'Sort in ascending order',
         'sortDown': 'Sort in descending order',
-        'mins': 'min | mins'
+        'mins': 'min | mins',
+        'Unknown': 'Unknown'
     },
     home: {
         'new_available_flats': 'New available flats'
