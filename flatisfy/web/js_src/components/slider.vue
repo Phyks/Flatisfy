@@ -1,15 +1,15 @@
 <template>
 <div @keydown="closeModal">
     <isotope ref="cpt" :options="isotopeOptions" v-images-loaded:on.progress="layout" :list="photos">
-        <div v-for="(photo, index) in photos" :key="photo.url">
-            <img :src="photo.url" v-on:click="openModal(index)"/>
+        <div v-for="(photo, index) in photosURLOrLocal" :key="photo">
+            <img :src="photo" v-on:click="openModal(index)"/>
         </div>
     </isotope>
 
     <div class="modal" ref="modal" :aria-label="$t('slider.Fullscreen_photo')" role="dialog">
         <span class="close"><button v-on:click="closeModal" :title="$t('common.Close')" :aria-label="$t('common.Close')">&times;</button></span>
 
-        <img class="modal-content" :src="photos[modalImgIndex].url">
+        <img class="modal-content" :src="photosURLOrLocal[modalImgIndex]">
     </div>
 </div>
 </template>
@@ -25,6 +25,17 @@ export default {
 
     components: {
         isotope
+    },
+
+    computed: {
+        photosURLOrLocal() {
+            return this.photos.map(photo => {
+                if (photo.local) {
+                    return `/data/img/${photo.local}`;
+                }
+                return photo.url;
+            });
+        },
     },
 
     created () {
