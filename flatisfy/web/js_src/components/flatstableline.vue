@@ -15,7 +15,7 @@
 
                 <template v-if="photo">
                     <br/>
-                    <img :src="photo" height=200 />
+                    <img :src="photo" height="200" style="max-width: 25vw" />
                 </template>
 
                 <template v-if="showNotes">
