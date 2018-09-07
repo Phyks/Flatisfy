@@ -12,6 +12,7 @@ import re
 
 from flatisfy import data
 from flatisfy import tools
+from flatisfy.constants import TimeToModes
 from flatisfy.models.postal_code import PostalCode
 from flatisfy.models.public_transport import PublicTransport
 
@@ -417,12 +418,14 @@ def compute_travel_times(flats_list, constraint, config):
         # For each place, loop over the stations close to the flat, and find
         # the minimum travel time.
         for place_name, place in constraint["time_to"].items():
+            mode = place.get("mode", "PUBLIC_TRANSPORT")
             time_to_place_dict = None
             for station in flat["flatisfy"]["matched_stations"]:
                 # Time from station is a dict with time and route
                 time_from_station_dict = tools.get_travel_time_between(
                     station["gps"],
                     place["gps"],
+                    TimeToModes[mode],
                     config
                 )
                 if (
@@ -436,8 +439,8 @@ def compute_travel_times(flats_list, constraint, config):
 
             if time_to_place_dict:
                 LOGGER.info(
-                    "Travel time between %s and flat %s is %ds.",
-                    place_name, flat["id"], time_to_place_dict["time"]
+                    "Travel time between %s and flat %s by %s is %ds.",
+                    place_name, flat["id"], mode, time_to_place_dict["time"]
                 )
                 flat["flatisfy"]["time_to"][place_name] = time_to_place_dict
     return flats_list

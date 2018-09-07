@@ -19,6 +19,7 @@ from weboob.capabilities.housing import POSTS_TYPES, HOUSE_TYPES
 
 from flatisfy import data
 from flatisfy import tools
+from flatisfy.constants import TimeToModes
 from flatisfy.models.postal_code import PostalCode
 
 
@@ -38,7 +39,8 @@ DEFAULT_CONFIG = {
             "minimum_nb_photos": None,  # min number of photos
             "description_should_contain": [],  # list of terms
             "time_to": {}  # Dict mapping names to {"gps": [lat, lng],
-                           #                        "time": (min, max) }
+                           #                        "time": (min, max),
+                           #                        "mode": Valid mode }
                            # Time is in seconds
         }
     },
@@ -56,6 +58,8 @@ DEFAULT_CONFIG = {
     "serve_images_locally": True,
     # Navitia API key
     "navitia_api_key": None,
+    # Mapbox API key
+    "mapbox_api_key": None,
     # Number of filtering passes to run
     "passes": 3,
     # Maximum number of entries to fetch
@@ -151,6 +155,10 @@ def validate_config(config, check_with_data):
         assert isinstance(config["duplicate_threshold"], int)
         assert isinstance(config["duplicate_image_hash_threshold"], int)
 
+        # API keys
+        assert config["navitia_api_key"] is None or isinstance(config["navitia_api_key"], str)  # noqa: E501
+        assert config["mapbox_api_key"] is None or isinstance(config["mapbox_api_key"], str)  # noqa: E501
+
         # Ensure constraints are ok
         assert config["constraints"]
         for constraint in config["constraints"].values():
@@ -209,6 +217,8 @@ def validate_config(config, check_with_data):
                 assert len(item["gps"]) == 2
                 assert "time" in item
                 _check_constraints_bounds(item["time"])
+                if "mode" in item:
+                    TimeToModes[item["mode"]]
 
         return True
     except (AssertionError, KeyError):

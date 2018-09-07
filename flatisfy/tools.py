@@ -15,14 +15,34 @@ import math
 import re
 import time
 
+import mapbox
 import requests
 import unidecode
+
+from flatisfy.constants import TimeToModes
 
 
 LOGGER = logging.getLogger(__name__)
 
 # Constants
 NAVITIA_ENDPOINT = "https://api.navitia.io/v1/coverage/fr-idf/journeys"
+
+
+def next_weekday(d, weekday):
+    """
+    Find datetime object for next given weekday.
+
+    From
+    https://stackoverflow.com/questions/6558535/find-the-date-for-the-first-monday-after-a-given-a-date.
+
+    :param d: Datetime to search from.
+    :param weekday: Weekday (0 for Monday, etc)
+    :returns: The datetime object for the next given weekday.
+    """
+    days_ahead = weekday - d.weekday()
+    if days_ahead <= 0: # Target day already happened this week
+        days_ahead += 7
+    return d + datetime.timedelta(days_ahead)
 
 
 def convert_arabic_to_roman(arabic):
@@ -322,7 +342,7 @@ def merge_dicts(*args):
     return merge_dicts(merged_flat, *args[2:])
 
 
-def get_travel_time_between(latlng_from, latlng_to, config):
+def get_travel_time_between(latlng_from, latlng_to, mode, config):
     """
     Query the Navitia API to get the travel time between two points identified
     by their latitude and longitude.
@@ -330,6 +350,7 @@ def get_travel_time_between(latlng_from, latlng_to, config):
     :param latlng_from: A tuple of (latitude, longitude) for the starting
         point.
     :param latlng_to: A tuple of (latitude, longitude) for the destination.
+    :param mode: A TimeToMode enum value for the mode of transportation to use.
     :return: A dict of the travel time in seconds and sections of the journey
         with GeoJSON paths. Returns ``None`` if it could not fetch it.
 
@@ -338,58 +359,118 @@ def get_travel_time_between(latlng_from, latlng_to, config):
         Uses the Navitia API. Requires a ``navitia_api_key`` field to be
         filled-in in the ``config``.
     """
+    sections = []
     travel_time = None
 
-    # Check that Navitia API key is available
-    if config["navitia_api_key"]:
-        payload = {
-            "from": "%s;%s" % (latlng_from[1], latlng_from[0]),
-            "to": "%s;%s" % (latlng_to[1], latlng_to[0]),
-            "datetime": datetime.datetime.now().isoformat(),
-            "count": 1
-        }
-        try:
-            # Do the query to Navitia API
-            req = requests.get(
-                NAVITIA_ENDPOINT, params=payload,
-                auth=(config["navitia_api_key"], "")
+    if mode == TimeToModes.PUBLIC_TRANSPORT:
+        # Check that Navitia API key is available
+        if config["navitia_api_key"]:
+            # Search route for next Monday at 8am to avoid looking for a route
+            # in the middle of the night if the fetch is done by night.
+            date_from = next_weekday(datetime.datetime.now(), 0).replace(
+                hour=8,
+                minute=0,
             )
-            req.raise_for_status()
+            payload = {
+                "from": "%s;%s" % (latlng_from[1], latlng_from[0]),
+                "to": "%s;%s" % (latlng_to[1], latlng_to[0]),
+                "datetime": date_from.isoformat(),
+                "count": 1
+            }
+            try:
+                # Do the query to Navitia API
+                req = requests.get(
+                    NAVITIA_ENDPOINT, params=payload,
+                    auth=(config["navitia_api_key"], "")
+                )
+                req.raise_for_status()
 
-            journeys = req.json()["journeys"][0]
-            travel_time = journeys["durations"]["total"]
-            sections = []
-            for section in journeys["sections"]:
-                if section["type"] == "public_transport":
-                    # Public transport
-                    sections.append({
-                        "geojson": section["geojson"],
-                        "color": (
-                            section["display_informations"].get("color", None)
-                        )
-                    })
-                elif section["type"] == "street_network":
-                    # Walking
-                    sections.append({
-                        "geojson": section["geojson"],
-                        "color": None
-                    })
-                else:
-                    # Skip anything else
-                    continue
-        except (requests.exceptions.RequestException,
-                ValueError, IndexError, KeyError) as exc:
-            # Ignore any possible exception
+                journeys = req.json()["journeys"][0]
+                travel_time = journeys["durations"]["total"]
+                for section in journeys["sections"]:
+                    if section["type"] == "public_transport":
+                        # Public transport
+                        sections.append({
+                            "geojson": section["geojson"],
+                            "color": (
+                                section["display_informations"].get("color", None)
+                            )
+                        })
+                    elif section["type"] == "street_network":
+                        # Walking
+                        sections.append({
+                            "geojson": section["geojson"],
+                            "color": None
+                        })
+                    else:
+                        # Skip anything else
+                        continue
+            except (requests.exceptions.RequestException,
+                    ValueError, IndexError, KeyError) as exc:
+                # Ignore any possible exception
+                LOGGER.warning(
+                    "An exception occurred during travel time lookup on "
+                    "Navitia: %s.",
+                    str(exc)
+                )
+        else:
             LOGGER.warning(
-                "An exception occurred during travel time lookup on "
-                "Navitia: %s.",
-                str(exc)
+                "No API key available for travel time lookup. Please provide "
+                "a Navitia API key. Skipping travel time lookup."
             )
-    else:
-        LOGGER.warning(
-            "No API key available for travel time lookup. Please provide "
-            "a Navitia API key. Skipping travel time lookup."
-        )
+    elif mode in [TimeToModes.WALK, TimeToModes.BIKE, TimeToModes.CAR]:
+        MAPBOX_MODES = {
+            TimeToModes.WALK: 'mapbox/walking',
+            TimeToModes.BIKE: 'mapbox/cycling',
+            TimeToModes.CAR: 'mapbox/driving'
+        }
+        # Check that Mapbox API key is available
+        if config["mapbox_api_key"]:
+            try:
+                service = mapbox.Directions(
+                    access_token=config['mapbox_api_key']
+                )
+                origin = {
+                    'type': 'Feature',
+                    'properties': {'name': 'Start'},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [latlng_from[1], latlng_from[0]]}}
+                destination = {
+                    'type': 'Feature',
+                    'properties': {'name': 'End'},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [latlng_to[1], latlng_to[0]]}}
+                response = service.directions(
+                    [origin, destination], MAPBOX_MODES[mode]
+                )
+                response.raise_for_status()
+                route = response.geojson()['features'][0]
+                # Fix longitude/latitude inversion in geojson output
+                geometry = route['geometry']
+                geometry['coordinates'] = [
+                    (x[1], x[0]) for x in geometry['coordinates']
+                ]
+                sections = [{
+                    "geojson": geometry,
+                    "color": "000"
+                }]
+                travel_time = route['properties']['duration']
+            except (requests.exceptions.RequestException,
+                    IndexError, KeyError) as exc:
+                # Ignore any possible exception
+                LOGGER.warning(
+                    "An exception occurred during travel time lookup on "
+                    "Mapbox: %s.",
+                    str(exc)
+                )
+        else:
+            LOGGER.warning(
+                "No API key available for travel time lookup. Please provide "
+                "a Mapbox API key. Skipping travel time lookup."
+            )
+
     if travel_time:
         return {
             "time": travel_time,
