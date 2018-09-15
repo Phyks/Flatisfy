@@ -69,7 +69,7 @@ export default {
 
     computed: {
         capitalizedStatus() {
-            return capitalize($t('status.followed'));
+            return capitalize(this.$t('status.followed'));
         },
         photo() {
             if (this.flat.photos && this.flat.photos.length > 0) {
