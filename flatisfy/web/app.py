@@ -122,6 +122,10 @@ def get_app(config):
         lambda filename: _serve_static_file("/img/{}".format(filename))
     )
     app.route(
+        "/.well-known/<filename:path>", "GET",
+        lambda filename: _serve_static_file("/.well-known/{}".format(filename))
+    )
+    app.route(
         "/data/img/<filename:path>", "GET",
         lambda filename: bottle.static_file(
             filename,
