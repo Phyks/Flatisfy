@@ -11,7 +11,7 @@ import enum
 import arrow
 
 from sqlalchemy import (
-    Column, DateTime, Enum, Float, SmallInteger, String, Text, inspect
+    Boolean, Column, DateTime, Enum, Float, SmallInteger, String, Text, inspect
 )
 from sqlalchemy.orm import validates
 
@@ -83,6 +83,7 @@ class Flat(BASE):
     merged_ids = Column(MagicJSON)
     notes = Column(Text)
     notation = Column(SmallInteger, default=0)
+    is_expired = Column(Boolean, default=False)
 
     # Flatisfy data
     # TODO: Should be in another table with relationships
