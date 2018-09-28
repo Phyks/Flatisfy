@@ -11,7 +11,7 @@
                     <i class="fa fa-star" aria-hidden="true" :title="capitalizedStatus"></i>
                 </template>
 
-                [{{ flat.id.split("@")[1] }}] {{ flat.title }}
+                [{{ flat.id.split("@")[1] }}] {{ flat.is_expired ? "[EXPIRED]" : null }} {{ flat.title }}
 
                 <template v-if="photo">
                     <br/>

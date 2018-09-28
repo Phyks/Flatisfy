@@ -2,7 +2,13 @@
     <div>
         <FlatsMap :flats="flatsMarkers" :places="timeToPlaces"></FlatsMap>
 
-        <h2>{{ $t("home.new_available_flats") }}</h2>
+        <h2>
+          {{ $t("home.new_available_flats") }}
+          <label class="show-expired-flats-label">
+            <input type="checkbox" class="show-expired-flats-checkbox" v-model="showExpiredFlats" />
+            Show expired flats
+          </label>
+        </h2>
 
         <template v-if="Object.keys(postalCodesFlatsBuckets).length > 0">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
@@ -12,7 +18,7 @@
                     </span>
                     - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}
                 </h3>
-                <FlatsTable :flats="postal_code_data.flats"></FlatsTable>
+                <FlatsTable :flats="postal_code_data.flats" :key="postal_code"></FlatsTable>
             </template>
         </template>
         <template v-else-if="isLoading">
@@ -43,12 +49,24 @@ export default {
         this.$store.dispatch('getAllTimeToPlaces')
     },
 
+    data () {
+        return {
+            showExpiredFlats: false,
+        };
+    },
+
     computed: {
         postalCodesFlatsBuckets () {
-            return this.$store.getters.postalCodesFlatsBuckets(flat => flat.status === 'new')
+            return this.$store.getters.postalCodesFlatsBuckets(flat =>
+                flat.status === 'new' &&
+                (this.showExpiredFlats || !flat.is_expired)
+            )
         },
         flatsMarkers () {
-            return this.$store.getters.flatsMarkers(this.$router, flat => flat.status === 'new')
+            return this.$store.getters.flatsMarkers(this.$router, flat =>
+                flat.status === 'new' &&
+                (this.showExpiredFlats || !flat.is_expired)
+            )
         },
         timeToPlaces () {
             return this.$store.getters.allTimeToPlaces
@@ -59,3 +77,15 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+h2 {
+    display: flex;
+    justify-content: space-between;
+}
+
+.show-expired-flats-label {
+    font-weight: initial;
+    font-size: initial;
+}
+</style>
