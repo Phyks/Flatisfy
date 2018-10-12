@@ -155,6 +155,11 @@ def import_and_filter(config, load_from_db=False):
             flatten_flats_by_status[status].extend(flats_list)
 
     with get_session() as session:
+        # Set is_expired to true for all existing flats.
+        # This will be set back to false if we find them during importing.
+        for flat in session.query(flat_model.Flat).all():
+            flat.is_expired = True;
+
         for status, flats_list in flatten_flats_by_status.items():
             # Build SQLAlchemy Flat model objects for every available flat
             flats_objects = {
@@ -178,6 +183,10 @@ def import_and_filter(config, load_from_db=False):
                         )
                     else:
                         flat_object.status = each.status
+
+                    # Every flat we fetched isn't expired
+                    flat_object.is_expired = False
+
                     # For each flat already in the db, merge it (UPDATE)
                     # instead of adding it
                     session.merge(flats_objects.pop(each.id))
