@@ -14,10 +14,12 @@ export default {
         'sortUp': 'Sort in ascending order',
         'sortDown': 'Sort in descending order',
         'mins': 'min | mins',
-        'Unknown': 'Unknown'
+        'Unknown': 'Unknown',
+        'expired': 'expired'
     },
     home: {
-        'new_available_flats': 'New available flats'
+        'new_available_flats': 'New available flats',
+        'show_expired_flats': 'Show expired flats'
     },
     flatListing: {
         'no_available_flats': 'No available flats.',

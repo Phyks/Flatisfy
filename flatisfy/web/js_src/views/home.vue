@@ -6,7 +6,7 @@
           {{ $t("home.new_available_flats") }}
           <label class="show-expired-flats-label">
             <input type="checkbox" class="show-expired-flats-checkbox" v-model="showExpiredFlats" />
-            Show expired flats
+            {{ $t("home.show_expired_flats") }}
           </label>
         </h2>
 
