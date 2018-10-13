@@ -11,7 +11,7 @@
                             -->{{ flat.status ? capitalize($t("status." + flat.status)) : '' }}<!--
                         --></router-link><!--
                     -->) {{ flat.title }} [{{ flat.id.split("@")[1] }}]
-                    {{ flat.is_expired ? '[' + $t('common.expired') + ']' : '' }}
+                    <span class="expired">{{ flat.is_expired ? '[' + $t('common.expired') + ']' : '' }}</span>
                 </h2>
                 <div class="grid">
                     <div class="left-panel">
@@ -369,6 +369,11 @@ export default {
 </script>
 
 <style scoped>
+.expired {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
 @media screen and (min-width: 768px) {
     .grid {
         display: grid;

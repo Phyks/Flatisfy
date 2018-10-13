@@ -12,7 +12,7 @@
                 </template>
 
                 [{{ flat.id.split("@")[1] }}]
-                {{ flat.is_expired ? "[" + $t("common.expired") + "]" : null }}
+                <span class="expired">{{ flat.is_expired ? "[" + $t("common.expired") + "]" : null }}</span>
                 {{ flat.title }}
 
                 <template v-if="photo">
@@ -88,3 +88,10 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+.expired {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+</style>
