@@ -15,6 +15,7 @@ import math
 import re
 import time
 
+import imagehash
 import mapbox
 import requests
 import unidecode
@@ -128,7 +129,13 @@ class DateAwareJSONEncoder(json.JSONEncoder):
     def default(self, o):  # pylint: disable=locally-disabled,E0202
         if isinstance(o, (datetime.date, datetime.datetime)):
             return o.isoformat()
-        return json.JSONEncoder.default(self, o)
+        try:
+            return json.JSONEncoder.default(self, o)
+        except TypeError:
+            # Discard image hashes
+            if isinstance(o, imagehash.ImageHash):
+                return None
+            raise
 
 
 def pretty_json(data):
