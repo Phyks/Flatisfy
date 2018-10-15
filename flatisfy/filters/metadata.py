@@ -289,12 +289,24 @@ def guess_stations(flats_list, constraint, config):
             )
             continue
 
-        matched_stations = fuzzy_match(
-            flat_station,
-            [x.name for x in opendata["stations"]],
-            limit=10,
-            threshold=50
-        )
+        # Weboob modules can return several stations in a comma-separated list.
+        flat_stations = flat_station.split(',')
+        # But some stations containing a comma exist, so let's add the initial
+        # value to the list of stations to check if there was one.
+        if len(flat_stations) > 1:
+            flat_stations.append(flat_station)
+
+        matched_stations = []
+        for tentative_station in flat_stations:
+            matched_stations += fuzzy_match(
+                tentative_station,
+                [x.name for x in opendata["stations"]],
+                limit=10,
+                threshold=50
+            )
+
+        # Keep only one occurrence of each station
+        matched_stations = list(set(matched_stations))
 
         # Filter out the stations that are obviously too far and not well
         # guessed
