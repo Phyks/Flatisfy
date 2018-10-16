@@ -1,3 +1,4 @@
+alembic
 appdirs
 arrow
 backports.csv; python_version < '3.0'

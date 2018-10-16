@@ -77,4 +77,20 @@ If you want to add new data files, especially for public transportation stops
 3. Write a preprocessing function in `flatisfy/data_files/__init__.py`. You
    can have a look at the existing functions for a model.
 
+
+## Adding new migrations
+
+If you want to change the database schema, you should create a matching
+migration. Here is the way to do it correctly:
+
+1. First, edit the `flatisfy/models` files to create / remove the required
+   fields. If you create a new database from scratch, these are the files
+   which will be used.
+2. Then, run `alembic revision -m "Some description"` in the root of the git
+   repo to create a new migration.
+3. Finally, edit the newly created migration file under the `migrations/`
+   folder to add the required code to alter the database (both upgrade and
+   downgrade).
+
+
 Thanks!
