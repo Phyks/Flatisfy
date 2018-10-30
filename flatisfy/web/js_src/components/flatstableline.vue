@@ -86,6 +86,12 @@ export default {
             return range(this.flat.notation);
         },
     },
+
+    methods: {
+        updateFlatStatus (id, status) {
+            this.$store.dispatch('updateFlatStatus', { flatId: id, newStatus: status })
+        },
+    },
 };
 </script>
 

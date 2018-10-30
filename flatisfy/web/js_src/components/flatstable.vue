@@ -118,9 +118,6 @@ export default {
     },
 
     methods: {
-        updateFlatStatus (id, status) {
-            this.$store.dispatch('updateFlatStatus', { flatId: id, newStatus: status })
-        },
         updateSortBy (field) {
             if (this.sortBy === field) {
                 if (this.sortOrder === 'up') {
