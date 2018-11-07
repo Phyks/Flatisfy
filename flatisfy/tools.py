@@ -169,7 +169,10 @@ def batch(iterable, size):
     sourceiter = iter(iterable)
     while True:
         batchiter = itertools.islice(sourceiter, size)
-        yield itertools.chain([next(batchiter)], batchiter)
+        try:
+            yield itertools.chain([next(batchiter)], batchiter)
+        except StopIteration:
+            return
 
 
 def is_within_interval(value, min_value=None, max_value=None):
