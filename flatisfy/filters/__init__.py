@@ -117,16 +117,25 @@ def refine_with_details_criteria(flats_list, constraint):
             )
             is_ok[i] = False
 
-        has_terms_in_description = True
+        has_all_good_terms_in_description = True
         if constraint["description_should_contain"]:
-            has_terms_in_description = all(
+            has_all_good_terms_in_description = all(
                 term in flat['text']
                 for term in constraint["description_should_contain"]
             )
-        if not has_terms_in_description:
+
+        has_a_bad_term_in_description = False
+        if constraint["description_should_not_contain"]:
+            has_a_bad_term_in_description = any(
+                term in flat['text']
+                for term in constraint["description_should_not_contain"]
+            )
+
+        if (not has_all_good_terms_in_description
+            or has_a_bad_term_in_description):
             LOGGER.info(
                 ("Description for flat %s does not contain all the required "
-                 "terms."),
+                 "terms, or contains a blacklisted term."),
                 flat["id"]
             )
             is_ok[i] = False
