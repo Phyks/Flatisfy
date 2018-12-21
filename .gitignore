@@ -11,3 +11,6 @@ package-lock.json
 doc/_build
 yarn.lock
 data_rework/
+.env
+weboob
+.htpasswd

@@ -3,6 +3,7 @@ import VueI18n from 'vue-i18n'
 
 // Import translations
 import en from './en'
+import fr from './fr'
 
 Vue.use(VueI18n)
 
@@ -32,7 +33,8 @@ export function getBrowserLocales () {
 }
 
 const messages = {
-    'en': en
+    'en': en,
+    'fr': fr
 }
 
 const locales = getBrowserLocales()
