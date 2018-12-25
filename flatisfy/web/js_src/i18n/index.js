@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
+import moment from 'moment'
 
 // Import translations
 import en from './en'
@@ -47,6 +48,9 @@ for (var i = 0; i < locales.length; ++i) {
         break  // Break at first matching locale
     }
 }
+
+// Set the locale for Moment.js
+moment.locale(locale)
 
 export default new VueI18n({
     locale: locale,
