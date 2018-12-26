@@ -40,7 +40,7 @@
                     <h3>{{ $t("flatsDetails.Description") }}</h3>
                     <p>{{ flat.text }}</p>
                     <p class="right">{{ flat.location }}</p>
-                    <p>First posted {{ flat.date ? flat.date.fromNow() : '?' }}.</p>
+                    <p>{{ $t("flatsDetails.First_posted") }} {{ flat.date ? flat.date.fromNow() : '?' }}.</p>
                 </div>
                 <div>
                     <h3>{{ $t("flatsDetails.Details") }}</h3>
@@ -114,11 +114,11 @@
                     <FlatsMap :flats="flatMarkers" :places="timeToPlaces" :journeys="journeys"></FlatsMap>
                 </div>
                 <div>
-                    <h3>Notes</h3>
+                    <h3>{{ $t("flatsDetails.Notes") }}</h3>
 
                     <form v-on:submit="updateFlatNotes">
                         <textarea ref="notesTextarea" rows="10">{{ flat.notes }}</textarea>
-                        <p class="right"><input type="submit" value="Save"/></p>
+                        <p class="right"><input type="submit" :value="$t('flatsDetails.Save')"/></p>
                     </form>
                 </div>
             </div>
