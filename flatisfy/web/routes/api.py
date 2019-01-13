@@ -10,6 +10,7 @@ import datetime
 import itertools
 import json
 import re
+import os
 
 import bottle
 import vobject
@@ -146,7 +147,8 @@ def index_v1():
         "flat": "/api/v1/flat/:id",
         "search": "/api/v1/search",
         "ics": "/api/v1/ics/visits.ics",
-        "time_to_places": "/api/v1/time_to_places"
+        "time_to_places": "/api/v1/time_to_places",
+        "metadata": "/api/v1/metadata"
     }
 
 
@@ -496,6 +498,34 @@ def opendata_postal_codes_v1(db):
             "data": postal_codes,
             "page": page_number,
             "items_per_page": page_size if page_size else len(postal_codes)
+        }
+    except Exception as exc:  # pylint: disable= broad-except
+        return JSONError(500, str(exc))
+
+def metadata_v1(config):
+    """
+    API v1 metadata of the application.
+
+    Example::
+
+        GET /api/v1/metadata
+
+    :return: The application metadata.
+    """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
+    try:
+        ts_file = os.path.join(
+            config['data_directory'],
+            'timestamp'
+        )
+        ts = os.path.getmtime(ts_file)
+        return {
+            'data': {
+                'last_update': ts
+            }
         }
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))

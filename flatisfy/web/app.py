@@ -107,6 +107,8 @@ def get_app(config):
     app.route("/api/v1/opendata/postal_codes", "GET",
               api_routes.opendata_postal_codes_v1)
 
+    app.route("/api/v1/metadata", ["GET", "OPTIONS"], api_routes.metadata_v1)
+
     # Index
     app.route("/", "GET", lambda: _serve_static_file("index.html"))
 

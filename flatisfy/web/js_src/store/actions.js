@@ -50,5 +50,11 @@ export default {
         api.doSearch(query, flats => {
             commit(types.REPLACE_FLATS, { flats })
         })
+    },
+    getMetadata ({ commit }) {
+        commit(types.IS_LOADING)
+        api.getMetadata(metadata => {
+            commit(types.RECEIVE_METADATA, { metadata })
+        })
     }
 }
