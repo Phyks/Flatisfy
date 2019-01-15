@@ -42,7 +42,7 @@ export default {
         'utilities_included': '(utilities included)',
         'utilities_excluded': '(utilities excluded)',
         'Description': 'Description',
-        'First_posted' : 'First posted',
+        'First_posted': 'First posted',
         'Details': 'Details',
         'Metadata': 'Metadata',
         'postal_code': 'Postal code',

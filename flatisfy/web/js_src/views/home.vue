@@ -59,8 +59,8 @@ export default {
 
     data () {
         return {
-            showExpiredFlats: false,
-        };
+            showExpiredFlats: false
+        }
     },
 
     computed: {

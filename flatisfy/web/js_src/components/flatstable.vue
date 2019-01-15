@@ -56,13 +56,13 @@
 <script>
 import 'font-awesome-webpack'
 
-import FlatsTableLine from './flatstableline.vue';
+import FlatsTableLine from './flatstableline.vue'
 
 import { capitalize } from '../tools'
 
 export default {
     components: {
-        FlatsTableLine,
+        FlatsTableLine
     },
 
     data () {
@@ -129,7 +129,7 @@ export default {
                 this.sortBy = field
             }
         },
-        capitalize: capitalize,
+        capitalize: capitalize
     }
 }
 </script>
