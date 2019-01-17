@@ -101,10 +101,10 @@ def get_app(config):
     app.route("/api/v1/ics/visits.ics", ["GET", "OPTIONS"],
               api_routes.ics_feed_v1)
 
-    app.route("/api/v1/search", "POST", api_routes.search_v1)
+    app.route("/api/v1/search", ["POST", "OPTIONS"], api_routes.search_v1)
 
-    app.route("/api/v1/opendata", "GET", api_routes.opendata_index_v1)
-    app.route("/api/v1/opendata/postal_codes", "GET",
+    app.route("/api/v1/opendata", ["GET", "OPTIONS"], api_routes.opendata_index_v1)
+    app.route("/api/v1/opendata/postal_codes", ["GET", "OPTIONS"],
               api_routes.opendata_postal_codes_v1)
 
     app.route("/api/v1/metadata", ["GET", "OPTIONS"], api_routes.metadata_v1)

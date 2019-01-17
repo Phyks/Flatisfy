@@ -439,6 +439,10 @@ def opendata_index_v1():
 
         GET /api/v1/opendata
     """
+    if bottle.request.method == 'OPTIONS':
+        # CORS
+        return {}
+
     return {
         "postal_codes": "/api/v1/opendata/postal_codes"
     }
