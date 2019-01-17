@@ -19,6 +19,7 @@ export default {
     },
     home: {
         'new_available_flats': 'Nouveaux appartements disponibles',
+        'Last_update': 'Dernière mise à jour :',
         'show_expired_flats': 'Montrer les annonces expirées'
     },
     flatListing: {

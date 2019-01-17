@@ -67,5 +67,7 @@ export default {
 
     timeToPlaces: (state, getters) => (constraintName) => {
         return state.timeToPlaces[constraintName]
-    }
+    },
+
+    metadata: state => state.metadata
 }

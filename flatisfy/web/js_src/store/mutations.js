@@ -5,6 +5,7 @@ import * as types from './mutations-types'
 export const state = {
     flats: [],
     timeToPlaces: [],
+    metadata: [],
     loading: 0
 }
 
@@ -56,6 +57,10 @@ export const mutations = {
     },
     [types.RECEIVE_TIME_TO_PLACES] (state, { timeToPlaces }) {
         state.timeToPlaces = timeToPlaces
+        state.loading -= 1
+    },
+    [types.RECEIVE_METADATA] (state, { metadata }) {
+        state.metadata = metadata
         state.loading -= 1
     },
     [types.IS_LOADING] (state) {

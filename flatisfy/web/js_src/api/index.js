@@ -161,3 +161,10 @@ export const doSearch = function (query, callback) {
         console.error('Unable to perform search: ' + ex)
     })
 }
+
+export const getMetadata = function (callback) {
+    fetch('/api/v1/metadata', { credentials: 'same-origin' })
+    .then(response => response.json())
+    .then(json => callback(json.data))
+    .catch(ex => console.error('Unable to fetch application metadata: ' + ex))
+}

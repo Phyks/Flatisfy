@@ -66,33 +66,33 @@ export default {
     props: {
         flat: Object,
         showNotationColumn: Boolean,
-        showNotes: Boolean,
+        showNotes: Boolean
     },
 
     computed: {
-        capitalizedStatus() {
-            return capitalize(this.$t('status.followed'));
+        capitalizedStatus () {
+            return capitalize(this.$t('status.followed'))
         },
-        photo() {
+        photo () {
             if (this.flat.photos && this.flat.photos.length > 0) {
                 if (this.flat.photos[0].local) {
-                    return `/data/img/${this.flat.photos[0].local}`;
+                    return `/data/img/${this.flat.photos[0].local}`
                 }
-                return this.flat.photos[0].url;
+                return this.flat.photos[0].url
             }
-            return null;
+            return null
         },
-        notationRange() {
-            return range(this.flat.notation);
-        },
+        notationRange () {
+            return range(this.flat.notation)
+        }
     },
 
     methods: {
         updateFlatStatus (id, status) {
             this.$store.dispatch('updateFlatStatus', { flatId: id, newStatus: status })
-        },
-    },
-};
+        }
+    }
+}
 </script>
 
 <style scoped>

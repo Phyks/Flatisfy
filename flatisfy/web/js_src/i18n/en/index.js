@@ -19,6 +19,7 @@ export default {
     },
     home: {
         'new_available_flats': 'New available flats',
+        'Last_update': 'Last update:',
         'show_expired_flats': 'Show expired flats'
     },
     flatListing: {
@@ -41,7 +42,7 @@ export default {
         'utilities_included': '(utilities included)',
         'utilities_excluded': '(utilities excluded)',
         'Description': 'Description',
-        'First_posted' : 'First posted',
+        'First_posted': 'First posted',
         'Details': 'Details',
         'Metadata': 'Metadata',
         'postal_code': 'Postal code',

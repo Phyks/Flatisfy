@@ -4,6 +4,11 @@
 
         <h2>
           {{ $t("home.new_available_flats") }}
+          <template v-if="lastUpdate">
+            <label class="show-last-update">
+              {{ $t("home.Last_update") }} {{ lastUpdate.fromNow() }}
+            </label>
+          </template>
           <label class="show-expired-flats-label">
             <input type="checkbox" class="show-expired-flats-checkbox" v-model="showExpiredFlats" />
             {{ $t("home.show_expired_flats") }}
@@ -33,6 +38,7 @@
 <script>
 import FlatsMap from '../components/flatsmap.vue'
 import FlatsTable from '../components/flatstable.vue'
+import moment from 'moment'
 
 export default {
     components: {
@@ -47,12 +53,14 @@ export default {
         this.$store.dispatch('getAllFlats')
         // Fetch time to places when the component is created
         this.$store.dispatch('getAllTimeToPlaces')
+        // Fetch application metadata when the component is created
+        this.$store.dispatch('getMetadata')
     },
 
     data () {
         return {
-            showExpiredFlats: false,
-        };
+            showExpiredFlats: false
+        }
     },
 
     computed: {
@@ -71,6 +79,14 @@ export default {
         timeToPlaces () {
             return this.$store.getters.allTimeToPlaces
         },
+        lastUpdate () {
+            var metadata = this.$store.getters.metadata
+            var lastUpdateDate = moment.unix(metadata['last_update'])
+            if (!lastUpdateDate.isValid()) {
+                lastUpdateDate = 0
+            }
+            return lastUpdateDate
+        },
         isLoading () {
             return this.$store.getters.isLoading
         }
@@ -85,6 +101,11 @@ h2 {
 }
 
 .show-expired-flats-label {
+    font-weight: initial;
+    font-size: initial;
+}
+
+.show-last-update {
     font-weight: initial;
     font-size: initial;
 }

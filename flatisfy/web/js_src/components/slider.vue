@@ -28,14 +28,14 @@ export default {
     },
 
     computed: {
-        photosURLOrLocal() {
+        photosURLOrLocal () {
             return this.photos.map(photo => {
                 if (photo.local) {
-                    return `/data/img/${photo.local}`;
+                    return `/data/img/${photo.local}`
                 }
-                return photo.url;
-            });
-        },
+                return photo.url
+            })
+        }
     },
 
     created () {

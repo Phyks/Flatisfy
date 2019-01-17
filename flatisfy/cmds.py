@@ -6,6 +6,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
 import logging
+import os
 
 import flatisfy.filters
 from flatisfy import database
@@ -202,6 +203,14 @@ def import_and_filter(config, load_from_db=False):
 
         if config["send_email"]:
             email.send_notification(config, new_flats)
+
+    # Touch a file to indicate last update timestamp
+    ts_file = os.path.join(
+        config["data_directory"],
+        "timestamp"
+    )
+    with open(ts_file, 'w'):
+        os.utime(ts_file, None)
 
     LOGGER.info("Done!")
 
