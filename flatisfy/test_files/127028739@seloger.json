@@ -15,42 +15,7 @@
   "photos": [
     {
       "id": "0an3yarge9y446j653dewxu0jwy33pmwar47k2qym.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/0/a/n/3/0an3yarge9y446j653dewxu0jwy33pmwar47k2qym.jpg",
-      "data": null
-    },
-    {
-      "id": "1qnz6hpffcrd1c71htbooubgb7s57d82ie1v0zyf2.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/1/q/n/z/1qnz6hpffcrd1c71htbooubgb7s57d82ie1v0zyf2.jpg",
-      "data": null
-    },
-    {
-      "id": "16bv8yqgytefa1fq57hyk6e0y6ox8t2mh8wj2dgxq.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/1/6/b/v/16bv8yqgytefa1fq57hyk6e0y6ox8t2mh8wj2dgxq.jpg",
-      "data": null
-    },
-    {
-      "id": "1o23blwk87ew95e3vcq5ygyk10z2hy82fzo5j6hha.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/1/o/2/3/1o23blwk87ew95e3vcq5ygyk10z2hy82fzo5j6hha.jpg",
-      "data": null
-    },
-    {
-      "id": "20vuxbdp160sot4ccryf6g7g4rwxrkhz3b3tmq7zy.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/2/0/v/u/20vuxbdp160sot4ccryf6g7g4rwxrkhz3b3tmq7zy.jpg",
-      "data": null
-    },
-    {
-      "id": "00d9bpezie95lqtfmoccqg1ddrld2m64c2mcod5ha.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/0/0/d/9/00d9bpezie95lqtfmoccqg1ddrld2m64c2mcod5ha.jpg",
-      "data": null
-    },
-    {
-      "id": "0lhqf881qm2j03hz5581d8ggplp1xwwchb2rtoqgu.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/0/l/h/q/0lhqf881qm2j03hz5581d8ggplp1xwwchb2rtoqgu.jpg",
-      "data": null
-    },
-    {
-      "id": "0chwbagbf8tc0qf9sd3wryzl4gm7hkswcnrtnx2bi.jpg",
-      "url": "https://v.seloger.com/s/width/800/visuels/0/c/h/w/0chwbagbf8tc0qf9sd3wryzl4gm7hkswcnrtnx2bi.jpg",
+      "url": "flatisfy/test_files/127028739@seloger.jpg",
       "data": null
     }
   ],
@@ -69,5 +34,8 @@
     "Etages": "30",
     "Parking": "1",
     "Salle de Séjour": ""
+  },
+  "flatisfy": {
+      "postal_code": "35000"
   }
 }

@@ -15,42 +15,7 @@
   "photos": [
     {
       "id": "f9b2da6dfa184759aa0c349edb1cd037.jpg",
-      "url": "http://thbr.figarocms.net/images/2qEDBqRV-QNlp4fHVNhSCWlt6rU=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/f9b2da6dfa184759aa0c349edb1cd037.jpg",
-      "data": null
-    },
-    {
-      "id": "3f2cc9dc429d4e3dbb9f4216f109d224.jpg",
-      "url": "http://thbr.figarocms.net/images/DulZQyZkkwa0ZFBT1nYD9rUD0A4=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/3f2cc9dc429d4e3dbb9f4216f109d224.jpg",
-      "data": null
-    },
-    {
-      "id": "56ae1db620f44af6b860df10eba55870.jpg",
-      "url": "http://thbr.figarocms.net/images/EpvEffLcFbBT7spEZB2dcOHaZwA=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/56ae1db620f44af6b860df10eba55870.jpg",
-      "data": null
-    },
-    {
-      "id": "5acdef1f05314fe19111a0c3d92b8fe5.jpg",
-      "url": "http://thbr.figarocms.net/images/wHtDlJMwIrMC3cWXi8ASN4I6Zl4=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/5acdef1f05314fe19111a0c3d92b8fe5.jpg",
-      "data": null
-    },
-    {
-      "id": "16c686ea91b248129fe60011d61e060b.jpg",
-      "url": "http://thbr.figarocms.net/images/SD5VT1gxRSXSlt3pAz8r_SI3rqw=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/16c686ea91b248129fe60011d61e060b.jpg",
-      "data": null
-    },
-    {
-      "id": "e6a67d42709d443481da0feb9a7e11a1.jpg",
-      "url": "http://thbr.figarocms.net/images/u8PGKXqC0CL9AyEOI5T9TFeGs-Y=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/e6a67d42709d443481da0feb9a7e11a1.jpg",
-      "data": null
-    },
-    {
-      "id": "6888cc7bc823402198205e480c8cab6c.jpg",
-      "url": "http://thbr.figarocms.net/images/-3AseFCRaleidG2vsDJpA5BLBa4=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/6888cc7bc823402198205e480c8cab6c.jpg",
-      "data": null
-    },
-    {
-      "id": "d40dbeea9e424ea2a846f5683746ea9e.jpg",
-      "url": "http://thbr.figarocms.net/images/TMKBtBuucYge-BgCoUGRjxZjdBE=/560x420/filters:fill(f6f6f6):quality(80):strip_icc()/d40dbeea9e424ea2a846f5683746ea9e.jpg",
+      "url": "flatisfy/test_files/14428129@explorimmo.jpg",
       "data": null
     }
   ],
@@ -73,5 +38,8 @@
     "agencyFees": 0,
     "availabilityDate": null,
     "guarantee": 0
+  },
+  "flatisfy": {
+      "postal_code": "35000"
   }
 }
