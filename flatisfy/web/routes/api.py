@@ -521,14 +521,19 @@ def metadata_v1(config):
         return {}
 
     try:
-        ts_file = os.path.join(
-            config['data_directory'],
-            'timestamp'
-        )
-        ts = os.path.getmtime(ts_file)
+        last_update = None
+        try:
+            ts_file = os.path.join(
+                config['data_directory'],
+                'timestamp'
+            )
+            last_update = os.path.getmtime(ts_file)
+        except OSError:
+            pass
+
         return {
             'data': {
-                'last_update': ts
+                'last_update': last_update
             }
         }
     except Exception as exc:  # pylint: disable= broad-except
