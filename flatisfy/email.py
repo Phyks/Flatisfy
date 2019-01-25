@@ -16,7 +16,7 @@ from email.utils import formatdate, make_msgid
 LOGGER = logging.getLogger(__name__)
 
 
-def send_email(server, port, subject, _from, _to, txt, html):
+def send_email(server, port, subject, _from, _to, txt, html, username=None, password=None):
     """
     Send an email
 
@@ -33,6 +33,8 @@ def send_email(server, port, subject, _from, _to, txt, html):
         return
 
     server = smtplib.SMTP(server, port)
+    if username or password:
+        server.login(username or "", password or "")
 
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
@@ -110,4 +112,6 @@ def send_notification(config, flats):
                config["smtp_from"],
                config["smtp_to"],
                txt,
-               html)
+               html,
+               config.get("smtp_username"),
+               config.get("smtp_password"))
