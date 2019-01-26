@@ -88,6 +88,8 @@ DEFAULT_CONFIG = {
     "send_email": False,
     "smtp_server": 'localhost',
     "smtp_port": 25,
+    "smtp_username": None,
+    "smtp_password": None,
     "smtp_from": "noreply@flatisfy.org",
     "smtp_to": [],
     # The web site url, to be used in email notifications. (doesn't matter
@@ -149,6 +151,8 @@ def validate_config(config, check_with_data):
         assert isinstance(config["send_email"], bool)
         assert config["smtp_server"] is None or isinstance(config["smtp_server"], str)  # noqa: E501
         assert config["smtp_port"] is None or isinstance(config["smtp_port"], int)  # noqa: E501
+        assert config["smtp_username"] is None or isinstance(config["smtp_username"], str)  # noqa: E501
+        assert config["smtp_password"] is None or isinstance(config["smtp_password"], str)  # noqa: E501
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
 
         assert isinstance(config["store_personal_data"], bool)
