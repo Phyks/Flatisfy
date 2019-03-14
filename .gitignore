@@ -14,3 +14,4 @@ data_rework/
 .env
 weboob
 .htpasswd
+.vscode
