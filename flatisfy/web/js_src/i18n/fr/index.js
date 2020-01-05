@@ -6,7 +6,7 @@ export default {
         'More_about': 'Plus sur',
         'Remove': 'Enlever',
         'Restore': 'Remettre',
-        'Original_post': 'Annonce originale | Annonces originales',
+        'Original_post': 'Annonce originale | Annonces originales',
         'Original_post_for': 'Annonce originale pour',
         'Follow': 'Suivre',
         'Unfollow': 'Arrêter de suivre',
