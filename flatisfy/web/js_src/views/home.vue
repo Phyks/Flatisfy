@@ -17,7 +17,8 @@
 
         <template v-if="Object.keys(postalCodesFlatsBuckets).length > 0">
             <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                <h3>{{ postal_code_data.name || $t('common.Unknown') }}
+                <h3>
+                    {{ postal_code_data.name || $t('common.Unknown') }}
                     <span v-if="postal_code !== 'undefined'">
                         ({{ postal_code }})
                     </span>
@@ -98,6 +99,12 @@ export default {
 h2 {
     display: flex;
     justify-content: space-between;
+}
+
+table {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
 }
 
 .show-expired-flats-label {

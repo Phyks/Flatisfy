@@ -38,7 +38,12 @@ DEFAULT_CONFIG = {
             "bedrooms": (None, None),  # (min, max)
             "minimum_nb_photos": None,  # min number of photos
             "description_should_contain": [],  # list of terms
-            "description_should_not_contain": [],  # list of terms
+            "description_should_not_contain": [  # list of terms
+                "vendu",
+                "Vendu",
+                "VENDU",
+                "recherche"
+            ],
             "time_to": {}  # Dict mapping names to {"gps": [lat, lng],
                            #                        "time": (min, max),
                            #                        "mode": Valid mode }

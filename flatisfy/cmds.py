@@ -252,4 +252,5 @@ def serve(config):
         # standard logging
         server = web_app.QuietWSGIRefServer
 
+    print("Launching web viewer running on http://%s:%s" % (config["host"], config["port"]))
     app.run(host=config["host"], port=config["port"], server=server)
