@@ -1,12 +1,9 @@
 alembic
 appdirs
 arrow
-backports.csv; python_version < '3.0'
 bottle
 bottle-sqlalchemy
 canister
-enum34; python_version < '3.4'
-functools32; python_version < '3.2.3'
 future
 imagehash
 mapbox

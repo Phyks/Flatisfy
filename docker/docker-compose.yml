@@ -1,0 +1,11 @@
+version: "3"
+services:
+  app:
+    build: .
+    # image: phyks/flatisfy
+    environment:
+      - LOCAL_USER_ID=1000
+    volumes:
+      - ./data:/flatisfy
+    ports:
+      - "8080:8080"

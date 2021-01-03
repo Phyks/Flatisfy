@@ -1,4 +1,4 @@
-FROM python:2
+FROM python:3
 MAINTAINER Phyks <phyks@phyks.me>
 
 # Setup layout.
@@ -12,10 +12,10 @@ RUN apt-get update && \
 
 # Install latest pip and python dependencies.
 RUN pip install -U setuptools && \
-    pip install html2text simplejson BeautifulSoup
+    pip install html2text simplejson beautifulsoup4
 
 # Install node.js.
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - \
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
     && apt-get install -y nodejs
 
 # Install weboob's code itself.
@@ -30,7 +30,7 @@ COPY ./*.sh /home/user/
 
 # Install Flatisfy, set up directories and permissions.
 RUN cd /home/user \
-    && git clone https://framagit.org/phyks/Flatisfy/ ./app \
+    && git clone https://framagit.org/phyks/Flatisfy.git/ ./app \
     && cd ./app \
     && pip install -r requirements.txt \
     && npm install \
