@@ -16,10 +16,7 @@ from flatisfy.models.postal_code import PostalCode
 from flatisfy.models.public_transport import PublicTransport
 from flatisfy.tools import normalize_string
 
-if sys.version_info >= (3, 0):
-    import csv
-else:
-    from backports import csv
+import csv
 
 
 LOGGER = logging.getLogger(__name__)
