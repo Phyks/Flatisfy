@@ -34,7 +34,7 @@ RUN cd /home/user \
     && cd ./app \
     && pip install -r requirements.txt \
     && npm install \
-    && npm run build:prod \
+    && npm run build:dev \
     && mkdir -p /home/user/.local/share/flatisfy \
     && chown user:user -R /home/user \
     && chmod +x /home/user/*.sh
