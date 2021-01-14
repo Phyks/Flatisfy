@@ -46,9 +46,9 @@ export default {
                 fillColor: '#e4ce7f',
                 fillOpacity: 1
             },
-            center: null,
+            center: [46.449, 2.210],
             zoom: {
-                defaultZoom: 13,
+                defaultZoom: 6,
                 minZoom: 5,
                 maxZoom: 17
             },
