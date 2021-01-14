@@ -53,6 +53,7 @@
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^11.3.4",
     "vue-template-compiler": "^2.2.6",
-    "webpack": "^2.3.3"
+    "webpack": "^2.3.3",
+    "ziparound": "https://github.com/guix77/ziparound"
   }
 }
