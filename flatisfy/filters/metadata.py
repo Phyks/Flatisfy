@@ -148,13 +148,18 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
     for flat in flats_list:
         location = flat.get("location", None)
         if not location:
+            addr = flat.get("address", None)
+            if addr:
+                location = addr['full_address']
+        if not location:
             # Skip everything if empty location
             LOGGER.info(
                 (
                     "No location field for flat %s, skipping postal "
-                    "code lookup."
+                    "code lookup. (%s)"
                 ),
-                flat["id"]
+                flat["id"],
+                flat["address"]
             )
             continue
 
