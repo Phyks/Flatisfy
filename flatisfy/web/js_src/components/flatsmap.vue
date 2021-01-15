@@ -2,16 +2,20 @@
     <div class="full">
         <v-map :zoom="zoom.defaultZoom" :center="center" :bounds="bounds" :min-zoom="zoom.minZoom" :max-zoom="zoom.maxZoom">
             <v-tilelayer :url="tiles.url" :attribution="tiles.attribution"></v-tilelayer>
-            <template v-for="marker in flats">
-                <v-marker :lat-lng="{ lat: marker.gps[0], lng: marker.gps[1] }" :icon="icons.flat">
-                    <v-popup :content="marker.content"></v-popup>
-                </v-marker>
-            </template>
-            <template v-for="(place_gps, place_name) in places">
-                <v-marker :lat-lng="{ lat: place_gps[0], lng: place_gps[1] }" :icon="icons.place">
-                    <v-tooltip :content="place_name"></v-tooltip>
-                </v-marker>
-            </template>
+            <v-marker-cluster>
+                <template v-for="marker in flats">
+                        <v-marker :lat-lng="{ lat: marker.gps[0], lng: marker.gps[1] }" :icon="icons.flat">
+                            <v-popup :content="marker.content"></v-popup>
+                        </v-marker>
+                </template>
+            </v-marker-cluster>
+            <v-marker-cluster>
+                <template v-for="(place_gps, place_name) in places">
+                        <v-marker :lat-lng="{ lat: place_gps[0], lng: place_gps[1] }" :icon="icons.place">
+                            <v-tooltip :content="place_name"></v-tooltip>
+                        </v-marker>
+                </template>
+            </v-marker-cluster>
             <template v-for="journey in journeys">
                 <v-geojson-layer :geojson="journey.geojson" :options="Object.assign({}, defaultGeoJSONOptions, journey.options)"></v-geojson-layer>
             </template>
@@ -31,10 +35,13 @@ L.Icon.Default.mergeOptions({
 })
 
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 require('leaflet.icon.glyph')
 
-import Vue2Leaflet from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LTooltip, LPopup, LGeoJSON } from 'vue2-leaflet'
+import Vue2LeafletMarkerCluster from 'vue2-leaflet-markercluster'
 
 export default {
     data () {
@@ -67,12 +74,13 @@ export default {
     },
 
     components: {
-        'v-map': Vue2Leaflet.Map,
-        'v-tilelayer': Vue2Leaflet.TileLayer,
-        'v-marker': Vue2Leaflet.Marker,
-        'v-tooltip': Vue2Leaflet.Tooltip,
-        'v-popup': Vue2Leaflet.Popup,
-        'v-geojson-layer': Vue2Leaflet.GeoJSON
+        'v-map': LMap,
+        'v-tilelayer': LTileLayer,
+        'v-marker': LMarker,
+        'v-marker-cluster': Vue2LeafletMarkerCluster,
+        'v-tooltip': LTooltip,
+        'v-popup': LPopup,
+        'v-geojson-layer': LGeoJSON
     },
 
     computed: {

@@ -1,7 +1,6 @@
 <template>
     <div>
         <FlatsMap :flats="flatsMarkers" :places="timeToPlaces"></FlatsMap>
-
         <h2>
           {{ $t("home.new_available_flats") }}
           <template v-if="lastUpdate">

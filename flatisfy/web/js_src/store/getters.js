@@ -33,20 +33,20 @@ export default {
                 const gps = findFlatGPS(flat)
 
                 if (gps) {
-                    const previousMarkerIndex = markers.findIndex(
+                    const previousMarker = markers.find(
                         marker => marker.gps[0] === gps[0] && marker.gps[1] === gps[1]
                     )
-
-                    const href = router.resolve({ name: 'details', params: { id: flat.id }}).href
-                    if (previousMarkerIndex !== -1) {
-                        markers[previousMarkerIndex].content += '<br/><a href="' + href + '">' + flat.title + '</a>'
-                    } else {
-                        markers.push({
-                            'title': '',
-                            'content': '<a href="' + href + '">' + flat.title + '</a>',
-                            'gps': gps
-                        })
+                    if (previousMarker) {
+                        // randomize position a bit
+                        // gps[0] += (Math.random() - 0.5) / 500
+                        // gps[1] += (Math.random() - 0.5) / 500
                     }
+                    const href = router.resolve({ name: 'details', params: { id: flat.id }}).href
+                    markers.push({
+                        'title': '',
+                        'content': '<a href="' + href + '">' + flat.title + '</a>',
+                        'gps': gps
+                    })
                 }
             }
         })
