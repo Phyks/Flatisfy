@@ -91,6 +91,7 @@ class Flat(BASE):
     flatisfy_postal_code = Column(String)
     flatisfy_time_to = Column(MagicJSON)
     flatisfy_constraint = Column(String)
+    flatisfy_position = Column(MagicJSON)
 
     # Status
     status = Column(Enum(FlatStatus), default=FlatStatus.new)
@@ -182,6 +183,9 @@ class Flat(BASE):
             )
             flat_dict["flatisfy_postal_code"] = (
                 flat_dict["flatisfy"].get("postal_code", None)
+            )
+            flat_dict["flatisfy_position"] = (
+                flat_dict["flatisfy"].get("position", None)
             )
             flat_dict["flatisfy_time_to"] = (
                 flat_dict["flatisfy"].get("time_to", {})

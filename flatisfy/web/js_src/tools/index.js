@@ -1,8 +1,10 @@
 export function findFlatGPS (flat) {
     let gps
 
-    // Try to push a marker based on stations
-    if (flat.flatisfy_stations && flat.flatisfy_stations.length > 0) {
+    if (flat.flatisfy_position) {
+        gps = [flat.flatisfy_position.lat, flat.flatisfy_position.lng]
+    } else if (flat.flatisfy_stations && flat.flatisfy_stations.length > 0) {
+        // Try to push a marker based on stations
         gps = [0.0, 0.0]
         flat.flatisfy_stations.forEach(station => {
             gps = [gps[0] + station.gps[0], gps[1] + station.gps[1]]
