@@ -57,7 +57,7 @@ export default {
             zoom: {
                 defaultZoom: 6,
                 minZoom: 5,
-                maxZoom: 17
+                maxZoom: 20
             },
             tiles: {
                 url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
