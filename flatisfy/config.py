@@ -99,7 +99,8 @@ DEFAULT_CONFIG = {
     "smtp_to": [],
     # The web site url, to be used in email notifications. (doesn't matter
     # whether the trailing slash is present or not)
-    "website_url": "http://127.0.0.1:8080"
+    "website_url": "http://127.0.0.1:8080",
+    "ignore_station": False,
 }
 
 LOGGER = logging.getLogger(__name__)
@@ -168,6 +169,8 @@ def validate_config(config, check_with_data):
         # API keys
         assert config["navitia_api_key"] is None or isinstance(config["navitia_api_key"], str)  # noqa: E501
         assert config["mapbox_api_key"] is None or isinstance(config["mapbox_api_key"], str)  # noqa: E501
+
+        assert config["ignore_station"] is None or isinstance(config["ignore_station"], bool)  # noqa: E501
 
         # Ensure constraints are ok
         assert config["constraints"]

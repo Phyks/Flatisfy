@@ -185,8 +185,11 @@ def first_pass(flats_list, constraint, config):
 
     # Guess the postal codes
     flats_list = metadata.guess_postal_code(flats_list, constraint, config)
-    # Try to match with stations
-    flats_list = metadata.guess_stations(flats_list, constraint, config)
+
+    if not config["ignore_station"]:
+        # Try to match with stations
+        flats_list = metadata.guess_stations(flats_list, constraint, config)
+
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list,
                                                             constraint)
@@ -222,10 +225,11 @@ def second_pass(flats_list, constraint, config):
     flats_list = metadata.guess_postal_code(flats_list, constraint, config)
 
     # Better match with stations (confirm and check better)
-    flats_list = metadata.guess_stations(flats_list, constraint, config)
+    if not config["ignore_station"]:
+        flats_list = metadata.guess_stations(flats_list, constraint, config)
 
-    # Compute travel time to specified points
-    flats_list = metadata.compute_travel_times(flats_list, constraint, config)
+        # Compute travel time to specified points
+        flats_list = metadata.compute_travel_times(flats_list, constraint, config)
 
     # Remove returned housing posts that do not match criteria
     flats_list, ignored_list = refine_with_housing_criteria(flats_list,
