@@ -235,14 +235,14 @@ class WebOOBProxy(object):
 
         try:
             housing = backend.get_housing(flat_id)
-            # Otherwise, we miss the @backend afterwards
-            housing.id = full_flat_id
             if not store_personal_data:
                 # Ensure phone is cleared
                 housing.phone = None
             else:
                 # Ensure phone is fetched
                 backend.fillobj(housing, 'phone')
+            # Otherwise, we miss the @backend afterwards
+            housing.id = full_flat_id
 
             return json.dumps(housing, cls=WeboobEncoder)
         except Exception as exc:  # pylint: disable=broad-except
