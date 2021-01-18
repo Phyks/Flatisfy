@@ -18,7 +18,7 @@ from flatisfy import fetch
 from flatisfy import tools
 from flatisfy.filters import metadata
 from flatisfy.web import app as web_app
-
+import time
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,6 +69,10 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
         for i, flat in enumerate(first_pass_result["new"]):
             details = fetch.fetch_details(config, flat["id"])
             first_pass_result["new"][i] = tools.merge_dicts(flat, details)
+            if flat["id"].endswith("@leboncoin"):
+                # sleep 0.5s to avoid rate-kick
+                time.sleep(0.5)
+
 
     # Do a second pass to consolidate all the infos we found and make use of
     # additional infos
