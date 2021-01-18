@@ -275,6 +275,7 @@ def fetch_flats(config):
                     webOOB_proxy.query(query, config["max_entries"],
                                        config["store_personal_data"])
                 )
+        housing_posts = housing_posts[:config["max_entries"]]
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
         constraint_flats_list = [json.loads(flat) for flat in housing_posts]
