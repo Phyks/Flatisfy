@@ -136,10 +136,10 @@
                             {{ $t("flatsDetails.no_phone_found") }}
                         </template>
                     </p>
-                    <p>{{ $tc("common.Original_post", 42) }}
+                    <p>{{ $tc("common.Original_post", flat.urls.length) }}
                         <ul>
                             <li v-for="(url, index) in flat.urls">
-                                <a :href="url">
+                                <a :href="url" target="_blank">
                                     {{ $tc("common.Original_post", 1) }} {{ index + 1 }}
                                     <i class="fa fa-external-link" aria-hidden="true"></i>
                                 </a>
