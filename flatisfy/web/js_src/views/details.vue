@@ -117,7 +117,7 @@
                     <h3>{{ $t("flatsDetails.Notes") }}</h3>
 
                     <form v-on:submit="updateFlatNotes">
-                        <textarea ref="notesTextarea" rows="10">{{ flat.notes }}</textarea>
+                        <textarea ref="notesTextarea" rows="10" :v-model="flat.notes"></textarea>
                         <p class="right"><input type="submit" :value="$t('flatsDetails.Save')"/></p>
                     </form>
                 </div>
