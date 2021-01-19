@@ -23,16 +23,17 @@ import time
 LOGGER = logging.getLogger(__name__)
 
 
-def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
+def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, past_flats=None):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
     :param config: A config dict.
     :param constraint_name: The constraint name that the ``flats_list`` should
         satisfy.
+    :param flats_list: The initial list of flat objects to filter.
     :param fetch_details: Whether additional details should be fetched between
         the two passes.
-    :param flats_list: The initial list of flat objects to filter.
+    :param past_flats: The list of already fetched flats
     :return: A dict mapping flat status and list of flat objects.
     """
     # Add the flatisfy metadata entry and prepare the flat objects
@@ -66,13 +67,21 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
 
     # Load additional infos
     if fetch_details:
+        past_ids = {x["id"]: x for x in past_flats} if past_flats else {}
         for i, flat in enumerate(first_pass_result["new"]):
-            details = fetch.fetch_details(config, flat["id"])
-            first_pass_result["new"][i] = tools.merge_dicts(flat, details)
-            if flat["id"].endswith("@leboncoin"):
-                # sleep 0.5s to avoid rate-kick
-                time.sleep(0.5)
+            details = None
 
+            use_cache = past_ids.get(flat["id"])
+            if use_cache:
+                LOGGER.info("Skipping details download for %s.", flat["id"])
+                details = use_cache
+            else:
+                details = fetch.fetch_details(config, flat["id"])
+                if flat["id"].endswith("@leboncoin"):
+                    # sleep 0.5s to avoid rate-kick
+                    time.sleep(0.5)
+
+            first_pass_result["new"][i] = tools.merge_dicts(flat, details)
 
     # Do a second pass to consolidate all the infos we found and make use of
     # additional infos
@@ -107,7 +116,7 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
     }
 
 
-def filter_fetched_flats(config, fetched_flats, fetch_details=True):
+def filter_fetched_flats(config, fetched_flats, fetch_details=True, past_flats={}):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
@@ -124,12 +133,13 @@ def filter_fetched_flats(config, fetched_flats, fetch_details=True):
             config,
             constraint_name,
             flats_list,
-            fetch_details
+            fetch_details,
+            past_flats.get(constraint_name, None)
         )
     return fetched_flats
 
 
-def import_and_filter(config, load_from_db=False):
+def import_and_filter(config, load_from_db=False, new_only=False):
     """
     Fetch the available flats list. Then, filter it according to criteria.
     Finally, store it in the database.
@@ -140,13 +150,15 @@ def import_and_filter(config, load_from_db=False):
     :return: ``None``.
     """
     # Fetch and filter flats list
+    past_flats = fetch.load_flats_from_db(config)
     if load_from_db:
-        fetched_flats = fetch.load_flats_from_db(config)
+        fetched_flats = past_flats
     else:
         fetched_flats = fetch.fetch_flats(config)
     # Do not fetch additional details if we loaded data from the db.
     flats_by_status = filter_fetched_flats(config, fetched_flats=fetched_flats,
-                                           fetch_details=(not load_from_db))
+                                           fetch_details=(not load_from_db),
+                                           past_flats=past_flats if new_only else {})
     # Create database connection
     get_session = database.init_db(config["database"], config["search_index"])
 
@@ -207,6 +219,8 @@ def import_and_filter(config, load_from_db=False):
 
         if config["send_email"]:
             email.send_notification(config, new_flats)
+
+    LOGGER.info(f"Found {len(new_flats)} new flats.")
 
     # Touch a file to indicate last update timestamp
     ts_file = os.path.join(

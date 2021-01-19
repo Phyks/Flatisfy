@@ -171,7 +171,7 @@ def guess_location_position(location, cities, constraint):
             ]
             if len(postal_code_objects_for_city):
                 position = {"lat": postal_code_objects_for_city[0].lat, "lng": postal_code_objects_for_city[0].lng}
-                LOGGER.info(
+                LOGGER.debug(
                     ("Found position %s using city %s."),
                     position, matched_city_name
                 )
@@ -228,7 +228,7 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
             # Check the postal code is within the db
             assert postal_code in [x.postal_code for x in opendata["postal_codes"]]
 
-            LOGGER.info(
+            LOGGER.debug(
                 "Found postal code in location field for flat %s: %s.",
                 flat["id"], postal_code
             )
@@ -266,13 +266,12 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
                     ("Postal code %s found for flat %s @ %s is off-constraints "
                      "(distance is %dm > %dm). Let's consider it is an "
                      "artifact match and keep the post without this postal "
-                     "code. (%s)"),
+                     "code."),
                     postal_code,
                     flat["id"],
                     location,
                     int(distance),
                     int(distance_threshold),
-                    flat
                 )
                 postal_code = None
                 position = None

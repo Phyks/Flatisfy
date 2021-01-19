@@ -101,8 +101,16 @@ def parse_args(argv=None):
     )
 
     # Import subcommand parser
-    subparsers.add_parser("import", parents=[parent_parser],
-                          help="Import housing posts in database.")
+    import_filter = subparsers.add_parser(
+                        "import", parents=[parent_parser],
+                        help="Import housing posts in database.")
+    import_filter.add_argument(
+        "--new-only",
+        action="store_true",
+        help=(
+            "Download new housing posts only but do not refresh existing ones"
+        )
+    )
 
     # Purge subcommand parser
     subparsers.add_parser("purge", parents=[parent_parser],
@@ -211,7 +219,7 @@ def main():
         return
     # Import command
     elif args.cmd == "import":
-        cmds.import_and_filter(config, load_from_db=False)
+        cmds.import_and_filter(config, load_from_db=False, new_only=args.new_only)
         return
     # Serve command
     elif args.cmd == "serve":
