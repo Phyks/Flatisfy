@@ -9,10 +9,12 @@ import collections
 import hashlib
 import os
 import requests
+import logging
 from io import BytesIO
 
 import PIL.Image
 
+LOGGER = logging.getLogger(__name__)
 
 class MemoryCache(object):
     """
@@ -104,6 +106,11 @@ class ImageCache(MemoryCache):
         if len(self.map.keys()) > self.max_items:
             self.map.popitem(last=False)
 
+        if url.endswith(".svg"):
+            # Skip SVG photo which are unsupported and unlikely to be relevant
+            return None
+
+        filepath = None
         # Try to load from local folder
         if self.storage_dir:
             filepath = os.path.join(
@@ -114,13 +121,15 @@ class ImageCache(MemoryCache):
                 return PIL.Image.open(filepath)
         # Otherwise, fetch it
         try:
+            LOGGER.debug(f"Download photo from {url} to {filepath}")
             req = requests.get(url)
             req.raise_for_status()
             image = PIL.Image.open(BytesIO(req.content))
-            if self.storage_dir:
+            if filepath:
                 image.save(filepath, format=image.format)
             return image
-        except (requests.HTTPError, IOError):
+        except (requests.HTTPError, IOError) as exc:
+            LOGGER.info(f"Download photo from {url} failed: {exc}")
             return None
 
     def __init__(self, max_items=200, storage_dir=None):
