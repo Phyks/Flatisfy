@@ -38,15 +38,16 @@ export default {
                     )
                     if (previousMarker) {
                         // randomize position a bit
-                        // gps[0] += (Math.random() - 0.5) / 500
-                        // gps[1] += (Math.random() - 0.5) / 500
+                        gps[0] += (Math.random() - 0.5) / 500
+                        gps[1] += (Math.random() - 0.5) / 500
                     }
                     const href = router.resolve({ name: 'details', params: { id: flat.id }}).href
                     const cost = flat.cost ? ' ( ' + flat.cost + '€)' : ''
                     markers.push({
                         'title': '',
                         'content': '<a href="' + href + '">' + flat.title + '</a>' + cost,
-                        'gps': gps
+                        'gps': gps,
+                        'flat_id': flat.id
                     })
                 }
             }

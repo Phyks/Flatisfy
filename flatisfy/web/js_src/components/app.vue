@@ -16,7 +16,7 @@
 <style>
 body {
   margin: 0 auto;
-  max-width: 75em;
+  /* max-width: 75em; */
   font-family: "Helvetica", "Arial", sans-serif;
   line-height: 1.5;
   padding: 4em 1em;
