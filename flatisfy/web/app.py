@@ -96,6 +96,7 @@ def get_app(config):
     )
 
     app.route("/api/v1/metadata", ["GET", "OPTIONS"], api_routes.metadata_v1)
+    app.route("/api/v1/import", ["GET", "OPTIONS"], api_routes.import_v1)
 
     # Index
     app.route("/", "GET", lambda: _serve_static_file("index.html"))

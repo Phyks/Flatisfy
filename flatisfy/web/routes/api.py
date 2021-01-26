@@ -16,6 +16,7 @@ import vobject
 import flatisfy.data
 from flatisfy.models import flat as flat_model
 from flatisfy.models.postal_code import PostalCode
+from flatisfy import cmds
 
 FILTER_RE = re.compile(r"filter\[([A-z0-9_]+)\]")
 
@@ -494,5 +495,26 @@ def metadata_v1(config):
             pass
 
         return {"data": {"last_update": last_update}}
+    except Exception as exc:  # pylint: disable= broad-except
+        return JSONError(500, str(exc))
+
+
+def import_v1(config):
+    """
+    API v1 import new flats.
+
+    Example::
+
+        GET /api/v1/import
+
+    :return: The new flats.
+    """
+    if bottle.request.method == "OPTIONS":
+        # CORS
+        return {}
+
+    try:
+        flats_id = cmds.import_and_filter(config, False, True)
+        return {"flats": flats_id}
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
