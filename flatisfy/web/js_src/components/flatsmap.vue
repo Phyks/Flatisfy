@@ -1,6 +1,6 @@
 <template lang="html">
     <div class="full">
-        <v-map :zoom="zoom.defaultZoom" :center="center" :bounds="bounds" :min-zoom="zoom.minZoom" :max-zoom="zoom.maxZoom" v-on:click="$emit('select-flat', null)">
+        <v-map v-if="bounds" :zoom="zoom.defaultZoom" :bounds="bounds" :min-zoom="zoom.minZoom" :max-zoom="zoom.maxZoom" v-on:click="$emit('select-flat', null)" @update:bounds="bounds = $event">
             <v-tilelayer :url="tiles.url" :attribution="tiles.attribution"></v-tilelayer>
             <v-marker-cluster>
                 <template v-for="marker in flats">
@@ -20,6 +20,7 @@
                 <v-geojson-layer :geojson="journey.geojson" :options="Object.assign({}, defaultGeoJSONOptions, journey.options)"></v-geojson-layer>
             </template>
         </v-map>
+        <div v-else>Nothing to display yet</div>
     </div>
 </template>
 
@@ -53,7 +54,7 @@ export default {
                 fillColor: '#e4ce7f',
                 fillOpacity: 1
             },
-            center: [46.449, 2.210],
+            bounds: [[40.91351257612758, -7.580566406250001], [51.65892664880053, 12.0849609375]],
             zoom: {
                 defaultZoom: 6,
                 minZoom: 5,
@@ -83,17 +84,18 @@ export default {
         'v-geojson-layer': LGeoJSON
     },
 
-    computed: {
-        bounds () {
-            let bounds = []
-            this.flats.forEach(flat => bounds.push(flat.gps))
-            Object.keys(this.places).forEach(place => bounds.push(this.places[place]))
+    watch: {
+        flats: 'computeBounds',
+        places: 'computeBounds'
+    },
 
-            if (bounds.length > 0) {
-                bounds = L.latLngBounds(bounds)
-                return bounds
-            } else {
-                return null
+    methods: {
+        computeBounds (newData, oldData) {
+            if (this.flats.length && JSON.stringify(newData) !== JSON.stringify(oldData)) {
+                const allBounds = []
+                this.flats.forEach(flat => allBounds.push(flat.gps))
+                Object.keys(this.places).forEach(place => allBounds.push(this.places[place]))
+                this.bounds = allBounds.length ? L.latLngBounds(allBounds) : undefined
             }
         }
     },

@@ -101,7 +101,7 @@
             <div>
                 <h3>{{ $t("flatsDetails.Location") }}</h3>
 
-                <FlatsMap :flats="flatMarkers" :places="timeToPlaces" :journeys="journeys"></FlatsMap>
+                <FlatsMap :flats="flatMarker" :places="timeToPlaces" :journeys="journeys"></FlatsMap>
             </div>
             <div>
                 <h3>{{ $t("flatsDetails.Notes") }}</h3>
@@ -239,7 +239,7 @@ export default {
         isLoading () {
             return this.$store.getters.isLoading
         },
-        flatMarkers () {
+        flatMarker () {
             return this.$store.getters.flatsMarkers(this.$router, flat => flat.id === this.flat.id)
         },
         'flatpickrValue' () {
