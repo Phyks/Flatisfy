@@ -25,14 +25,7 @@ def download_images(flats_list, config):
     photo_cache = ImageCache(
         storage_dir=os.path.join(config["data_directory"], "images")
     )
-    flats_list_length = len(flats_list)
-    for i, flat in enumerate(flats_list):
-        LOGGER.info(
-            "Downloading photos for flat %d/%d: %s.",
-            i + 1,
-            flats_list_length,
-            flat["id"],
-        )
+    for flat in flats_list:
         for photo in flat["photos"]:
             # Download photo
             image = photo_cache.get(photo["url"])
