@@ -50,10 +50,7 @@ def preprocess_data(config, force=False):
     # Check if a build is required
     get_session = database.init_db(config["database"], config["search_index"])
     with get_session() as session:
-        is_built = (
-            session.query(PublicTransport).count() > 0
-            and session.query(PostalCode).count() > 0
-        )
+        is_built = session.query(PublicTransport).count() > 0 and session.query(PostalCode).count() > 0
         if is_built and not force:
             # No need to rebuild the database, skip
             return False
@@ -66,9 +63,7 @@ def preprocess_data(config, force=False):
     for preprocess in data_files.PREPROCESSING_FUNCTIONS:
         data_objects = preprocess()
         if not data_objects:
-            raise flatisfy.exceptions.DataBuildError(
-                "Error with %s." % preprocess.__name__
-            )
+            raise flatisfy.exceptions.DataBuildError("Error with %s." % preprocess.__name__)
         with get_session() as session:
             session.add_all(data_objects)
     LOGGER.info("Done building data!")

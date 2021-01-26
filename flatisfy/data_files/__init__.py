@@ -114,19 +114,11 @@ def french_postal_codes_to_quarter(postal_code):
     }
 
     subdivision = next(
-        (
-            i
-            for i, departments in department_to_subdivision.items()
-            if departement in departments
-        ),
+        (i for i, departments in department_to_subdivision.items() if departement in departments),
         None,
     )
     return next(
-        (
-            i
-            for i, subdivisions in subdivision_to_quarters.items()
-            if subdivision in subdivisions
-        ),
+        (i for i, subdivisions in subdivision_to_quarters.items() if subdivision in subdivisions),
         None,
     )
 
@@ -165,9 +157,7 @@ def _preprocess_laposte():
                 )
                 continue
 
-            name = normalize_string(
-                titlecase.titlecase(fields["nom_de_la_commune"]), lowercase=False
-            )
+            name = normalize_string(titlecase.titlecase(fields["nom_de_la_commune"]), lowercase=False)
 
             if (fields["code_postal"], name) in seen_postal_codes:
                 continue
@@ -183,9 +173,7 @@ def _preprocess_laposte():
                 )
             )
         except KeyError:
-            LOGGER.info(
-                "Missing data for postal code %s, skipping it.", fields["code_postal"]
-            )
+            LOGGER.info("Missing data for postal code %s, skipping it.", fields["code_postal"])
 
     return postal_codes_data
 
@@ -201,15 +189,11 @@ def _preprocess_public_transport():
     for area, data_file in TRANSPORT_DATA_FILES.items():
         LOGGER.info("Building from public transport data %s.", data_file)
         try:
-            with io.open(
-                os.path.join(MODULE_DIR, data_file), "r", encoding="utf-8"
-            ) as fh:
+            with io.open(os.path.join(MODULE_DIR, data_file), "r", encoding="utf-8") as fh:
                 filereader = csv.reader(fh)
                 next(filereader, None)  # Skip first row (headers)
                 for row in filereader:
-                    public_transport_data.append(
-                        PublicTransport(name=row[2], area=area, lat=row[3], lng=row[4])
-                    )
+                    public_transport_data.append(PublicTransport(name=row[2], area=area, lat=row[3], lng=row[4]))
         except (IOError, IndexError):
             LOGGER.error("Invalid raw opendata file: %s.", data_file)
             return []

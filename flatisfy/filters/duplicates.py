@@ -169,9 +169,7 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
             # Sort matching flats by backend precedence
             matching_flats.sort(
                 key=lambda flat: next(
-                    i
-                    for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE)
-                    if flat["id"].endswith(backend)
+                    i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE) if flat["id"].endswith(backend)
                 ),
                 reverse=True,
             )
@@ -199,9 +197,7 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
     if should_intersect:
         # We added some flats twice with the above method, let's deduplicate on
         # id.
-        unique_flats_list, _ = detect(
-            unique_flats_list, key="id", merge=True, should_intersect=False
-        )
+        unique_flats_list, _ = detect(unique_flats_list, key="id", merge=True, should_intersect=False)
 
     return unique_flats_list, duplicate_flats
 
@@ -274,18 +270,14 @@ def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold):
         # If the two flats are from the same website and have a
         # different float part, consider they cannot be duplicates. See
         # https://framagit.org/phyks/Flatisfy/issues/100.
-        both_are_from_same_backend = (
-            flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]
-        )
+        both_are_from_same_backend = flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]
         both_have_float_part = (flat1["area"] % 1) > 0 and (flat2["area"] % 1) > 0
         both_have_equal_float_part = (flat1["area"] % 1) == (flat2["area"] % 1)
         if both_have_float_part and both_are_from_same_backend:
             assert both_have_equal_float_part
 
         if flat1.get("photos", []) and flat2.get("photos", []):
-            n_common_photos = find_number_common_photos(
-                flat1["photos"], flat2["photos"], photo_cache, hash_threshold
-            )
+            n_common_photos = find_number_common_photos(flat1["photos"], flat2["photos"], photo_cache, hash_threshold)
 
             min_number_photos = min(len(flat1["photos"]), len(flat2["photos"]))
 
@@ -332,18 +324,13 @@ def deep_detect(flats_list, config):
             if flat2["id"] in matching_flats[flat1["id"]]:
                 continue
 
-            n_common_items = get_duplicate_score(
-                flat1, flat2, photo_cache, config["duplicate_image_hash_threshold"]
-            )
+            n_common_items = get_duplicate_score(flat1, flat2, photo_cache, config["duplicate_image_hash_threshold"])
 
             # Minimal score to consider they are duplicates
             if n_common_items >= config["duplicate_threshold"]:
                 # Mark flats as duplicates
                 LOGGER.info(
-                    (
-                        "Found duplicates using deep detection: (%s, %s). "
-                        "Score is %d."
-                    ),
+                    ("Found duplicates using deep detection: (%s, %s). " "Score is %d."),
                     flat1["id"],
                     flat2["id"],
                     n_common_items,
@@ -369,9 +356,7 @@ def deep_detect(flats_list, config):
         to_merge = sorted(
             [flat for flat in flats_list if flat["id"] in matching_flats[flat_id]],
             key=lambda flat: next(
-                i
-                for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE)
-                if flat["id"].endswith(backend)
+                i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE) if flat["id"].endswith(backend)
             ),
             reverse=True,
         )

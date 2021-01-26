@@ -28,15 +28,11 @@ def parse_args(argv=None):
     """
     Create parser and parse arguments.
     """
-    parser = argparse.ArgumentParser(
-        prog="Flatisfy", description="Find the perfect flat."
-    )
+    parser = argparse.ArgumentParser(prog="Flatisfy", description="Find the perfect flat.")
 
     # Parent parser containing arguments common to any subcommand
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument(
-        "--data-dir", help="Location of Flatisfy data directory."
-    )
+    parent_parser.add_argument("--data-dir", help="Location of Flatisfy data directory.")
     parent_parser.add_argument("--config", help="Configuration file to use.")
     parent_parser.add_argument(
         "--passes",
@@ -44,12 +40,8 @@ def parse_args(argv=None):
         type=int,
         help="Number of passes to do on the filtered data.",
     )
-    parent_parser.add_argument(
-        "--max-entries", type=int, help="Maximum number of entries to fetch."
-    )
-    parent_parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose logging output."
-    )
+    parent_parser.add_argument("--max-entries", type=int, help="Maximum number of entries to fetch.")
+    parent_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging output.")
     parent_parser.add_argument("-vv", action="store_true", help="Debug logging output.")
     parent_parser.add_argument(
         "--constraints",
@@ -61,17 +53,13 @@ def parse_args(argv=None):
     subparsers = parser.add_subparsers(dest="cmd", help="Available subcommands")
 
     # Build data subcommand
-    subparsers.add_parser(
-        "build-data", parents=[parent_parser], help="Build necessary data"
-    )
+    subparsers.add_parser("build-data", parents=[parent_parser], help="Build necessary data")
 
     # Init config subcommand
     parser_init_config = subparsers.add_parser(
         "init-config", parents=[parent_parser], help="Initialize empty configuration."
     )
-    parser_init_config.add_argument(
-        "output", nargs="?", help="Output config file. Use '-' for stdout."
-    )
+    parser_init_config.add_argument("output", nargs="?", help="Output config file. Use '-' for stdout.")
 
     # Fetch subcommand parser
     subparsers.add_parser("fetch", parents=[parent_parser], help="Fetch housings posts")
@@ -93,9 +81,7 @@ def parse_args(argv=None):
     )
 
     # Import subcommand parser
-    import_filter = subparsers.add_parser(
-        "import", parents=[parent_parser], help="Import housing posts in database."
-    )
+    import_filter = subparsers.add_parser("import", parents=[parent_parser], help="Import housing posts in database.")
     import_filter.add_argument(
         "--new-only",
         action="store_true",
@@ -106,9 +92,7 @@ def parse_args(argv=None):
     subparsers.add_parser("purge", parents=[parent_parser], help="Purge database.")
 
     # Serve subcommand parser
-    parser_serve = subparsers.add_parser(
-        "serve", parents=[parent_parser], help="Serve the web app."
-    )
+    parser_serve = subparsers.add_parser("serve", parents=[parent_parser], help="Serve the web app.")
     parser_serve.add_argument("--port", type=int, help="Port to bind to.")
     parser_serve.add_argument("--host", help="Host to listen on.")
 
@@ -170,14 +154,9 @@ def main():
     if args.cmd == "fetch":
         # Fetch and filter flats list
         fetched_flats = fetch.fetch_flats(config)
-        fetched_flats = cmds.filter_fetched_flats(
-            config, fetched_flats=fetched_flats, fetch_details=True
-        )
+        fetched_flats = cmds.filter_fetched_flats(config, fetched_flats=fetched_flats, fetch_details=True)
         # Sort by cost
-        fetched_flats = {
-            k: tools.sort_list_of_dicts_by(v["new"], "cost")
-            for k, v in fetched_flats.items()
-        }
+        fetched_flats = {k: tools.sort_list_of_dicts_by(v["new"], "cost") for k, v in fetched_flats.items()}
 
         print(tools.pretty_json(fetched_flats))
         return
@@ -187,15 +166,10 @@ def main():
         if args.input:
             fetched_flats = fetch.load_flats_from_file(args.input, config)
 
-            fetched_flats = cmds.filter_fetched_flats(
-                config, fetched_flats=fetched_flats, fetch_details=False
-            )
+            fetched_flats = cmds.filter_fetched_flats(config, fetched_flats=fetched_flats, fetch_details=False)
 
             # Sort by cost
-            fetched_flats = {
-                k: tools.sort_list_of_dicts_by(v["new"], "cost")
-                for k, v in fetched_flats.items()
-            }
+            fetched_flats = {k: tools.sort_list_of_dicts_by(v["new"], "cost") for k, v in fetched_flats.items()}
 
             # Output to stdout
             print(tools.pretty_json(fetched_flats))

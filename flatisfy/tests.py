@@ -65,9 +65,7 @@ class TestTexts(unittest.TestCase):
             tools.convert_arabic_to_roman_in_text("Dans le 15e arrondissement"),
         )
 
-        self.assertEqual(
-            "XXeme arr.", tools.convert_arabic_to_roman_in_text("20eme arr.")
-        )
+        self.assertEqual("XXeme arr.", tools.convert_arabic_to_roman_in_text("20eme arr."))
 
         self.assertEqual(
             "A AIX EN PROVENCE",
@@ -121,25 +119,19 @@ class TestPhoneNumbers(unittest.TestCase):
         """
         Checks phone numbers with international prefixes.
         """
-        self.assertEqual(
-            "0605040302", duplicates.homogeneize_phone_number("+33605040302")
-        )
+        self.assertEqual("0605040302", duplicates.homogeneize_phone_number("+33605040302"))
 
     def test_dots_separators(self):
         """
         Checks phone numbers with dots.
         """
-        self.assertEqual(
-            "0605040302", duplicates.homogeneize_phone_number("06.05.04.03.02")
-        )
+        self.assertEqual("0605040302", duplicates.homogeneize_phone_number("06.05.04.03.02"))
 
     def test_spaces_separators(self):
         """
         Checks phone numbers with spaces.
         """
-        self.assertEqual(
-            "0605040302", duplicates.homogeneize_phone_number("06 05 04 03 02")
-        )
+        self.assertEqual("0605040302", duplicates.homogeneize_phone_number("06 05 04 03 02"))
 
 
 class TestPhotos(unittest.TestCase):
@@ -157,11 +149,7 @@ class TestPhotos(unittest.TestCase):
         """
         photo = {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"}
 
-        self.assertTrue(
-            duplicates.compare_photos(
-                photo, photo, self.IMAGE_CACHE, self.HASH_THRESHOLD
-            )
-        )
+        self.assertTrue(duplicates.compare_photos(photo, photo, self.IMAGE_CACHE, self.HASH_THRESHOLD))
 
     def test_different_photos(self):
         """
@@ -256,9 +244,7 @@ class TestImageCache(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        self.IMAGE_CACHE = ImageCache(  # pylint: disable=invalid-name
-            storage_dir=tempfile.mkdtemp(prefix="flatisfy-")
-        )
+        self.IMAGE_CACHE = ImageCache(storage_dir=tempfile.mkdtemp(prefix="flatisfy-"))  # pylint: disable=invalid-name
         super(TestImageCache, self).__init__(*args, **kwargs)
 
     def test_invalid_url(self):
@@ -297,9 +283,7 @@ class TestDuplicates(unittest.TestCase):
         """
         Generates a fake flat post.
         """
-        backend = BACKENDS_BY_PRECEDENCE[
-            random.randint(0, len(BACKENDS_BY_PRECEDENCE) - 1)
-        ]
+        backend = BACKENDS_BY_PRECEDENCE[random.randint(0, len(BACKENDS_BY_PRECEDENCE) - 1)]
         return {
             "id": str(random.randint(100000, 199999)) + "@" + backend,
             "phone": "0607080910",
@@ -331,9 +315,7 @@ class TestDuplicates(unittest.TestCase):
         """
         flat1 = self.generate_fake_flat()
         flat2 = copy.deepcopy(flat1)
-        score = duplicates.get_duplicate_score(
-            flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_prices(self):
@@ -344,9 +326,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["cost"] += 1000
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_rooms(self):
@@ -358,9 +338,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["rooms"] += 1
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_areas(self):
@@ -371,9 +349,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["area"] += 10
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_areas_decimals(self):
@@ -386,9 +362,7 @@ class TestDuplicates(unittest.TestCase):
         flat1["area"] = 50.65
         flat2["area"] = 50.37
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_phones(self):
@@ -400,9 +374,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["phone"] = "0708091011"
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_real_duplicates(self):
@@ -412,9 +384,7 @@ class TestDuplicates(unittest.TestCase):
         """
         flats = self.load_files("127028739@seloger", "14428129@explorimmo")
 
-        score = duplicates.get_duplicate_score(
-            flats[0], flats[1], self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flats[0], flats[1], self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITH_PHOTOS)
 
         # TODO: fixme, find new testing examples

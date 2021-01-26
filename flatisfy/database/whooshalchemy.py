@@ -92,23 +92,17 @@ class IndexService(object):
         for model in session.new:
             model_class = model.__class__
             if hasattr(model_class, "__searchable__"):
-                self.to_update.setdefault(model_class.__name__, []).append(
-                    ("new", model)
-                )
+                self.to_update.setdefault(model_class.__name__, []).append(("new", model))
 
         for model in session.deleted:
             model_class = model.__class__
             if hasattr(model_class, "__searchable__"):
-                self.to_update.setdefault(model_class.__name__, []).append(
-                    ("deleted", model)
-                )
+                self.to_update.setdefault(model_class.__name__, []).append(("deleted", model))
 
         for model in session.dirty:
             model_class = model.__class__
             if hasattr(model_class, "__searchable__"):
-                self.to_update.setdefault(model_class.__name__, []).append(
-                    ("changed", model)
-                )
+                self.to_update.setdefault(model_class.__name__, []).append(("changed", model))
 
     def after_commit(self, session):
         """
@@ -129,16 +123,11 @@ class IndexService(object):
                     # added as a new doc. Could probably replace this with a whoosh
                     # update.
 
-                    writer.delete_by_term(
-                        primary_field, text_type(getattr(model, primary_field))
-                    )
+                    writer.delete_by_term(primary_field, text_type(getattr(model, primary_field)))
 
                     if change_type in ("new", "changed"):
                         attrs = dict((key, getattr(model, key)) for key in searchable)
-                        attrs = {
-                            attr: text_type(getattr(model, attr))
-                            for attr in attrs.keys()
-                        }
+                        attrs = {attr: text_type(getattr(model, attr)) for attr in attrs.keys()}
                         attrs[primary_field] = text_type(getattr(model, primary_field))
                         writer.add_document(**attrs)
 

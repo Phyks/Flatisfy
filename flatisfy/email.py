@@ -16,9 +16,7 @@ from email.utils import formatdate, make_msgid
 LOGGER = logging.getLogger(__name__)
 
 
-def send_email(
-    server, port, subject, _from, _to, txt, html, username=None, password=None
-):
+def send_email(server, port, subject, _from, _to, txt, html, username=None, password=None):
     """
     Send an email
 

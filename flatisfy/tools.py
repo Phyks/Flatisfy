@@ -90,9 +90,7 @@ def convert_arabic_to_roman_in_text(text):
     :returns: The corresponding text with roman literals converted to
         arabic.
     """
-    return re.sub(
-        r"(\d+)", lambda matchobj: convert_arabic_to_roman(matchobj.group(0)), text
-    )
+    return re.sub(r"(\d+)", lambda matchobj: convert_arabic_to_roman(matchobj.group(0)), text)
 
 
 def hash_dict(func):
@@ -155,9 +153,7 @@ def pretty_json(data):
             "toto": "ok"
         }
     """
-    return json.dumps(
-        data, cls=DateAwareJSONEncoder, indent=4, separators=(",", ": "), sort_keys=True
-    )
+    return json.dumps(data, cls=DateAwareJSONEncoder, indent=4, separators=(",", ": "), sort_keys=True)
 
 
 def batch(iterable, size):
@@ -296,10 +292,7 @@ def distance(gps1, gps2):
     long2 = math.radians(gps2[1])
 
     # pylint: disable=locally-disabled,invalid-name
-    a = (
-        math.sin((lat2 - lat1) / 2.0) ** 2
-        + math.cos(lat1) * math.cos(lat2) * math.sin((long2 - long1) / 2.0) ** 2
-    )
+    a = math.sin((lat2 - lat1) / 2.0) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin((long2 - long1) / 2.0) ** 2
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     earth_radius = 6371000
 
@@ -329,9 +322,7 @@ def merge_dicts(*args):
     if len(args) == 1:
         return args[0]
 
-    flat1, flat2 = args[
-        :2
-    ]  # pylint: disable=locally-disabled,unbalanced-tuple-unpacking,line-too-long
+    flat1, flat2 = args[:2]  # pylint: disable=locally-disabled,unbalanced-tuple-unpacking,line-too-long
     merged_flat = {}
     for k, value2 in flat2.items():
         value1 = flat1.get(k, None)
@@ -408,9 +399,7 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
                         sections.append(
                             {
                                 "geojson": section["geojson"],
-                                "color": (
-                                    section["display_informations"].get("color", None)
-                                ),
+                                "color": (section["display_informations"].get("color", None)),
                             }
                         )
                     elif section["type"] == "street_network":
@@ -427,8 +416,7 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
             ) as exc:
                 # Ignore any possible exception
                 LOGGER.warning(
-                    "An exception occurred during travel time lookup on "
-                    "Navitia: %s.",
+                    "An exception occurred during travel time lookup on " "Navitia: %s.",
                     str(exc),
                 )
         else:
@@ -467,9 +455,7 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
                 route = response.geojson()["features"][0]
                 # Fix longitude/latitude inversion in geojson output
                 geometry = route["geometry"]
-                geometry["coordinates"] = [
-                    (x[1], x[0]) for x in geometry["coordinates"]
-                ]
+                geometry["coordinates"] = [(x[1], x[0]) for x in geometry["coordinates"]]
                 sections = [{"geojson": geometry, "color": "000"}]
                 travel_time = route["properties"]["duration"]
             except (requests.exceptions.RequestException, IndexError, KeyError) as exc:

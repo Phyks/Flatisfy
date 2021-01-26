@@ -24,9 +24,7 @@ try:
     from weboob.core.ouiboube import WebNip
     from weboob.tools.json import WeboobEncoder
 except ImportError:
-    LOGGER.error(
-        "Weboob is not available on your system. Make sure you " "installed it."
-    )
+    LOGGER.error("Weboob is not available on your system. Make sure you " "installed it.")
     raise
 
 
@@ -79,9 +77,7 @@ class WebOOBProxy(object):
         self.webnip = WebNip(modules_path=config["modules_path"])
 
         # Create backends
-        self.backends = [
-            self.webnip.load_backend(module, module, params={}) for module in backends
-        ]
+        self.backends = [self.webnip.load_backend(module, module, params={}) for module in backends]
 
     def __enter__(self):
         return self
@@ -118,18 +114,14 @@ class WebOOBProxy(object):
 
                 if not matching_cities:
                     # If postal code gave no match, warn the user
-                    LOGGER.warn(
-                        "Postal code %s could not be matched with a city.", postal_code
-                    )
+                    LOGGER.warn("Postal code %s could not be matched with a city.", postal_code)
 
         # Remove "TOUTES COMMUNES" entry which are duplicates of the individual
         # cities entries in Logicimmo module.
         matching_cities = [
             city
             for city in matching_cities
-            if not (
-                city.backend == "logicimmo" and city.name.startswith("TOUTES COMMUNES")
-            )
+            if not (city.backend == "logicimmo" and city.name.startswith("TOUTES COMMUNES"))
         ]
 
         # Then, build queries by grouping cities by at most 3
@@ -139,8 +131,7 @@ class WebOOBProxy(object):
 
             try:
                 query.house_types = [
-                    getattr(HOUSE_TYPES, house_type.upper())
-                    for house_type in constraints_dict["house_types"]
+                    getattr(HOUSE_TYPES, house_type.upper()) for house_type in constraints_dict["house_types"]
                 ]
             except AttributeError:
                 LOGGER.error("Invalid house types constraint.")
@@ -193,9 +184,7 @@ class WebOOBProxy(object):
                 housings.append(json.dumps(housing, cls=WeboobEncoder))
         except CallErrors as exc:
             # If an error occured, just log it
-            LOGGER.error(
-                "An error occured while fetching the housing posts: %s", str(exc)
-            )
+            LOGGER.error("An error occured while fetching the housing posts: %s", str(exc))
         return housings
 
     def info(self, full_flat_id, store_personal_data=False):
@@ -210,9 +199,7 @@ class WebOOBProxy(object):
         """
         flat_id, backend_name = full_flat_id.rsplit("@", 1)
         try:
-            backend = next(
-                backend for backend in self.backends if backend.name == backend_name
-            )
+            backend = next(backend for backend in self.backends if backend.name == backend_name)
         except StopIteration:
             LOGGER.error("Backend %s is not available.", backend_name)
             return "{}"
@@ -231,9 +218,7 @@ class WebOOBProxy(object):
             return json.dumps(housing, cls=WeboobEncoder)
         except Exception as exc:  # pylint: disable=broad-except
             # If an error occured, just log it
-            LOGGER.error(
-                "An error occured while fetching housing %s: %s", full_flat_id, str(exc)
-            )
+            LOGGER.error("An error occured while fetching housing %s: %s", full_flat_id, str(exc))
             return "{}"
 
 
@@ -253,18 +238,12 @@ def fetch_flats(config):
             queries = webOOB_proxy.build_queries(constraint)
             housing_posts = []
             for query in queries:
-                housing_posts.extend(
-                    webOOB_proxy.query(
-                        query, config["max_entries"], config["store_personal_data"]
-                    )
-                )
+                housing_posts.extend(webOOB_proxy.query(query, config["max_entries"], config["store_personal_data"]))
         housing_posts = housing_posts[: config["max_entries"]]
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
         constraint_flats_list = [json.loads(flat) for flat in housing_posts]
-        constraint_flats_list = [
-            WebOOBProxy.restore_decimal_fields(flat) for flat in constraint_flats_list
-        ]
+        constraint_flats_list = [WebOOBProxy.restore_decimal_fields(flat) for flat in constraint_flats_list]
         fetched_flats[constraint_name] = constraint_flats_list
     return fetched_flats
 

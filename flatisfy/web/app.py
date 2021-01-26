@@ -28,9 +28,7 @@ class QuietWSGIRefServer(bottle.WSGIRefServer):
     quiet = True
 
     def run(self, app):
-        app.log.info(
-            "Server is now up and ready! Listening on %s:%s." % (self.host, self.port)
-        )
+        app.log.info("Server is now up and ready! Listening on %s:%s." % (self.host, self.port))
         super(QuietWSGIRefServer, self).run(app)
 
 
@@ -61,11 +59,7 @@ def get_app(config):
     app.install(canister.Canister())
     # Use DateAwareJSONEncoder to dump JSON strings
     # From http://stackoverflow.com/questions/21282040/bottle-framework-how-to-return-datetime-in-json-response#comment55718456_21282666.  pylint: disable=locally-disabled,line-too-long
-    app.install(
-        bottle.JSONPlugin(
-            json_dumps=functools.partial(json.dumps, cls=DateAwareJSONEncoder)
-        )
-    )
+    app.install(bottle.JSONPlugin(json_dumps=functools.partial(json.dumps, cls=DateAwareJSONEncoder)))
 
     # Enable CORS
     @app.hook("after_request")
@@ -76,9 +70,7 @@ def get_app(config):
         # The str() call is required as we import unicode_literal and WSGI
         # headers list should have plain str type.
         bottle.response.headers[str("Access-Control-Allow-Origin")] = str("*")
-        bottle.response.headers[str("Access-Control-Allow-Methods")] = str(
-            "PUT, GET, POST, DELETE, OPTIONS, PATCH"
-        )
+        bottle.response.headers[str("Access-Control-Allow-Methods")] = str("PUT, GET, POST, DELETE, OPTIONS, PATCH")
         bottle.response.headers[str("Access-Control-Allow-Headers")] = str(
             "Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token"
         )
@@ -86,9 +78,7 @@ def get_app(config):
     # API v1 routes
     app.route("/api/v1", ["GET", "OPTIONS"], api_routes.index_v1)
 
-    app.route(
-        "/api/v1/time_to_places", ["GET", "OPTIONS"], api_routes.time_to_places_v1
-    )
+    app.route("/api/v1/time_to_places", ["GET", "OPTIONS"], api_routes.time_to_places_v1)
 
     app.route("/api/v1/flats", ["GET", "OPTIONS"], api_routes.flats_v1)
     app.route("/api/v1/flats/:flat_id", ["GET", "OPTIONS"], api_routes.flat_v1)
@@ -130,9 +120,7 @@ def get_app(config):
     app.route(
         "/data/img/<filename:path>",
         "GET",
-        lambda filename: bottle.static_file(
-            filename, root=os.path.join(config["data_directory"], "images")
-        ),
+        lambda filename: bottle.static_file(filename, root=os.path.join(config["data_directory"], "images")),
     )
 
     return app

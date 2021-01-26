@@ -123,9 +123,7 @@ def validate_config(config, check_with_data):
         """
         assert isinstance(bounds, list)
         assert len(bounds) == 2
-        assert all(
-            x is None or (isinstance(x, (float, int)) and x >= 0) for x in bounds
-        )
+        assert all(x is None or (isinstance(x, (float, int)) and x >= 0) for x in bounds)
         if bounds[0] is not None and bounds[1] is not None:
             assert bounds[1] > bounds[0]
 
@@ -141,45 +139,25 @@ def validate_config(config, check_with_data):
             isinstance(config["max_entries"], int) and config["max_entries"] > 0
         )  # noqa: E501
 
-        assert config["data_directory"] is None or isinstance(
-            config["data_directory"], str
-        )  # noqa: E501
+        assert config["data_directory"] is None or isinstance(config["data_directory"], str)  # noqa: E501
         assert os.path.isdir(config["data_directory"])
         assert isinstance(config["search_index"], str)
-        assert config["modules_path"] is None or isinstance(
-            config["modules_path"], str
-        )  # noqa: E501
+        assert config["modules_path"] is None or isinstance(config["modules_path"], str)  # noqa: E501
 
-        assert config["database"] is None or isinstance(
-            config["database"], str
-        )  # noqa: E501
+        assert config["database"] is None or isinstance(config["database"], str)  # noqa: E501
 
         assert isinstance(config["port"], int)
         assert isinstance(config["host"], str)
-        assert config["webserver"] is None or isinstance(
-            config["webserver"], str
-        )  # noqa: E501
-        assert config["backends"] is None or isinstance(
-            config["backends"], list
-        )  # noqa: E501
+        assert config["webserver"] is None or isinstance(config["webserver"], str)  # noqa: E501
+        assert config["backends"] is None or isinstance(config["backends"], list)  # noqa: E501
 
         assert isinstance(config["send_email"], bool)
-        assert config["smtp_server"] is None or isinstance(
-            config["smtp_server"], str
-        )  # noqa: E501
-        assert config["smtp_port"] is None or isinstance(
-            config["smtp_port"], int
-        )  # noqa: E501
-        assert config["smtp_username"] is None or isinstance(
-            config["smtp_username"], str
-        )  # noqa: E501
-        assert config["smtp_password"] is None or isinstance(
-            config["smtp_password"], str
-        )  # noqa: E501
+        assert config["smtp_server"] is None or isinstance(config["smtp_server"], str)  # noqa: E501
+        assert config["smtp_port"] is None or isinstance(config["smtp_port"], int)  # noqa: E501
+        assert config["smtp_username"] is None or isinstance(config["smtp_username"], str)  # noqa: E501
+        assert config["smtp_password"] is None or isinstance(config["smtp_password"], str)  # noqa: E501
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
-        assert config["notification_lang"] is None or isinstance(
-            config["notification_lang"], str
-        )
+        assert config["notification_lang"] is None or isinstance(config["notification_lang"], str)
 
         assert isinstance(config["store_personal_data"], bool)
         assert isinstance(config["max_distance_housing_station"], (int, float))
@@ -187,16 +165,10 @@ def validate_config(config, check_with_data):
         assert isinstance(config["duplicate_image_hash_threshold"], int)
 
         # API keys
-        assert config["navitia_api_key"] is None or isinstance(
-            config["navitia_api_key"], str
-        )  # noqa: E501
-        assert config["mapbox_api_key"] is None or isinstance(
-            config["mapbox_api_key"], str
-        )  # noqa: E501
+        assert config["navitia_api_key"] is None or isinstance(config["navitia_api_key"], str)  # noqa: E501
+        assert config["mapbox_api_key"] is None or isinstance(config["mapbox_api_key"], str)  # noqa: E501
 
-        assert config["ignore_station"] is None or isinstance(
-            config["ignore_station"], bool
-        )  # noqa: E501
+        assert config["ignore_station"] is None or isinstance(config["ignore_station"], bool)  # noqa: E501
 
         # Ensure constraints are ok
         assert config["constraints"]
@@ -234,10 +206,7 @@ def validate_config(config, check_with_data):
                 # Ensure data is built into db
                 data.preprocess_data(config, force=False)
                 # Check postal codes
-                opendata_postal_codes = [
-                    x.postal_code
-                    for x in data.load_data(PostalCode, constraint, config)
-                ]
+                opendata_postal_codes = [x.postal_code for x in data.load_data(PostalCode, constraint, config)]
                 for postal_code in constraint["postal_codes"]:
                     assert postal_code in opendata_postal_codes  # noqa: E501
 
@@ -292,16 +261,13 @@ def load_config(args=None, check_with_data=True):
                 config_data.update(json.load(fh))
         except (IOError, ValueError) as exc:
             LOGGER.error(
-                "Unable to load configuration from file, "
-                "using default configuration: %s.",
+                "Unable to load configuration from file, " "using default configuration: %s.",
                 exc,
             )
 
     # Overload config with arguments
     if args and getattr(args, "passes", None) is not None:
-        LOGGER.debug(
-            "Overloading number of passes from CLI arguments: %d.", args.passes
-        )
+        LOGGER.debug("Overloading number of passes from CLI arguments: %d.", args.passes)
         config_data["passes"] = args.passes
     if args and getattr(args, "max_entries", None) is not None:
         LOGGER.debug(
@@ -322,9 +288,7 @@ def load_config(args=None, check_with_data=True):
         config_data["data_directory"] = args.data_dir
     elif config_data["data_directory"] is None:
         config_data["data_directory"] = appdirs.user_data_dir("flatisfy", "flatisfy")
-        LOGGER.debug(
-            "Using default XDG data directory: %s.", config_data["data_directory"]
-        )
+        LOGGER.debug("Using default XDG data directory: %s.", config_data["data_directory"])
 
     if not os.path.isdir(config_data["data_directory"]):
         LOGGER.info(
@@ -335,14 +299,10 @@ def load_config(args=None, check_with_data=True):
         os.makedirs(os.path.join(config_data["data_directory"], "images"))
 
     if config_data["database"] is None:
-        config_data["database"] = "sqlite:///" + os.path.join(
-            config_data["data_directory"], "flatisfy.db"
-        )
+        config_data["database"] = "sqlite:///" + os.path.join(config_data["data_directory"], "flatisfy.db")
 
     if config_data["search_index"] is None:
-        config_data["search_index"] = os.path.join(
-            config_data["data_directory"], "search_index"
-        )
+        config_data["search_index"] = os.path.join(config_data["data_directory"], "search_index")
 
     # Handle constraints filtering
     if args and getattr(args, "constraints", None) is not None:
@@ -354,11 +314,7 @@ def load_config(args=None, check_with_data=True):
             args.constraints.replace(",", ", "),
         )
         constraints_filter = args.constraints.split(",")
-        config_data["constraints"] = {
-            k: v
-            for k, v in config_data["constraints"].items()
-            if k in constraints_filter
-        }
+        config_data["constraints"] = {k: v for k, v in config_data["constraints"].items() if k in constraints_filter}
 
     # Sanitize website url
     if config_data["website_url"] is not None:

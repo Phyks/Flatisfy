@@ -83,9 +83,7 @@ def _JSONApiSpec(query, model, default_sorting=None):
         try:
             sorting.append(getattr(model, default_sorting))
         except AttributeError:
-            raise ValueError(
-                "Invalid default sorting key provided: {}.".format(default_sorting)
-            )
+            raise ValueError("Invalid default sorting key provided: {}.".format(default_sorting))
 
     return filters, page_number, page_size, sorting
 
@@ -104,9 +102,7 @@ def _serialize_flat(flat, config):
 
     postal_codes = {}
     for constraint_name, constraint in config["constraints"].items():
-        postal_codes[constraint_name] = flatisfy.data.load_data(
-            PostalCode, constraint, config
-        )
+        postal_codes[constraint_name] = flatisfy.data.load_data(PostalCode, constraint, config)
 
     try:
         assert flat["flatisfy_postal_code"]
@@ -287,9 +283,7 @@ def time_to_places_v1(config):
     try:
         places = {}
         for constraint_name, constraint in config["constraints"].items():
-            places[constraint_name] = {
-                k: v["gps"] for k, v in constraint["time_to"].items()
-            }
+            places[constraint_name] = {k: v["gps"] for k, v in constraint["time_to"].items()}
         return {"data": places}
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
@@ -342,11 +336,7 @@ def search_v1(db, config):
         except ValueError as exc:
             return JSONError(400, str(exc))
 
-        flats_db_query = (
-            flat_model.Flat.search_query(db, query)
-            .filter_by(**filters)
-            .order_by(*sorting)
-        )
+        flats_db_query = flat_model.Flat.search_query(db, query).filter_by(**filters).order_by(*sorting)
         flats = [
             _serialize_flat(flat, config)
             for flat in itertools.islice(
@@ -381,9 +371,7 @@ def ics_feed_v1(config, db):
 
     cal = vobject.iCalendar()
     try:
-        flats_with_visits = db.query(flat_model.Flat).filter(
-            flat_model.Flat.visit_date.isnot(None)
-        )
+        flats_with_visits = db.query(flat_model.Flat).filter(flat_model.Flat.visit_date.isnot(None))
 
         for flat in flats_with_visits:
             vevent = cal.add("vevent")

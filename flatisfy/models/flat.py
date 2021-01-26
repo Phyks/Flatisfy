@@ -182,22 +182,14 @@ class Flat(BASE):
         # Handle flatisfy metadata
         flat_dict = flat_dict.copy()
         if "flatisfy" in flat_dict:
-            flat_dict["flatisfy_stations"] = flat_dict["flatisfy"].get(
-                "matched_stations", []
-            )
-            flat_dict["flatisfy_postal_code"] = flat_dict["flatisfy"].get(
-                "postal_code", None
-            )
+            flat_dict["flatisfy_stations"] = flat_dict["flatisfy"].get("matched_stations", [])
+            flat_dict["flatisfy_postal_code"] = flat_dict["flatisfy"].get("postal_code", None)
             flat_dict["flatisfy_position"] = flat_dict["flatisfy"].get("position", None)
             flat_dict["flatisfy_time_to"] = flat_dict["flatisfy"].get("time_to", {})
-            flat_dict["flatisfy_constraint"] = flat_dict["flatisfy"].get(
-                "constraint", "default"
-            )
+            flat_dict["flatisfy_constraint"] = flat_dict["flatisfy"].get("constraint", "default")
             del flat_dict["flatisfy"]
 
-        flat_dict = {
-            k: v for k, v in flat_dict.items() if k in inspect(Flat).columns.keys()
-        }
+        flat_dict = {k: v for k, v in flat_dict.items() if k in inspect(Flat).columns.keys()}
         return Flat(**flat_dict)
 
     def __repr__(self):

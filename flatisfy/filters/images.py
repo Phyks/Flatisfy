@@ -22,9 +22,7 @@ def download_images(flats_list, config):
     :param flats_list: A list of flats dicts.
     :param config: A config dict.
     """
-    photo_cache = ImageCache(
-        storage_dir=os.path.join(config["data_directory"], "images")
-    )
+    photo_cache = ImageCache(storage_dir=os.path.join(config["data_directory"], "images"))
     for flat in flats_list:
         for photo in flat["photos"]:
             # Download photo
