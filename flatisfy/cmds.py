@@ -23,7 +23,9 @@ import time
 LOGGER = logging.getLogger(__name__)
 
 
-def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, past_flats=None):
+def filter_flats_list(
+    config, constraint_name, flats_list, fetch_details=True, past_flats=None
+):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
@@ -45,13 +47,9 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, p
     except KeyError:
         LOGGER.error(
             "Missing constraint %s. Skipping filtering for these posts.",
-            constraint_name
+            constraint_name,
         )
-        return {
-            "new": [],
-            "duplicate": [],
-            "ignored": []
-        }
+        return {"new": [], "duplicate": [], "ignored": []}
 
     first_pass_result = collections.defaultdict(list)
     second_pass_result = collections.defaultdict(list)
@@ -59,9 +57,7 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, p
     # Do a first pass with the available infos to try to remove as much
     # unwanted postings as possible
     if config["passes"] > 0:
-        first_pass_result = flatisfy.filters.first_pass(flats_list,
-                                                        constraint,
-                                                        config)
+        first_pass_result = flatisfy.filters.first_pass(flats_list, constraint, config)
     else:
         first_pass_result["new"] = flats_list
 
@@ -95,8 +91,7 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, p
     # Do a third pass to deduplicate better
     if config["passes"] > 2:
         third_pass_result = flatisfy.filters.third_pass(
-            second_pass_result["new"],
-            config
+            second_pass_result["new"], config
         )
     else:
         third_pass_result["new"] = second_pass_result["new"]
@@ -104,15 +99,15 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, p
     return {
         "new": third_pass_result["new"],
         "duplicate": (
-            first_pass_result["duplicate"] +
-            second_pass_result["duplicate"] +
-            third_pass_result["duplicate"]
+            first_pass_result["duplicate"]
+            + second_pass_result["duplicate"]
+            + third_pass_result["duplicate"]
         ),
         "ignored": (
-            first_pass_result["ignored"] +
-            second_pass_result["ignored"] +
-            third_pass_result["ignored"]
-        )
+            first_pass_result["ignored"]
+            + second_pass_result["ignored"]
+            + third_pass_result["ignored"]
+        ),
     }
 
 
@@ -134,7 +129,7 @@ def filter_fetched_flats(config, fetched_flats, fetch_details=True, past_flats={
             constraint_name,
             flats_list,
             fetch_details,
-            past_flats.get(constraint_name, None)
+            past_flats.get(constraint_name, None),
         )
     return fetched_flats
 
@@ -156,9 +151,12 @@ def import_and_filter(config, load_from_db=False, new_only=False):
     else:
         fetched_flats = fetch.fetch_flats(config)
     # Do not fetch additional details if we loaded data from the db.
-    flats_by_status = filter_fetched_flats(config, fetched_flats=fetched_flats,
-                                           fetch_details=(not load_from_db),
-                                           past_flats=past_flats if new_only else {})
+    flats_by_status = filter_fetched_flats(
+        config,
+        fetched_flats=fetched_flats,
+        fetch_details=(not load_from_db),
+        past_flats=past_flats if new_only else {},
+    )
     # Create database connection
     get_session = database.init_db(config["database"], config["search_index"])
 
@@ -175,7 +173,7 @@ def import_and_filter(config, load_from_db=False, new_only=False):
         # Set is_expired to true for all existing flats.
         # This will be set back to false if we find them during importing.
         for flat in session.query(flat_model.Flat).all():
-            flat.is_expired = True;
+            flat.is_expired = True
 
         for status, flats_list in flatten_flats_by_status.items():
             # Build SQLAlchemy Flat model objects for every available flat
@@ -195,9 +193,7 @@ def import_and_filter(config, load_from_db=False, new_only=False):
                     # status if the user defined it
                     flat_object = flats_objects[each.id]
                     if each.status in flat_model.AUTOMATED_STATUSES:
-                        flat_object.status = getattr(
-                            flat_model.FlatStatus, status
-                        )
+                        flat_object.status = getattr(flat_model.FlatStatus, status)
                     else:
                         flat_object.status = each.status
 
@@ -223,11 +219,8 @@ def import_and_filter(config, load_from_db=False, new_only=False):
     LOGGER.info(f"Found {len(new_flats)} new flats.")
 
     # Touch a file to indicate last update timestamp
-    ts_file = os.path.join(
-        config["data_directory"],
-        "timestamp"
-    )
-    with open(ts_file, 'w'):
+    ts_file = os.path.join(config["data_directory"], "timestamp")
+    with open(ts_file, "w"):
         os.utime(ts_file, None)
 
     LOGGER.info("Done!")
@@ -270,5 +263,8 @@ def serve(config):
         # standard logging
         server = web_app.QuietWSGIRefServer
 
-    print("Launching web viewer running on http://%s:%s" % (config["host"], config["port"]))
+    print(
+        "Launching web viewer running on http://%s:%s"
+        % (config["host"], config["port"])
+    )
     app.run(host=config["host"], port=config["port"], server=server)

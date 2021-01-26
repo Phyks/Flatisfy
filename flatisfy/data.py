@@ -24,11 +24,13 @@ except ImportError:
     try:
         from functools32 import lru_cache
     except ImportError:
+
         def lru_cache(maxsize=None):  # pylint: disable=unused-argument
             """
             Identity implementation of ``lru_cache`` for fallback.
             """
             return lambda func: func
+
         LOGGER.warning(
             "`functools.lru_cache` is not available on your system. Consider "
             "installing `functools32` Python module if using Python2 for "
@@ -49,8 +51,8 @@ def preprocess_data(config, force=False):
     get_session = database.init_db(config["database"], config["search_index"])
     with get_session() as session:
         is_built = (
-            session.query(PublicTransport).count() > 0 and
-            session.query(PostalCode).count() > 0
+            session.query(PublicTransport).count() > 0
+            and session.query(PostalCode).count() > 0
         )
         if is_built and not force:
             # No need to rebuild the database, skip
@@ -96,10 +98,7 @@ def load_data(model, constraint, config):
         # Load data for each area
         areas = list(set(areas))
         for area in areas:
-            results.extend(
-                session.query(model)
-                .filter(model.area == area).all()
-            )
+            results.extend(session.query(model).filter(model.area == area).all())
         # Expunge loaded data from the session to be able to use them
         # afterwards
         session.expunge_all()

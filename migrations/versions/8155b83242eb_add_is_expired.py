@@ -10,21 +10,15 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8155b83242eb'
+revision = "8155b83242eb"
 down_revision = None
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
-    op.add_column(
-        'flats',
-        sa.Column('is_expired', sa.Boolean(), default=False)
-    )
+    op.add_column("flats", sa.Column("is_expired", sa.Boolean(), default=False))
 
 
 def downgrade():
-    op.drop_column(
-        'flats',
-        'is_expired'
-    )
+    op.drop_column("flats", "is_expired")

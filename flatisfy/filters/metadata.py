@@ -103,7 +103,7 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
             if choice in normalized_query
         ],
         key=lambda x: x[1],
-        reverse=True
+        reverse=True,
     )
     if limit:
         matches = matches[:limit]
@@ -111,10 +111,7 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
     # Update confidence
     if matches:
         max_confidence = max(match[1] for match in matches)
-        matches = [
-            (x[0], int(x[1] / max_confidence * 100))
-            for x in matches
-        ]
+        matches = [(x[0], int(x[1] / max_confidence * 100)) for x in matches]
 
     # Convert back matches to original strings
     # Also filter out matches below threshold
@@ -126,32 +123,27 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
 
     return matches
 
+
 def guess_location_position(location, cities, constraint):
     # try to find a city
     # Find all fuzzy-matching cities
     postal_code = None
     position = None
 
-    matched_cities = fuzzy_match(
-        location,
-        [x.name for x in cities],
-        limit=None
-    )
+    matched_cities = fuzzy_match(location, [x.name for x in cities], limit=None)
     if matched_cities:
         # Find associated postal codes
         matched_postal_codes = []
         for matched_city_name, _ in matched_cities:
             postal_code_objects_for_city = [
-                x for x in cities
-                if x.name == matched_city_name
+                x for x in cities if x.name == matched_city_name
             ]
             matched_postal_codes.extend(
-                pc.postal_code
-                for pc in postal_code_objects_for_city
+                pc.postal_code for pc in postal_code_objects_for_city
             )
         # Try to match them with postal codes in config constraint
-        matched_postal_codes_in_config = (
-            set(matched_postal_codes) & set(constraint["postal_codes"])
+        matched_postal_codes_in_config = set(matched_postal_codes) & set(
+            constraint["postal_codes"]
         )
         if matched_postal_codes_in_config:
             # If there are some matched postal codes which are also in
@@ -166,14 +158,17 @@ def guess_location_position(location, cities, constraint):
         # take the city position
         for matched_city_name, _ in matched_cities:
             postal_code_objects_for_city = [
-                x for x in cities
+                x
+                for x in cities
                 if x.name == matched_city_name and x.postal_code == postal_code
             ]
             if len(postal_code_objects_for_city):
-                position = {"lat": postal_code_objects_for_city[0].lat, "lng": postal_code_objects_for_city[0].lng}
+                position = {
+                    "lat": postal_code_objects_for_city[0].lat,
+                    "lng": postal_code_objects_for_city[0].lng,
+                }
                 LOGGER.debug(
-                    ("Found position %s using city %s."),
-                    position, matched_city_name
+                    ("Found position %s using city %s."), position, matched_city_name
                 )
                 break
 
@@ -194,25 +189,20 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
 
     :return: An updated list of flats dict with guessed postal code.
     """
-    opendata = {
-        "postal_codes": data.load_data(PostalCode, constraint, config)
-    }
+    opendata = {"postal_codes": data.load_data(PostalCode, constraint, config)}
 
     for flat in flats_list:
         location = flat.get("location", None)
         if not location:
             addr = flat.get("address", None)
             if addr:
-                location = addr['full_address']
+                location = addr["full_address"]
         if not location:
             # Skip everything if empty location
             LOGGER.info(
-                (
-                    "No location field for flat %s, skipping postal "
-                    "code lookup. (%s)"
-                ),
+                ("No location field for flat %s, skipping postal " "code lookup. (%s)"),
                 flat["id"],
-                flat.get("address")
+                flat.get("address"),
             )
             continue
 
@@ -230,17 +220,22 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
 
             LOGGER.debug(
                 "Found postal code in location field for flat %s: %s.",
-                flat["id"], postal_code
+                flat["id"],
+                postal_code,
             )
         except AssertionError:
             postal_code = None
 
         # Then fetch position (and postal_code is couldn't be found earlier)
         if postal_code:
-            cities = [x for x in opendata["postal_codes"] if x.postal_code == postal_code]
+            cities = [
+                x for x in opendata["postal_codes"] if x.postal_code == postal_code
+            ]
             (_, position) = guess_location_position(location, cities, constraint)
         else:
-            (postal_code, position) = guess_location_position(location, opendata["postal_codes"], constraint)
+            (postal_code, position) = guess_location_position(
+                location, opendata["postal_codes"], constraint
+            )
 
         # Check that postal code is not too far from the ones listed in config,
         # limit bad fuzzy matching
@@ -256,17 +251,19 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
                         (x.lat, x.lng)
                         for x in opendata["postal_codes"]
                         if x.postal_code == constraint_postal_code
-                    )
+                    ),
                 )
                 for constraint_postal_code in constraint["postal_codes"]
             )
 
             if distance > distance_threshold:
                 LOGGER.info(
-                    ("Postal code %s found for flat %s @ %s is off-constraints "
-                     "(distance is %dm > %dm). Let's consider it is an "
-                     "artifact match and keep the post without this postal "
-                     "code."),
+                    (
+                        "Postal code %s found for flat %s @ %s is off-constraints "
+                        "(distance is %dm > %dm). Let's consider it is an "
+                        "artifact match and keep the post without this postal "
+                        "code."
+                    ),
                     postal_code,
                     flat["id"],
                     location,
@@ -282,7 +279,9 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
             if existing_postal_code and existing_postal_code != postal_code:
                 LOGGER.warning(
                     "Replacing previous postal code %s by %s for flat %s.",
-                    existing_postal_code, postal_code, flat["id"]
+                    existing_postal_code,
+                    postal_code,
+                    flat["id"],
                 )
             flat["flatisfy"]["postal_code"] = postal_code
         else:
@@ -304,10 +303,10 @@ def guess_stations(flats_list, constraint, config):
 
     :return: An updated list of flats dict with guessed nearby stations.
     """
-    distance_threshold = config['max_distance_housing_station']
+    distance_threshold = config["max_distance_housing_station"]
     opendata = {
         "postal_codes": data.load_data(PostalCode, constraint, config),
-        "stations": data.load_data(PublicTransport, constraint, config)
+        "stations": data.load_data(PublicTransport, constraint, config),
     }
 
     for flat in flats_list:
@@ -316,13 +315,12 @@ def guess_stations(flats_list, constraint, config):
         if not flat_station:
             # Skip everything if empty station
             LOGGER.info(
-                "No stations field for flat %s, skipping stations lookup.",
-                flat["id"]
+                "No stations field for flat %s, skipping stations lookup.", flat["id"]
             )
             continue
 
         # Weboob modules can return several stations in a comma-separated list.
-        flat_stations = flat_station.split(',')
+        flat_stations = flat_station.split(",")
         # But some stations containing a comma exist, so let's add the initial
         # value to the list of stations to check if there was one.
         if len(flat_stations) > 1:
@@ -334,7 +332,7 @@ def guess_stations(flats_list, constraint, config):
                 tentative_station,
                 [x.name for x in opendata["stations"]],
                 limit=10,
-                threshold=50
+                threshold=50,
             )
 
         # Keep only one occurrence of each station
@@ -361,32 +359,34 @@ def guess_stations(flats_list, constraint, config):
                 ]
                 for station_data in stations_objects:
                     distance = tools.distance(
-                        (station_data.lat, station_data.lng),
-                        postal_code_gps
+                        (station_data.lat, station_data.lng), postal_code_gps
                     )
                     if distance < distance_threshold:
                         # If at least one of the coordinates for a given
                         # station is close enough, that's ok and we can add
                         # the station
-                        good_matched_stations.append({
-                            "key": station[0],
-                            "name": station_data.name,
-                            "confidence": station[1],
-                            "gps": (station_data.lat, station_data.lng)
-                        })
+                        good_matched_stations.append(
+                            {
+                                "key": station[0],
+                                "name": station_data.name,
+                                "confidence": station[1],
+                                "gps": (station_data.lat, station_data.lng),
+                            }
+                        )
                         break
                     LOGGER.info(
-                        ("Station %s is too far from flat %s (%dm > %dm), "
-                         "discarding this station."),
+                        (
+                            "Station %s is too far from flat %s (%dm > %dm), "
+                            "discarding this station."
+                        ),
                         station[0],
                         flat["id"],
                         int(distance),
-                        int(distance_threshold)
+                        int(distance_threshold),
                     )
         else:
             LOGGER.info(
-                "No postal code for flat %s, skipping stations detection.",
-                flat["id"]
+                "No postal code for flat %s, skipping stations detection.", flat["id"]
             )
 
         if not good_matched_stations:
@@ -394,7 +394,7 @@ def guess_stations(flats_list, constraint, config):
             LOGGER.info(
                 "No stations found for flat %s, matching %s.",
                 flat["id"],
-                flat["station"]
+                flat["station"],
             )
             continue
 
@@ -402,29 +402,20 @@ def guess_stations(flats_list, constraint, config):
             "Found stations for flat %s: %s (matching %s).",
             flat["id"],
             ", ".join(x["name"] for x in good_matched_stations),
-            flat["station"]
+            flat["station"],
         )
 
         # If some stations were already filled in and the result is different,
         # display some warning to the user
-        if (
-                "matched_stations" in flat["flatisfy"] and
-                (
-                    # Do a set comparison, as ordering is not important
-                    set([
-                        station["name"]
-                        for station in flat["flatisfy"]["matched_stations"]
-                    ]) !=
-                    set([
-                        station["name"]
-                        for station in good_matched_stations
-                    ])
-                )
+        if "matched_stations" in flat["flatisfy"] and (
+            # Do a set comparison, as ordering is not important
+            set([station["name"] for station in flat["flatisfy"]["matched_stations"]])
+            != set([station["name"] for station in good_matched_stations])
         ):
             LOGGER.warning(
                 "Replacing previously fetched stations for flat %s. Found "
                 "stations differ from the previously found ones.",
-                flat["id"]
+                flat["id"],
             )
 
         flat["flatisfy"]["matched_stations"] = good_matched_stations
@@ -449,9 +440,8 @@ def compute_travel_times(flats_list, constraint, config):
         if not flat["flatisfy"].get("matched_stations", []):
             # Skip any flat without matched stations
             LOGGER.info(
-                "Skipping travel time computation for flat %s. No matched "
-                "stations.",
-                flat["id"]
+                "Skipping travel time computation for flat %s. No matched " "stations.",
+                flat["id"],
             )
             continue
 
@@ -467,15 +457,11 @@ def compute_travel_times(flats_list, constraint, config):
             for station in flat["flatisfy"]["matched_stations"]:
                 # Time from station is a dict with time and route
                 time_from_station_dict = tools.get_travel_time_between(
-                    station["gps"],
-                    place["gps"],
-                    TimeToModes[mode],
-                    config
+                    station["gps"], place["gps"], TimeToModes[mode], config
                 )
-                if (
-                        time_from_station_dict and
-                        (time_from_station_dict["time"] < time_to_place_dict or
-                         time_to_place_dict is None)
+                if time_from_station_dict and (
+                    time_from_station_dict["time"] < time_to_place_dict
+                    or time_to_place_dict is None
                 ):
                     # If starting from this station makes the route to the
                     # specified place shorter, update
@@ -484,7 +470,10 @@ def compute_travel_times(flats_list, constraint, config):
             if time_to_place_dict:
                 LOGGER.info(
                     "Travel time between %s and flat %s by %s is %ds.",
-                    place_name, flat["id"], mode, time_to_place_dict["time"]
+                    place_name,
+                    flat["id"],
+                    mode,
+                    time_to_place_dict["time"],
                 )
                 flat["flatisfy"]["time_to"][place_name] = time_to_place_dict
     return flats_list

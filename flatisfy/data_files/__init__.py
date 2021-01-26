@@ -24,8 +24,8 @@ MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 titlecase.set_small_word_list(
     # Add French small words
-    r"l|d|un|une|et|à|a|sur|ou|le|la|de|lès|les|" +
-    titlecase.SMALL
+    r"l|d|un|une|et|à|a|sur|ou|le|la|de|lès|les|"
+    + titlecase.SMALL
 )
 
 TRANSPORT_DATA_FILES = {
@@ -33,7 +33,7 @@ TRANSPORT_DATA_FILES = {
     "FR-NW": "stops_fr-nw.txt",
     "FR-NE": "stops_fr-ne.txt",
     "FR-SW": "stops_fr-sw.txt",
-    "FR-SE": "stops_fr-se.txt"
+    "FR-SE": "stops_fr-se.txt",
 }
 
 
@@ -51,8 +51,20 @@ def french_postal_codes_to_quarter(postal_code):
     # French departements
     # Taken from Wikipedia data.
     department_to_subdivision = {
-        "FR-ARA": ["01", "03", "07", "15", "26", "38", "42", "43", "63", "69",
-                   "73", "74"],
+        "FR-ARA": [
+            "01",
+            "03",
+            "07",
+            "15",
+            "26",
+            "38",
+            "42",
+            "43",
+            "63",
+            "69",
+            "73",
+            "74",
+        ],
         "FR-BFC": ["21", "25", "39", "58", "70", "71", "89", "90"],
         "FR-BRE": ["22", "29", "35", "44", "56"],
         "FR-CVL": ["18", "28", "36", "37", "41", "45"],
@@ -61,19 +73,44 @@ def french_postal_codes_to_quarter(postal_code):
         "FR-HDF": ["02", "59", "60", "62", "80"],
         "FR-IDF": ["75", "77", "78", "91", "92", "93", "94", "95"],
         "FR-NOR": ["14", "27", "50", "61", "76"],
-        "FR-NAQ": ["16", "17", "19", "23", "24", "33", "40", "47", "64", "79",
-                   "86", "87"],
-        "FR-OCC": ["09", "11", "12", "30", "31", "32", "34", "46", "48", "65",
-                   "66", "81", "82"],
+        "FR-NAQ": [
+            "16",
+            "17",
+            "19",
+            "23",
+            "24",
+            "33",
+            "40",
+            "47",
+            "64",
+            "79",
+            "86",
+            "87",
+        ],
+        "FR-OCC": [
+            "09",
+            "11",
+            "12",
+            "30",
+            "31",
+            "32",
+            "34",
+            "46",
+            "48",
+            "65",
+            "66",
+            "81",
+            "82",
+        ],
         "FR-PDL": ["44", "49", "53", "72", "85"],
-        "FR-PAC": ["04", "05", "06", "13", "83", "84"]
+        "FR-PAC": ["04", "05", "06", "13", "83", "84"],
     }
     subdivision_to_quarters = {
-        'FR-IDF': ['FR-IDF'],
-        'FR-NW': ['FR-BRE', 'FR-CVL', 'FR-NOR', 'FR-PDL'],
-        'FR-NE': ['FR-BFC', 'FR-GES', 'FR-HDF'],
-        'FR-SE': ['FR-ARA', 'FR-COR', 'FR-PAC', 'FR-OCC'],
-        'FR-SW': ['FR-NAQ']
+        "FR-IDF": ["FR-IDF"],
+        "FR-NW": ["FR-BRE", "FR-CVL", "FR-NOR", "FR-PDL"],
+        "FR-NE": ["FR-BFC", "FR-GES", "FR-HDF"],
+        "FR-SE": ["FR-ARA", "FR-COR", "FR-PAC", "FR-OCC"],
+        "FR-SW": ["FR-NAQ"],
     }
 
     subdivision = next(
@@ -82,7 +119,7 @@ def french_postal_codes_to_quarter(postal_code):
             for i, departments in department_to_subdivision.items()
             if departement in departments
         ),
-        None
+        None,
     )
     return next(
         (
@@ -90,7 +127,7 @@ def french_postal_codes_to_quarter(postal_code):
             for i, subdivisions in subdivision_to_quarters.items()
             if subdivision in subdivisions
         ),
-        None
+        None,
     )
 
 
@@ -106,9 +143,7 @@ def _preprocess_laposte():
     raw_laposte_data = []
     # Load opendata file
     try:
-        with io.open(
-            os.path.join(MODULE_DIR, data_file), "r", encoding='utf-8'
-        ) as fh:
+        with io.open(os.path.join(MODULE_DIR, data_file), "r", encoding="utf-8") as fh:
             raw_laposte_data = json.load(fh)
     except (IOError, ValueError):
         LOGGER.error("Invalid raw LaPoste opendata file.")
@@ -126,29 +161,31 @@ def _preprocess_laposte():
             if area is None:
                 LOGGER.info(
                     "No matching area found for postal code %s, skipping it.",
-                    fields["code_postal"]
+                    fields["code_postal"],
                 )
                 continue
 
             name = normalize_string(
-                titlecase.titlecase(fields["nom_de_la_commune"]),
-                lowercase=False
+                titlecase.titlecase(fields["nom_de_la_commune"]), lowercase=False
             )
 
             if (fields["code_postal"], name) in seen_postal_codes:
                 continue
 
             seen_postal_codes.append((fields["code_postal"], name))
-            postal_codes_data.append(PostalCode(
-                area=area,
-                postal_code=fields["code_postal"],
-                name=name,
-                lat=fields["coordonnees_gps"][0],
-                lng=fields["coordonnees_gps"][1]
-            ))
+            postal_codes_data.append(
+                PostalCode(
+                    area=area,
+                    postal_code=fields["code_postal"],
+                    name=name,
+                    lat=fields["coordonnees_gps"][0],
+                    lng=fields["coordonnees_gps"][1],
+                )
+            )
         except KeyError:
-            LOGGER.info("Missing data for postal code %s, skipping it.",
-                        fields["code_postal"])
+            LOGGER.info(
+                "Missing data for postal code %s, skipping it.", fields["code_postal"]
+            )
 
     return postal_codes_data
 
@@ -164,17 +201,15 @@ def _preprocess_public_transport():
     for area, data_file in TRANSPORT_DATA_FILES.items():
         LOGGER.info("Building from public transport data %s.", data_file)
         try:
-            with io.open(os.path.join(MODULE_DIR, data_file), "r",
-                         encoding='utf-8') as fh:
+            with io.open(
+                os.path.join(MODULE_DIR, data_file), "r", encoding="utf-8"
+            ) as fh:
                 filereader = csv.reader(fh)
                 next(filereader, None)  # Skip first row (headers)
                 for row in filereader:
-                    public_transport_data.append(PublicTransport(
-                        name=row[2],
-                        area=area,
-                        lat=row[3],
-                        lng=row[4]
-                    ))
+                    public_transport_data.append(
+                        PublicTransport(name=row[2], area=area, lat=row[3], lng=row[4])
+                    )
         except (IOError, IndexError):
             LOGGER.error("Invalid raw opendata file: %s.", data_file)
             return []
@@ -183,7 +218,4 @@ def _preprocess_public_transport():
 
 
 # List of all the available preprocessing functions. Order can be important.
-PREPROCESSING_FUNCTIONS = [
-    _preprocess_laposte,
-    _preprocess_public_transport
-]
+PREPROCESSING_FUNCTIONS = [_preprocess_laposte, _preprocess_public_transport]

@@ -24,8 +24,9 @@ try:
     from weboob.core.ouiboube import WebNip
     from weboob.tools.json import WeboobEncoder
 except ImportError:
-    LOGGER.error("Weboob is not available on your system. Make sure you "
-                 "installed it.")
+    LOGGER.error(
+        "Weboob is not available on your system. Make sure you " "installed it."
+    )
     raise
 
 
@@ -34,6 +35,7 @@ class WebOOBProxy(object):
     Wrapper around WebOOB ``WebNip`` class, to fetch housing posts without
     having to spawn a subprocess.
     """
+
     @staticmethod
     def version():
         """
@@ -78,12 +80,7 @@ class WebOOBProxy(object):
 
         # Create backends
         self.backends = [
-            self.webnip.load_backend(
-                module,
-                module,
-                params={}
-            )
-            for module in backends
+            self.webnip.load_backend(module, module, params={}) for module in backends
         ]
 
     def __enter__(self):
@@ -114,19 +111,15 @@ class WebOOBProxy(object):
             except CallErrors as exc:
                 # If an error occured, just log it
                 LOGGER.error(
-                    (
-                        "An error occured while building query for "
-                        "postal code %s: %s"
-                    ),
+                    ("An error occured while building query for " "postal code %s: %s"),
                     postal_code,
-                    str(exc)
+                    str(exc),
                 )
 
                 if not matching_cities:
                     # If postal code gave no match, warn the user
                     LOGGER.warn(
-                        "Postal code %s could not be matched with a city.",
-                        postal_code
+                        "Postal code %s could not be matched with a city.", postal_code
                     )
 
         # Remove "TOUTES COMMUNES" entry which are duplicates of the individual
@@ -134,8 +127,9 @@ class WebOOBProxy(object):
         matching_cities = [
             city
             for city in matching_cities
-            if not (city.backend == 'logicimmo' and
-                    city.name.startswith('TOUTES COMMUNES'))
+            if not (
+                city.backend == "logicimmo" and city.name.startswith("TOUTES COMMUNES")
+            )
         ]
 
         # Then, build queries by grouping cities by at most 3
@@ -145,10 +139,7 @@ class WebOOBProxy(object):
 
             try:
                 query.house_types = [
-                    getattr(
-                        HOUSE_TYPES,
-                        house_type.upper()
-                    )
+                    getattr(HOUSE_TYPES, house_type.upper())
                     for house_type in constraints_dict["house_types"]
                 ]
             except AttributeError:
@@ -156,10 +147,7 @@ class WebOOBProxy(object):
                 return None
 
             try:
-                query.type = getattr(
-                    POSTS_TYPES,
-                    constraints_dict["type"].upper()
-                )
+                query.type = getattr(POSTS_TYPES, constraints_dict["type"].upper())
             except AttributeError:
                 LOGGER.error("Invalid post type constraint.")
                 return None
@@ -190,16 +178,15 @@ class WebOOBProxy(object):
         # TODO: Handle max_entries better
         try:
             for housing in itertools.islice(
-                    self.webnip.do(
-                        'search_housings',
-                        query,
-                        # Only run the call on the required backends.
-                        # Otherwise, WebOOB is doing weird stuff and returning
-                        # nonsense.
-                        backends=[x for x in self.backends
-                                  if x.name in useful_backends]
-                    ),
-                    max_entries
+                self.webnip.do(
+                    "search_housings",
+                    query,
+                    # Only run the call on the required backends.
+                    # Otherwise, WebOOB is doing weird stuff and returning
+                    # nonsense.
+                    backends=[x for x in self.backends if x.name in useful_backends],
+                ),
+                max_entries,
             ):
                 if not store_personal_data:
                     housing.phone = None
@@ -207,8 +194,7 @@ class WebOOBProxy(object):
         except CallErrors as exc:
             # If an error occured, just log it
             LOGGER.error(
-                "An error occured while fetching the housing posts: %s",
-                str(exc)
+                "An error occured while fetching the housing posts: %s", str(exc)
             )
         return housings
 
@@ -225,9 +211,7 @@ class WebOOBProxy(object):
         flat_id, backend_name = full_flat_id.rsplit("@", 1)
         try:
             backend = next(
-                backend
-                for backend in self.backends
-                if backend.name == backend_name
+                backend for backend in self.backends if backend.name == backend_name
             )
         except StopIteration:
             LOGGER.error("Backend %s is not available.", backend_name)
@@ -240,7 +224,7 @@ class WebOOBProxy(object):
                 housing.phone = None
             else:
                 # Ensure phone is fetched
-                backend.fillobj(housing, 'phone')
+                backend.fillobj(housing, "phone")
             # Otherwise, we miss the @backend afterwards
             housing.id = full_flat_id
 
@@ -248,9 +232,7 @@ class WebOOBProxy(object):
         except Exception as exc:  # pylint: disable=broad-except
             # If an error occured, just log it
             LOGGER.error(
-                "An error occured while fetching housing %s: %s",
-                full_flat_id,
-                str(exc)
+                "An error occured while fetching housing %s: %s", full_flat_id, str(exc)
             )
             return "{}"
 
@@ -272,15 +254,17 @@ def fetch_flats(config):
             housing_posts = []
             for query in queries:
                 housing_posts.extend(
-                    webOOB_proxy.query(query, config["max_entries"],
-                                       config["store_personal_data"])
+                    webOOB_proxy.query(
+                        query, config["max_entries"], config["store_personal_data"]
+                    )
                 )
-        housing_posts = housing_posts[:config["max_entries"]]
+        housing_posts = housing_posts[: config["max_entries"]]
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
         constraint_flats_list = [json.loads(flat) for flat in housing_posts]
-        constraint_flats_list = [WebOOBProxy.restore_decimal_fields(flat)
-                                 for flat in constraint_flats_list]
+        constraint_flats_list = [
+            WebOOBProxy.restore_decimal_fields(flat) for flat in constraint_flats_list
+        ]
         fetched_flats[constraint_name] = constraint_flats_list
     return fetched_flats
 
@@ -295,8 +279,7 @@ def fetch_details(config, flat_id):
     """
     with WebOOBProxy(config) as webOOB_proxy:
         LOGGER.info("Loading additional details for flat %s.", flat_id)
-        webOOB_output = webOOB_proxy.info(flat_id,
-                                          config["store_personal_data"])
+        webOOB_output = webOOB_proxy.info(flat_id, config["store_personal_data"])
 
     flat_details = json.loads(webOOB_output)
     flat_details = WebOOBProxy.restore_decimal_fields(flat_details)
@@ -327,10 +310,7 @@ def load_flats_from_file(json_file, config):
         LOGGER.info("Found %d flats.", len(flats_list))
     except (IOError, ValueError):
         LOGGER.error("File %s is not a valid dump file.", json_file)
-    return {
-        constraint_name: flats_list
-        for constraint_name in config["constraints"]
-    }
+    return {constraint_name: flats_list for constraint_name in config["constraints"]}
 
 
 def load_flats_from_db(config):

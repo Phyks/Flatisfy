@@ -16,7 +16,9 @@ from email.utils import formatdate, make_msgid
 LOGGER = logging.getLogger(__name__)
 
 
-def send_email(server, port, subject, _from, _to, txt, html, username=None, password=None):
+def send_email(
+    server, port, subject, _from, _to, txt, html, username=None, password=None
+):
     """
     Send an email
 
@@ -36,15 +38,15 @@ def send_email(server, port, subject, _from, _to, txt, html, username=None, pass
     if username or password:
         server.login(username or "", password or "")
 
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = _from
-    msg['To'] = ', '.join(_to)
-    msg['Date'] = formatdate()
-    msg['Message-ID'] = make_msgid()
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = _from
+    msg["To"] = ", ".join(_to)
+    msg["Date"] = formatdate()
+    msg["Message-ID"] = make_msgid()
 
-    msg.attach(MIMEText(txt, 'plain', 'utf-8'))
-    msg.attach(MIMEText(html, 'html', 'utf-8'))
+    msg.attach(MIMEText(txt, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
 
     server.sendmail(_from, _to, msg.as_string())
     server.quit()
@@ -61,7 +63,7 @@ def send_notification(config, flats):
     if not flats:
         return
 
-    txt = u'Hello dear user,\n\nThe following new flats have been found:\n\n'
+    txt = "Hello dear user,\n\nThe following new flats have been found:\n\n"
     html = """
     <html>
       <head></head>
@@ -81,10 +83,8 @@ def send_notification(config, flats):
         cost = str(flat.cost)
         currency = str(flat.currency)
 
-        txt += (
-            '- {}: {}#/flat/{} (area: {}, cost: {} {})\n'.format(
-                title, website_url, flat_id, area, cost, currency
-            )
+        txt += "- {}: {}#/flat/{} (area: {}, cost: {} {})\n".format(
+            title, website_url, flat_id, area, cost, currency
         )
 
         html += """
@@ -92,26 +92,28 @@ def send_notification(config, flats):
                 <a href="{}#/flat/{}">{}</a>
                 (area: {}, cost: {} {})
             </li>
-        """.format(website_url, flat_id, title, area, cost, currency)
+        """.format(
+            website_url, flat_id, title, area, cost, currency
+        )
 
     html += "</ul>"
 
-    signature = (
-        u"\nHope you'll find what you were looking for.\n\nBye!\nFlatisfy"
-    )
+    signature = "\nHope you'll find what you were looking for.\n\nBye!\nFlatisfy"
     txt += signature
-    html += signature.replace('\n', '<br>')
+    html += signature.replace("\n", "<br>")
 
     html += """</p>
       </body>
     </html>"""
 
-    send_email(config["smtp_server"],
-               config["smtp_port"],
-               "New flats found!",
-               config["smtp_from"],
-               config["smtp_to"],
-               txt,
-               html,
-               config.get("smtp_username"),
-               config.get("smtp_password"))
+    send_email(
+        config["smtp_server"],
+        config["smtp_port"],
+        "New flats found!",
+        config["smtp_from"],
+        config["smtp_to"],
+        txt,
+        html,
+        config.get("smtp_username"),
+        config.get("smtp_password"),
+    )

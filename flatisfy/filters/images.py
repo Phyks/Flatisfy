@@ -29,7 +29,9 @@ def download_images(flats_list, config):
     for i, flat in enumerate(flats_list):
         LOGGER.info(
             "Downloading photos for flat %d/%d: %s.",
-            i + 1, flats_list_length, flat["id"]
+            i + 1,
+            flats_list_length,
+            flat["id"],
         )
         for photo in flat["photos"]:
             # Download photo

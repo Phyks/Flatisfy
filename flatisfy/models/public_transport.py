@@ -7,9 +7,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
-from sqlalchemy import (
-    Column, Float, Integer, String
-)
+from sqlalchemy import Column, Float, Integer, String
 
 from flatisfy.database.base import BASE
 
@@ -21,6 +19,7 @@ class PublicTransport(BASE):
     """
     SQLAlchemy ORM model to store public transport opendata.
     """
+
     __tablename__ = "public_transports"
 
     id = Column(Integer, primary_key=True)

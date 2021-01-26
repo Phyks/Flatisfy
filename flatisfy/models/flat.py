@@ -11,7 +11,15 @@ import enum
 import arrow
 
 from sqlalchemy import (
-    Boolean, Column, DateTime, Enum, Float, SmallInteger, String, Text, inspect
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    SmallInteger,
+    String,
+    Text,
+    inspect,
 )
 from sqlalchemy.orm import validates
 
@@ -26,6 +34,7 @@ class FlatUtilities(enum.Enum):
     """
     An enum of the possible utilities status for a flat entry.
     """
+
     included = 10
     unknown = 0
     excluded = -10
@@ -35,6 +44,7 @@ class FlatStatus(enum.Enum):
     """
     An enum of the possible status for a flat entry.
     """
+
     user_deleted = -100
     duplicate = -20
     ignored = -10
@@ -47,21 +57,16 @@ class FlatStatus(enum.Enum):
 
 # List of statuses that are automatically handled, and which the user cannot
 # manually set through the UI.
-AUTOMATED_STATUSES = [
-    FlatStatus.new,
-    FlatStatus.duplicate,
-    FlatStatus.ignored
-]
+AUTOMATED_STATUSES = [FlatStatus.new, FlatStatus.duplicate, FlatStatus.ignored]
 
 
 class Flat(BASE):
     """
     SQLAlchemy ORM model to store a flat.
     """
+
     __tablename__ = "flats"
-    __searchable__ = [
-        "title", "text", "station", "location", "details", "notes"
-    ]
+    __searchable__ = ["title", "text", "station", "location", "details", "notes"]
 
     # Weboob data
     id = Column(String, primary_key=True)
@@ -99,7 +104,7 @@ class Flat(BASE):
     # Date for visit
     visit_date = Column(DateTime)
 
-    @validates('utilities')
+    @validates("utilities")
     def validate_utilities(self, _, utilities):
         """
         Utilities validation method
@@ -124,8 +129,7 @@ class Flat(BASE):
         try:
             return getattr(FlatStatus, status)
         except (AttributeError, TypeError):
-            LOGGER.warn("Unkown flat status %s, ignoring it.",
-                        status)
+            LOGGER.warn("Unkown flat status %s, ignoring it.", status)
             return self.status.default.arg
 
     @validates("notation")
@@ -137,7 +141,7 @@ class Flat(BASE):
             notation = int(notation)
             assert notation >= 0 and notation <= 5
         except (ValueError, AssertionError):
-            raise ValueError('notation should be an integer between 0 and 5')
+            raise ValueError("notation should be an integer between 0 and 5")
         return notation
 
     @validates("date")
@@ -178,25 +182,22 @@ class Flat(BASE):
         # Handle flatisfy metadata
         flat_dict = flat_dict.copy()
         if "flatisfy" in flat_dict:
-            flat_dict["flatisfy_stations"] = (
-                flat_dict["flatisfy"].get("matched_stations", [])
+            flat_dict["flatisfy_stations"] = flat_dict["flatisfy"].get(
+                "matched_stations", []
             )
-            flat_dict["flatisfy_postal_code"] = (
-                flat_dict["flatisfy"].get("postal_code", None)
+            flat_dict["flatisfy_postal_code"] = flat_dict["flatisfy"].get(
+                "postal_code", None
             )
-            flat_dict["flatisfy_position"] = (
-                flat_dict["flatisfy"].get("position", None)
-            )
-            flat_dict["flatisfy_time_to"] = (
-                flat_dict["flatisfy"].get("time_to", {})
-            )
-            flat_dict["flatisfy_constraint"] = (
-                flat_dict["flatisfy"].get("constraint", "default")
+            flat_dict["flatisfy_position"] = flat_dict["flatisfy"].get("position", None)
+            flat_dict["flatisfy_time_to"] = flat_dict["flatisfy"].get("time_to", {})
+            flat_dict["flatisfy_constraint"] = flat_dict["flatisfy"].get(
+                "constraint", "default"
             )
             del flat_dict["flatisfy"]
 
-        flat_dict = {k: v for k, v in flat_dict.items()
-                     if k in inspect(Flat).columns.keys()}
+        flat_dict = {
+            k: v for k, v in flat_dict.items() if k in inspect(Flat).columns.keys()
+        }
         return Flat(**flat_dict)
 
     def __repr__(self):
@@ -207,11 +208,7 @@ class Flat(BASE):
         Return a dict representation of this flat object that is JSON
         serializable.
         """
-        flat_repr = {
-            k: v
-            for k, v in self.__dict__.items()
-            if not k.startswith("_")
-        }
+        flat_repr = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
         if isinstance(flat_repr["status"], FlatStatus):
             flat_repr["status"] = flat_repr["status"].name
         if isinstance(flat_repr["utilities"], FlatUtilities):

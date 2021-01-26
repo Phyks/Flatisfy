@@ -16,10 +16,12 @@ import PIL.Image
 
 LOGGER = logging.getLogger(__name__)
 
+
 class MemoryCache(object):
     """
     A cache in memory.
     """
+
     @staticmethod
     def on_miss(key):
         """
@@ -87,6 +89,7 @@ class ImageCache(MemoryCache):
     """
     A cache for images, stored in memory.
     """
+
     @staticmethod
     def compute_filename(url):
         """
@@ -113,10 +116,7 @@ class ImageCache(MemoryCache):
         filepath = None
         # Try to load from local folder
         if self.storage_dir:
-            filepath = os.path.join(
-                self.storage_dir,
-                self.compute_filename(url)
-            )
+            filepath = os.path.join(self.storage_dir, self.compute_filename(url))
             if os.path.isfile(filepath):
                 return PIL.Image.open(filepath)
         # Otherwise, fetch it

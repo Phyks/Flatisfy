@@ -50,4 +50,4 @@ class StringyJSON(types.TypeDecorator):
 # TypeEngine.with_variant says "use StringyJSON instead when
 # connecting to 'sqlite'"
 # pylint: disable=locally-disabled,invalid-name
-MagicJSON = types.JSON().with_variant(StringyJSON, 'sqlite')
+MagicJSON = types.JSON().with_variant(StringyJSON, "sqlite")

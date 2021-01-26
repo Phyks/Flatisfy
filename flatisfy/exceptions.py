@@ -10,4 +10,5 @@ class DataBuildError(Exception):
     """
     Error occurring on building a data file.
     """
+
     pass

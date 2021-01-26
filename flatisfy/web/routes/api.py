@@ -2,9 +2,7 @@
 """
 This module contains the definition of the web app API routes.
 """
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals
-)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 import itertools
@@ -60,26 +58,24 @@ def _JSONApiSpec(query, model, default_sorting=None):
     # Handle pagination according to JSON API spec
     page_number, page_size = 0, None
     try:
-        if 'page[size]' in query:
-            page_size = int(query['page[size]'])
+        if "page[size]" in query:
+            page_size = int(query["page[size]"])
             assert page_size > 0
-        if 'page[number]' in query:
-            page_number = int(query['page[number]'])
+        if "page[number]" in query:
+            page_number = int(query["page[number]"])
             assert page_number >= 0
     except (AssertionError, ValueError):
         raise ValueError("Invalid pagination provided.")
 
     # Handle sorting according to JSON API spec
     sorting = []
-    if 'sort' in query:
-        for index in query['sort'].split(','):
+    if "sort" in query:
+        for index in query["sort"].split(","):
             try:
-                sort_field = getattr(model, index.lstrip('-'))
+                sort_field = getattr(model, index.lstrip("-"))
             except AttributeError:
-                raise ValueError(
-                    "Invalid sorting key provided: {}.".format(index)
-                )
-            if index.startswith('-'):
+                raise ValueError("Invalid sorting key provided: {}.".format(index))
+            if index.startswith("-"):
                 sort_field = sort_field.desc()
             sorting.append(sort_field)
     # Default sorting options
@@ -88,9 +84,7 @@ def _JSONApiSpec(query, model, default_sorting=None):
             sorting.append(getattr(model, default_sorting))
         except AttributeError:
             raise ValueError(
-                "Invalid default sorting key provided: {}.".format(
-                    default_sorting
-                )
+                "Invalid default sorting key provided: {}.".format(default_sorting)
             )
 
     return filters, page_number, page_size, sorting
@@ -125,7 +119,7 @@ def _serialize_flat(flat, config):
         flat["flatisfy_postal_code"] = {
             "postal_code": flat["flatisfy_postal_code"],
             "name": postal_code_data.name,
-            "gps": (postal_code_data.lat, postal_code_data.lng)
+            "gps": (postal_code_data.lat, postal_code_data.lng),
         }
     except (AssertionError, StopIteration):
         flat["flatisfy_postal_code"] = {}
@@ -148,7 +142,7 @@ def index_v1():
         "search": "/api/v1/search",
         "ics": "/api/v1/ics/visits.ics",
         "time_to_places": "/api/v1/time_to_places",
-        "metadata": "/api/v1/metadata"
+        "metadata": "/api/v1/metadata",
     }
 
 
@@ -179,36 +173,32 @@ def flats_v1(config, db):
 
     :return: The available flats objects in a JSON ``data`` dict.
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
-        return ''
+        return ""
 
     try:
         try:
             filters, page_number, page_size, sorting = _JSONApiSpec(
-                bottle.request.query,
-                flat_model.Flat,
-                default_sorting='cost'
+                bottle.request.query, flat_model.Flat, default_sorting="cost"
             )
         except ValueError as exc:
             return JSONError(400, str(exc))
 
         # Build flat list
-        db_query = (
-            db.query(flat_model.Flat).filter_by(**filters).order_by(*sorting)
-        )
+        db_query = db.query(flat_model.Flat).filter_by(**filters).order_by(*sorting)
         flats = [
             _serialize_flat(flat, config)
             for flat in itertools.islice(
                 db_query,
                 page_number * page_size if page_size else None,
-                page_number * page_size + page_size if page_size else None
+                page_number * page_size + page_size if page_size else None,
             )
         ]
         return {
             "data": flats,
             "page": page_number,
-            "items_per_page": page_size if page_size else len(flats)
+            "items_per_page": page_size if page_size else len(flats),
         }
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
@@ -224,7 +214,7 @@ def flat_v1(flat_id, config, db):
 
     :return: The flat object in a JSON ``data`` dict.
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
@@ -234,9 +224,7 @@ def flat_v1(flat_id, config, db):
         if not flat:
             return JSONError(404, "No flat with id {}.".format(flat_id))
 
-        return {
-            "data": _serialize_flat(flat, config)
-        }
+        return {"data": _serialize_flat(flat, config)}
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
@@ -260,7 +248,7 @@ def update_flat_v1(flat_id, config, db):
 
     :return: The new flat object in a JSON ``data`` dict.
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
@@ -274,14 +262,9 @@ def update_flat_v1(flat_id, config, db):
             for key, value in json_body.items():
                 setattr(flat, key, value)
         except ValueError as exc:
-            return JSONError(
-                400,
-                "Invalid payload provided: {}.".format(str(exc))
-            )
+            return JSONError(400, "Invalid payload provided: {}.".format(str(exc)))
 
-        return {
-            "data": _serialize_flat(flat, config)
-        }
+        return {"data": _serialize_flat(flat, config)}
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
@@ -297,7 +280,7 @@ def time_to_places_v1(config):
     :return: The JSON dump of the places to compute time to (dict of places
         names mapped to GPS coordinates).
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
@@ -305,12 +288,9 @@ def time_to_places_v1(config):
         places = {}
         for constraint_name, constraint in config["constraints"].items():
             places[constraint_name] = {
-                k: v["gps"]
-                for k, v in constraint["time_to"].items()
+                k: v["gps"] for k, v in constraint["time_to"].items()
             }
-        return {
-            "data": places
-        }
+        return {"data": places}
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
 
@@ -345,7 +325,7 @@ def search_v1(db, config):
 
     :return: The matching flat objects in a JSON ``data`` dict.
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
@@ -357,30 +337,29 @@ def search_v1(db, config):
 
         try:
             filters, page_number, page_size, sorting = _JSONApiSpec(
-                bottle.request.query,
-                flat_model.Flat,
-                default_sorting='cost'
+                bottle.request.query, flat_model.Flat, default_sorting="cost"
             )
         except ValueError as exc:
             return JSONError(400, str(exc))
 
-        flats_db_query = (flat_model.Flat
-                          .search_query(db, query)
-                          .filter_by(**filters)
-                          .order_by(*sorting))
+        flats_db_query = (
+            flat_model.Flat.search_query(db, query)
+            .filter_by(**filters)
+            .order_by(*sorting)
+        )
         flats = [
             _serialize_flat(flat, config)
             for flat in itertools.islice(
                 flats_db_query,
                 page_number * page_size if page_size else None,
-                page_number * page_size + page_size if page_size else None
+                page_number * page_size + page_size if page_size else None,
             )
         ]
 
         return {
             "data": flats,
             "page": page_number,
-            "items_per_page": page_size if page_size else len(flats)
+            "items_per_page": page_size if page_size else len(flats),
         }
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
@@ -396,7 +375,7 @@ def ics_feed_v1(config, db):
 
     :return: The ICS feed for the visits.
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
@@ -407,24 +386,24 @@ def ics_feed_v1(config, db):
         )
 
         for flat in flats_with_visits:
-            vevent = cal.add('vevent')
-            vevent.add('dtstart').value = flat.visit_date
-            vevent.add('dtend').value = (
-                flat.visit_date + datetime.timedelta(hours=1)
-            )
-            vevent.add('summary').value = 'Visit - {}'.format(flat.title)
+            vevent = cal.add("vevent")
+            vevent.add("dtstart").value = flat.visit_date
+            vevent.add("dtend").value = flat.visit_date + datetime.timedelta(hours=1)
+            vevent.add("summary").value = "Visit - {}".format(flat.title)
 
-            description = (
-                '{} (area: {}, cost: {} {})\n{}#/flat/{}\n'.format(
-                    flat.title, flat.area, flat.cost, flat.currency,
-                    config['website_url'], flat.id
-                )
+            description = "{} (area: {}, cost: {} {})\n{}#/flat/{}\n".format(
+                flat.title,
+                flat.area,
+                flat.cost,
+                flat.currency,
+                config["website_url"],
+                flat.id,
             )
-            description += '\n{}\n'.format(flat.text)
+            description += "\n{}\n".format(flat.text)
             if flat.notes:
-                description += '\n{}\n'.format(flat.notes)
+                description += "\n{}\n".format(flat.notes)
 
-            vevent.add('description').value = description
+            vevent.add("description").value = description
     except Exception:  # pylint: disable= broad-except
         pass
 
@@ -439,13 +418,11 @@ def opendata_index_v1():
 
         GET /api/v1/opendata
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
-    return {
-        "postal_codes": "/api/v1/opendata/postal_codes"
-    }
+    return {"postal_codes": "/api/v1/opendata/postal_codes"}
 
 
 def opendata_postal_codes_v1(db):
@@ -476,35 +453,35 @@ def opendata_postal_codes_v1(db):
 
     :return: The postal codes data from opendata.
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
     try:
         try:
             filters, page_number, page_size, sorting = _JSONApiSpec(
-                bottle.request.query,
-                PostalCode,
-                default_sorting='postal_code'
+                bottle.request.query, PostalCode, default_sorting="postal_code"
             )
         except ValueError as exc:
             return JSONError(400, str(exc))
 
         db_query = db.query(PostalCode).filter_by(**filters).order_by(*sorting)
         postal_codes = [
-            x.json_api_repr() for x in itertools.islice(
+            x.json_api_repr()
+            for x in itertools.islice(
                 db_query,
                 page_number * page_size if page_size else None,
-                page_number * page_size + page_size if page_size else None
+                page_number * page_size + page_size if page_size else None,
             )
         ]
         return {
             "data": postal_codes,
             "page": page_number,
-            "items_per_page": page_size if page_size else len(postal_codes)
+            "items_per_page": page_size if page_size else len(postal_codes),
         }
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
+
 
 def metadata_v1(config):
     """
@@ -516,25 +493,18 @@ def metadata_v1(config):
 
     :return: The application metadata.
     """
-    if bottle.request.method == 'OPTIONS':
+    if bottle.request.method == "OPTIONS":
         # CORS
         return {}
 
     try:
         last_update = None
         try:
-            ts_file = os.path.join(
-                config['data_directory'],
-                'timestamp'
-            )
+            ts_file = os.path.join(config["data_directory"], "timestamp")
             last_update = os.path.getmtime(ts_file)
         except OSError:
             pass
 
-        return {
-            'data': {
-                'last_update': last_update
-            }
-        }
+        return {"data": {"last_update": last_update}}
     except Exception as exc:  # pylint: disable= broad-except
         return JSONError(500, str(exc))
