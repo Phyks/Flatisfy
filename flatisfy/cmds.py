@@ -161,6 +161,7 @@ def import_and_filter(config, load_from_db=False, new_only=False):
     get_session = database.init_db(config["database"], config["search_index"])
 
     new_flats = []
+    result = []
 
     LOGGER.info("Merging fetched flats in database...")
     # Flatten the flats_by_status dict
@@ -210,13 +211,14 @@ def import_and_filter(config, load_from_db=False, new_only=False):
                 flat.status = getattr(flat_model.FlatStatus, status)
                 if flat.status == flat_model.FlatStatus.new:
                     new_flats.append(flat)
+                    result.append(flat.id)
 
             session.add_all(flats_objects.values())
 
         if config["send_email"]:
             email.send_notification(config, new_flats)
 
-    LOGGER.info(f"Found {len(new_flats)} new flats.")
+    LOGGER.info(f"Found {len(result)} new flats.")
 
     # Touch a file to indicate last update timestamp
     ts_file = os.path.join(config["data_directory"], "timestamp")
@@ -224,6 +226,7 @@ def import_and_filter(config, load_from_db=False, new_only=False):
         os.utime(ts_file, None)
 
     LOGGER.info("Done!")
+    return result
 
 
 def purge_db(config):

@@ -97,6 +97,7 @@ DEFAULT_CONFIG = {
     "smtp_password": None,
     "smtp_from": "noreply@flatisfy.org",
     "smtp_to": [],
+    "notification_lang": "en",
     # The web site url, to be used in email notifications. (doesn't matter
     # whether the trailing slash is present or not)
     "website_url": "http://127.0.0.1:8080",
@@ -176,6 +177,9 @@ def validate_config(config, check_with_data):
             config["smtp_password"], str
         )  # noqa: E501
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
+        assert config["notification_lang"] is None or isinstance(
+            config["notification_lang"], str
+        )
 
         assert isinstance(config["store_personal_data"], bool)
         assert isinstance(config["max_distance_housing_station"], (int, float))
