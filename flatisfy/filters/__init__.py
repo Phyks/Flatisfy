@@ -37,15 +37,13 @@ def refine_with_housing_criteria(flats_list, constraint):
         # Check postal code
         postal_code = flat["flatisfy"].get("postal_code", None)
         if postal_code and postal_code not in constraint["postal_codes"]:
-            LOGGER.info("Postal code for flat %s is out of range.", flat["id"])
+            LOGGER.info("Postal code %s for flat %s is out of range.", postal_code, flat["id"])
             is_ok[i] = is_ok[i] and False
 
         # Check time_to
         for place_name, time in flat["flatisfy"].get("time_to", {}).items():
             time = time["time"]
-            is_within_interval = tools.is_within_interval(
-                time, *(constraint["time_to"][place_name]["time"])
-            )
+            is_within_interval = tools.is_within_interval(time, *(constraint["time_to"][place_name]["time"]))
             if not is_within_interval:
                 LOGGER.info(
                     "Flat %s is too far from place %s: %ds.",
@@ -58,12 +56,10 @@ def refine_with_housing_criteria(flats_list, constraint):
         # Check other fields
         for field in ["area", "cost", "rooms", "bedrooms"]:
             interval = constraint[field]
-            is_within_interval = tools.is_within_interval(
-                flat.get(field, None), *interval
-            )
+            is_within_interval = tools.is_within_interval(flat.get(field, None), *interval)
             if not is_within_interval:
                 LOGGER.info(
-                    "%s for flat %s is out of range.", field.capitalize(), flat["id"]
+                    "%s %s for flat %s is out of range.", field.capitalize(), str(flat.get(field, None)), flat["id"]
                 )
             is_ok[i] = is_ok[i] and is_within_interval
 
@@ -95,9 +91,7 @@ def refine_with_details_criteria(flats_list, constraint):
 
     for i, flat in enumerate(flats_list):
         # Check number of pictures
-        has_enough_photos = tools.is_within_interval(
-            len(flat.get("photos", [])), constraint["minimum_nb_photos"], None
-        )
+        has_enough_photos = tools.is_within_interval(len(flat.get("photos", [])), constraint["minimum_nb_photos"], None)
         if not has_enough_photos:
             LOGGER.info(
                 "Flat %s only has %d photos, it should have at least %d.",
@@ -148,16 +142,12 @@ def first_pass(flats_list, constraint, config):
 
     # Handle duplicates based on ids
     # Just remove them (no merge) as they should be the exact same object.
-    flats_list, _ = duplicates.detect(
-        flats_list, key="id", merge=False, should_intersect=False
-    )
+    flats_list, _ = duplicates.detect(flats_list, key="id", merge=False, should_intersect=False)
     # Also merge duplicates based on urls (these may come from different
     # flatboob backends)
     # This is especially useful as some websites such as entreparticuliers
     # contains a lot of leboncoin housings posts.
-    flats_list, duplicates_by_urls = duplicates.detect(
-        flats_list, key="urls", merge=True, should_intersect=True
-    )
+    flats_list, duplicates_by_urls = duplicates.detect(flats_list, key="urls", merge=True, should_intersect=True)
 
     # Guess the postal codes
     flats_list = metadata.guess_postal_code(flats_list, constraint, config)

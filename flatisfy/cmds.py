@@ -23,9 +23,7 @@ import time
 LOGGER = logging.getLogger(__name__)
 
 
-def filter_flats_list(
-    config, constraint_name, flats_list, fetch_details=True, past_flats=None
-):
+def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, past_flats=None):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
@@ -69,7 +67,7 @@ def filter_flats_list(
 
             use_cache = past_ids.get(flat["id"])
             if use_cache:
-                LOGGER.info("Skipping details download for %s.", flat["id"])
+                LOGGER.debug("Skipping details download for %s.", flat["id"])
                 details = use_cache
             else:
                 details = fetch.fetch_details(config, flat["id"])
@@ -82,32 +80,22 @@ def filter_flats_list(
     # Do a second pass to consolidate all the infos we found and make use of
     # additional infos
     if config["passes"] > 1:
-        second_pass_result = flatisfy.filters.second_pass(
-            first_pass_result["new"], constraint, config
-        )
+        second_pass_result = flatisfy.filters.second_pass(first_pass_result["new"], constraint, config)
     else:
         second_pass_result["new"] = first_pass_result["new"]
 
     # Do a third pass to deduplicate better
     if config["passes"] > 2:
-        third_pass_result = flatisfy.filters.third_pass(
-            second_pass_result["new"], config
-        )
+        third_pass_result = flatisfy.filters.third_pass(second_pass_result["new"], config)
     else:
         third_pass_result["new"] = second_pass_result["new"]
 
     return {
         "new": third_pass_result["new"],
         "duplicate": (
-            first_pass_result["duplicate"]
-            + second_pass_result["duplicate"]
-            + third_pass_result["duplicate"]
+            first_pass_result["duplicate"] + second_pass_result["duplicate"] + third_pass_result["duplicate"]
         ),
-        "ignored": (
-            first_pass_result["ignored"]
-            + second_pass_result["ignored"]
-            + third_pass_result["ignored"]
-        ),
+        "ignored": (first_pass_result["ignored"] + second_pass_result["ignored"] + third_pass_result["ignored"]),
     }
 
 
@@ -178,10 +166,7 @@ def import_and_filter(config, load_from_db=False, new_only=False):
 
         for status, flats_list in flatten_flats_by_status.items():
             # Build SQLAlchemy Flat model objects for every available flat
-            flats_objects = {
-                flat_dict["id"]: flat_model.Flat.from_dict(flat_dict)
-                for flat_dict in flats_list
-            }
+            flats_objects = {flat_dict["id"]: flat_model.Flat.from_dict(flat_dict) for flat_dict in flats_list}
 
             if flats_objects:
                 # If there are some flats, try to merge them with the ones in
@@ -266,8 +251,5 @@ def serve(config):
         # standard logging
         server = web_app.QuietWSGIRefServer
 
-    print(
-        "Launching web viewer running on http://%s:%s"
-        % (config["host"], config["port"])
-    )
+    print("Launching web viewer running on http://%s:%s" % (config["host"], config["port"]))
     app.run(host=config["host"], port=config["port"], server=server)
