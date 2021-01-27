@@ -41,7 +41,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 require('leaflet.icon.glyph')
 
-import { LMap, LTileLayer, LMarker, LTooltip, LPopup, LGeoJSON } from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LTooltip, LPopup, LGeoJson } from 'vue2-leaflet'
 import Vue2LeafletMarkerCluster from 'vue2-leaflet-markercluster'
 
 export default {
@@ -81,7 +81,7 @@ export default {
         'v-marker-cluster': Vue2LeafletMarkerCluster,
         'v-tooltip': LTooltip,
         'v-popup': LPopup,
-        'v-geojson-layer': LGeoJSON
+        'v-geojson-layer': LGeoJson
     },
 
     watch: {
