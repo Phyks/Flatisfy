@@ -113,7 +113,8 @@ def main():
     # Set logger
     if args.vv:
         logging.getLogger("").setLevel(logging.DEBUG)
-        logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
+        logging.getLogger("titlecase").setLevel(logging.INFO)
+        logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
     elif args.verbose:
         logging.getLogger("").setLevel(logging.INFO)
         # sqlalchemy INFO level is way too loud, just stick with WARNING

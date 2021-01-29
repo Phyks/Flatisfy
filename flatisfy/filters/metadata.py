@@ -76,10 +76,10 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
 
     Example::
 
-        >>> match("Paris 14ème", ["Ris", "ris", "Paris 14"], limit=1)
+        >>> fuzzy_match("Paris 14ème", ["Ris", "ris", "Paris 14"], limit=1)
         [("Paris 14", 100)
 
-        >>> match( \
+        >>> fuzzy_match( \
                 "Saint-Jacques, Denfert-Rochereau (Colonel Rol-Tanguy), " \
                 "Mouton-Duvernet", \
                 ["saint-jacques", "denfert rochereau", "duvernet", "toto"], \
@@ -212,7 +212,7 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
             assert postal_code in [x.postal_code for x in opendata["postal_codes"]]
 
             LOGGER.debug(
-                "Found postal code in location field for flat %s: %s.",
+                "Found postal code directly in location field for flat %s: %s.",
                 flat["id"],
                 postal_code,
             )
@@ -274,6 +274,14 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
 
         if position:
             flat["flatisfy"]["position"] = position
+        LOGGER.debug(
+            "found postal_code=%s insee_code=%s position=%s for flat %s (%s).",
+            postal_code,
+            insee_code,
+            position,
+            flat["id"],
+            location,
+        )
 
     return flats_list
 

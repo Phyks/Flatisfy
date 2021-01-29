@@ -174,7 +174,7 @@ def _preprocess_laposte():
                 )
             )
         except KeyError:
-            LOGGER.info("Missing data for postal code %s, skipping it.", fields["code_postal"])
+            LOGGER.debug("Missing data for postal code %s, skipping it.", fields["code_postal"])
 
     return postal_codes_data
 

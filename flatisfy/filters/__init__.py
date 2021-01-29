@@ -43,7 +43,7 @@ def refine_with_housing_criteria(flats_list, constraint):
                 flat["id"],
                 ", ".join(constraint["postal_codes"]),
             )
-            is_ok[i] = is_ok[i] and False
+            is_ok[i] = False
         # Check insee code
         insee_code = flat["flatisfy"].get("insee_code", None)
         if insee_code and "insee_codes" in constraint and insee_code not in constraint["insee_codes"]:
@@ -53,7 +53,7 @@ def refine_with_housing_criteria(flats_list, constraint):
                 flat["id"],
                 ", ".join(constraint["insee_codes"]),
             )
-            is_ok[i] = is_ok[i] and False
+            is_ok[i] = False
 
         # Check time_to
         for place_name, time in flat["flatisfy"].get("time_to", {}).items():
