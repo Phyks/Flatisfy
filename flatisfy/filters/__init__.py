@@ -37,7 +37,22 @@ def refine_with_housing_criteria(flats_list, constraint):
         # Check postal code
         postal_code = flat["flatisfy"].get("postal_code", None)
         if postal_code and postal_code not in constraint["postal_codes"]:
-            LOGGER.info("Postal code %s for flat %s is out of range.", postal_code, flat["id"])
+            LOGGER.info(
+                "Postal code %s for flat %s is out of range (%s).",
+                postal_code,
+                flat["id"],
+                ", ".join(constraint["postal_codes"]),
+            )
+            is_ok[i] = is_ok[i] and False
+        # Check insee code
+        insee_code = flat["flatisfy"].get("insee_code", None)
+        if insee_code and "insee_codes" in constraint and insee_code not in constraint["insee_codes"]:
+            LOGGER.info(
+                "insee code %s for flat %s is out of range (%s).",
+                insee_code,
+                flat["id"],
+                ", ".join(constraint["insee_codes"]),
+            )
             is_ok[i] = is_ok[i] and False
 
         # Check time_to

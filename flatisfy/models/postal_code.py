@@ -27,6 +27,7 @@ class PostalCode(BASE):
     # following ISO 3166-2.
     area = Column(String, index=True)
     postal_code = Column(String, index=True)
+    insee_code = Column(String, index=True)
     name = Column(String, index=True)
     lat = Column(Float)
     lng = Column(Float)

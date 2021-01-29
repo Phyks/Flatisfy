@@ -88,8 +88,8 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
         [('denfert rochereau', 100), ('saint-jacques', 76)]
     """
     # TODO: Is there a better confidence measure?
-    normalized_query = tools.normalize_string(query)
-    normalized_choices = [tools.normalize_string(choice) for choice in choices]
+    normalized_query = tools.normalize_string(query).replace("saint", "st")
+    normalized_choices = [tools.normalize_string(choice).replace("saint", "st") for choice in choices]
 
     # Remove duplicates in the choices list
     unique_normalized_choices = tools.uniqify(normalized_choices)
@@ -116,10 +116,11 @@ def fuzzy_match(query, choices, limit=3, threshold=75):
     return matches
 
 
-def guess_location_position(location, cities, constraint):
+def guess_location_position(location, cities, constraint, must_match):
     # try to find a city
     # Find all fuzzy-matching cities
     postal_code = None
+    insee_code = None
     position = None
 
     matched_cities = fuzzy_match(location, [x.name for x in cities], limit=None)
@@ -128,6 +129,7 @@ def guess_location_position(location, cities, constraint):
         matched_postal_codes = []
         for matched_city_name, _ in matched_cities:
             postal_code_objects_for_city = [x for x in cities if x.name == matched_city_name]
+            insee_code = [pc.insee_code for pc in postal_code_objects_for_city][0]
             matched_postal_codes.extend(pc.postal_code for pc in postal_code_objects_for_city)
         # Try to match them with postal codes in config constraint
         matched_postal_codes_in_config = set(matched_postal_codes) & set(constraint["postal_codes"])
@@ -154,7 +156,15 @@ def guess_location_position(location, cities, constraint):
                 LOGGER.debug(("Found position %s using city %s."), position, matched_city_name)
                 break
 
-    return (postal_code, position)
+    if not postal_code and must_match:
+        postal_code = cities[0].postal_code
+        position = {
+            "lat": cities[0].lat,
+            "lng": cities[0].lng,
+        }
+        insee_code = cities[0].insee_code
+
+    return (postal_code, insee_code, position)
 
 
 def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
@@ -189,6 +199,7 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
             continue
 
         postal_code = None
+        insee_code = None
         position = None
 
         # Try to find a postal code directly
@@ -209,11 +220,12 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
             postal_code = None
 
         # Then fetch position (and postal_code is couldn't be found earlier)
+        cities = opendata["postal_codes"]
         if postal_code:
-            cities = [x for x in opendata["postal_codes"] if x.postal_code == postal_code]
-            (_, position) = guess_location_position(location, cities, constraint)
-        else:
-            (postal_code, position) = guess_location_position(location, opendata["postal_codes"], constraint)
+            cities = [x for x in cities if x.postal_code == postal_code]
+        (postal_code, insee_code, position) = guess_location_position(
+            location, cities, constraint, postal_code is not None
+        )
 
         # Check that postal code is not too far from the ones listed in config,
         # limit bad fuzzy matching
@@ -256,6 +268,9 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
             flat["flatisfy"]["postal_code"] = postal_code
         else:
             LOGGER.info("No postal code found for flat %s.", flat["id"])
+
+        if insee_code:
+            flat["flatisfy"]["insee_code"] = insee_code
 
         if position:
             flat["flatisfy"]["position"] = position

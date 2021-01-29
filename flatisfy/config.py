@@ -32,6 +32,7 @@ DEFAULT_CONFIG = {
             "house_types": [],  # List of house types, must be in APART, HOUSE,
             # PARKING, LAND, OTHER or UNKNOWN
             "postal_codes": [],  # List of postal codes
+            "insees": [],  # List of postal codes
             "area": (None, None),  # (min, max) in m^2
             "cost": (None, None),  # (min, max) in currency unit
             "rooms": (None, None),  # (min, max)
@@ -202,13 +203,22 @@ def validate_config(config, check_with_data):
             assert "postal_codes" in constraint
             assert constraint["postal_codes"]
             assert all(isinstance(x, str) for x in constraint["postal_codes"])
+            if "insee_codes" in constraint:
+                assert constraint["insee_codes"]
+                assert all(isinstance(x, str) for x in constraint["insee_codes"])
+
             if check_with_data:
                 # Ensure data is built into db
                 data.preprocess_data(config, force=False)
                 # Check postal codes
-                opendata_postal_codes = [x.postal_code for x in data.load_data(PostalCode, constraint, config)]
+                opendata = data.load_data(PostalCode, constraint, config)
+                opendata_postal_codes = [x.postal_code for x in opendata]
+                opendata_insee_codes = [x.insee_code for x in opendata]
                 for postal_code in constraint["postal_codes"]:
                     assert postal_code in opendata_postal_codes  # noqa: E501
+                if "insee_codes" in constraint:
+                    for insee in constraint["insee_codes"]:
+                        assert insee in opendata_insee_codes  # noqa: E501
 
             assert "area" in constraint
             _check_constraints_bounds(constraint["area"])

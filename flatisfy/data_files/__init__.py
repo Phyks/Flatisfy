@@ -151,7 +151,7 @@ def _preprocess_laposte():
         try:
             area = french_postal_codes_to_quarter(fields["code_postal"])
             if area is None:
-                LOGGER.info(
+                LOGGER.debug(
                     "No matching area found for postal code %s, skipping it.",
                     fields["code_postal"],
                 )
@@ -167,6 +167,7 @@ def _preprocess_laposte():
                 PostalCode(
                     area=area,
                     postal_code=fields["code_postal"],
+                    insee_code=fields["code_commune_insee"],
                     name=name,
                     lat=fields["coordonnees_gps"][0],
                     lng=fields["coordonnees_gps"][1],
