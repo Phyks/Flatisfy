@@ -1,0 +1,15 @@
+{
+    "cSpell.words": [
+        "Weboob",
+        "flatisfy"
+    ],
+    "sqltools.useNodeRuntime": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "flatisfy",
+            "database": "${workspaceFolder:flatisfy}/data/flatisfy.db"
+        }
+    ]
+}
