@@ -14,7 +14,8 @@
     "watch:dev": "webpack --colors --progress --watch",
     "build:prod": "NODE_ENV=production webpack --colors --progress -p",
     "watch:prod": "NODE_ENV=production webpack --colors --progress --watch -p",
-    "lint": "eslint --ext .js,.vue ./flatisfy/web/js_src/**"
+    "lint": "eslint --fix --ext .js,.vue ./flatisfy/web/js_src/**",
+    "ziparound": "cp flatisfy/data_files/laposte.json node_modules/ziparound/laposte.json && node node_modules/ziparound"
   },
   "dependencies": {
     "es6-promise": "^4.1.0",
@@ -56,6 +57,6 @@
     "vue-loader": "^11.3.4",
     "vue-template-compiler": "^2.2.6",
     "webpack": "^2.3.3",
-    "ziparound": "https://github.com/guix77/ziparound"
+    "ziparound": "1.0.0"
   }
 }
