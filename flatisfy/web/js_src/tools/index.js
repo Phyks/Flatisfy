@@ -25,3 +25,18 @@ export function capitalize (string) {
 export function range (n) {
     return [...Array(n).keys()]
 }
+
+export function costFilter (value, currency) {
+    if (!value) {
+        return 'N/A'
+    }
+
+    if (currency === 'EUR') {
+        currency = ' €'
+    }
+
+    var valueStr = value.toString()
+    valueStr = ' '.repeat((3 + valueStr.length) % 3) + valueStr
+
+    return valueStr.match(/.{1,3}/g).join('.') + currency
+}

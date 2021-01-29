@@ -1,4 +1,4 @@
-import { findFlatGPS } from '../tools'
+import { findFlatGPS, costFilter } from '../tools'
 
 export default {
     allFlats: state => state.flats,
@@ -42,7 +42,9 @@ export default {
                       // gps[1] += (Math.random() - 0.5) / 500
                     }
                     const href = router.resolve({ name: 'details', params: { id: flat.id }}).href
-                    const cost = flat.cost ? ' ( ' + flat.cost + '€)' : ''
+                    const cost = flat.cost
+                        ? costFilter(flat.cost, flat.currency)
+                        : ''
                     markers.push({
                         'title': '',
                         'content': '<a href="' + href + '">' + flat.title + '</a>' + cost,

@@ -152,13 +152,7 @@
             <nav>
                 <ul>
                     <template v-if="flat.status !== 'user_deleted'">
-                        <li ref="notationButton">
-                            <template v-for="n in range(5)">
-                                <button class="btnIcon" v-bind:key="n" v-on:mouseover="handleNotationHover(n)" v-on:mouseout="handleNotationOut()" v-on:click="updateFlatNotation(n)">
-                                    <i class="fa" v-bind:class="{'fa-star': n < notation, 'fa-star-o': n >= notation}" aria-hidden="true"></i>
-                                </button>
-                            </template>
-                        </li>
+                        <Notation :flat="flat"></Notation>
                         <li>
                             <button v-on:click="updateFlatStatus('user_deleted')" class="fullButton">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
@@ -189,30 +183,16 @@ import 'flatpickr/dist/flatpickr.css'
 
 import FlatsMap from '../components/flatsmap.vue'
 import Slider from '../components/slider.vue'
+import Notation from '../components/notation.vue'
 
-import { capitalize, range } from '../tools'
+import { capitalize } from '../tools'
 
 export default {
     components: {
         FlatsMap,
         Slider,
-        flatPickr
-    },
-    filters: {
-        cost: function (value, currency) {
-            if (!value) {
-                return 'N/A'
-            }
-
-            if (currency === 'EUR') {
-                currency = ' €'
-            }
-
-            var valueStr = value.toString()
-            valueStr = ' '.repeat((3 + valueStr.length) % 3) + valueStr
-
-            return valueStr.match(/.{1,3}/g).join('.') + currency
-        }
+        flatPickr,
+        Notation
     },
 
     created () {
@@ -294,20 +274,6 @@ export default {
             this.$store.dispatch('getAllTimeToPlaces')
         },
 
-        updateFlatNotation (notation) {
-            notation = notation + 1
-
-            if (notation === this.flat.notation) {
-                this.flat.notation = 0
-                this.$store.dispatch('updateFlatNotation', { flatId: this.flat.id, newNotation: 0 })
-                this.$store.dispatch('updateFlatStatus', { flatId: this.flat.id, newStatus: 'new' })
-            } else {
-                this.flat.notation = notation
-                this.$store.dispatch('updateFlatNotation', { flatId: this.flat.id, newNotation: notation })
-                this.$store.dispatch('updateFlatStatus', { flatId: this.flat.id, newStatus: 'followed' })
-            }
-        },
-
         updateFlatStatus (status) {
             this.$store.dispatch('updateFlatStatus', { flatId: this.flat.id, newStatus: status })
         },
@@ -335,23 +301,13 @@ export default {
             return minutes + ' ' + this.$tc('common.mins', minutes)
         },
 
-        handleNotationHover (n) {
-            this.overloadNotation = n + 1
-        },
-
-        handleNotationOut () {
-            this.overloadNotation = null
-        },
-
         normalizePhoneNumber (phoneNumber) {
             phoneNumber = phoneNumber.replace(/ /g, '')
             phoneNumber = phoneNumber.replace(/\./g, '')
             return phoneNumber
         },
 
-        capitalize: capitalize,
-
-        range: range
+        capitalize: capitalize
     }
 }
 </script>
@@ -424,12 +380,6 @@ td {
     padding-left: 0;
     list-style-position: outside;
     list-style-type: none;
-}
-
-.btnIcon {
-    border: none;
-    width: auto;
-    background-color: transparent;
 }
 
 @media screen and (max-width: 767px) {

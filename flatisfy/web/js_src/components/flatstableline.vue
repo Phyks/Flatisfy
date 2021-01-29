@@ -1,16 +1,11 @@
 <template>
     <tr>
         <td v-if="showNotationColumn">
-            <template v-for="n in notationRange">
-                <i class="fa fa-star" aria-hidden="true" :title="capitalizedStatus"></i>
-            </template>
+            <Notation :flat="flat" :title="capitalizedStatus"></Notation>
         </td>
         <td class="no-padding">
+            <Notation v-if="!showNotationColumn" :flat="flat" :title="capitalizedStatus"></Notation>
             <router-link class="fill" :to="{name: 'details', params: {id: flat.id}}">
-                <template v-if="!showNotationColumn" v-for="n in notationRange">
-                    <i class="fa fa-star" aria-hidden="true" :title="capitalizedStatus"></i>
-                </template>
-
                 [{{ flat.id.split("@")[1] }}]
                 <span class="expired">{{ flat.is_expired ? "[" + $t("common.expired") + "]" : null }}</span>
                 {{ flat.title }}
@@ -31,7 +26,7 @@
             {{ flat.rooms ? flat.rooms : '?'}}
         </td>
         <td>
-            {{ flat.cost }} {{ flat.currency }}
+            {{ flat.cost | cost(flat.currency) }}
             <template v-if="flat.utilities == 'included'">
                 {{ $t("flatsDetails.utilities_included") }}
             </template>
@@ -60,13 +55,18 @@
 </template>
 
 <script>
-import { capitalize, range } from '../tools'
+import { capitalize } from '../tools'
+import Notation from '../components/notation.vue'
 
 export default {
     props: {
         flat: Object,
         showNotationColumn: Boolean,
         showNotes: Boolean
+    },
+
+    components: {
+        Notation
     },
 
     computed: {
@@ -81,9 +81,6 @@ export default {
                 return this.flat.photos[0].url
             }
             return null
-        },
-        notationRange () {
-            return range(this.flat.notation)
         }
     },
 
