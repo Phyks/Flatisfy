@@ -15,5 +15,4 @@ titlecase
 unidecode
 vobject
 whoosh
-https://git.weboob.org/weboob/devel/repository/archive.zip?ref=master
-https://git.weboob.org/weboob/modules/repository/archive.zip?ref=master
+https://git.weboob.org/weboob/weboob/repository/archive.zip?ref=master
