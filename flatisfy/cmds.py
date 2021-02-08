@@ -19,6 +19,7 @@ from flatisfy import tools
 from flatisfy.filters import metadata
 from flatisfy.web import app as web_app
 import time
+from ratelimit.exception import RateLimitException
 
 LOGGER = logging.getLogger(__name__)
 
@@ -70,10 +71,14 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, p
                 LOGGER.debug("Skipping details download for %s.", flat["id"])
                 details = use_cache
             else:
-                details = fetch.fetch_details(config, flat["id"])
-                if flat["id"].endswith("@leboncoin"):
-                    # sleep 0.5s to avoid rate-kick
-                    time.sleep(0.5)
+                if flat["id"].split("@")[1] in ["seloger", "leboncoin"]:
+                    try:
+                        details = fetch.fetch_details_rate_limited(config, flat["id"])
+                    except RateLimitException:
+                        time.sleep(60)
+                        details = fetch.fetch_details_rate_limited(config, flat["id"])
+                else:
+                    details = fetch.fetch_details(config, flat["id"])
 
             first_pass_result["new"][i] = tools.merge_dicts(flat, details)
 

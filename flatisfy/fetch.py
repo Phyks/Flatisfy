@@ -9,6 +9,7 @@ import collections
 import itertools
 import json
 import logging
+from ratelimit import limits
 
 from flatisfy import database
 from flatisfy import tools
@@ -246,6 +247,14 @@ def fetch_flats(config):
         constraint_flats_list = [WebOOBProxy.restore_decimal_fields(flat) for flat in constraint_flats_list]
         fetched_flats[constraint_name] = constraint_flats_list
     return fetched_flats
+
+
+@limits(calls=10, period=60)
+def fetch_details_rate_limited(config, flat_id):
+    """
+    Limit flats fetching to at most 10 calls per minute to avoid rate banning
+    """
+    return fetch_details(config, flat_id)
 
 
 def fetch_details(config, flat_id):

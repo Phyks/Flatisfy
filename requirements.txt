@@ -8,6 +8,7 @@ future
 imagehash
 mapbox
 pillow
+ratelimit
 requests
 requests_mock
 sqlalchemy
