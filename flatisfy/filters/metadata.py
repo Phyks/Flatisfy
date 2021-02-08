@@ -192,7 +192,7 @@ def guess_postal_code(flats_list, constraint, config, distance_threshold=20000):
         if not location:
             # Skip everything if empty location
             LOGGER.info(
-                ("No location field for flat %s, skipping postal " "code lookup. (%s)"),
+                ("No location field for flat %s, skipping postal code lookup. (%s)"),
                 flat["id"],
                 flat.get("address"),
             )
@@ -358,7 +358,7 @@ def guess_stations(flats_list, constraint, config):
                         )
                         break
                     LOGGER.info(
-                        ("Station %s is too far from flat %s (%dm > %dm), " "discarding this station."),
+                        ("Station %s is too far from flat %s (%dm > %dm), discarding this station."),
                         station[0],
                         flat["id"],
                         int(distance),
@@ -418,7 +418,7 @@ def compute_travel_times(flats_list, constraint, config):
         if not flat["flatisfy"].get("matched_stations", []):
             # Skip any flat without matched stations
             LOGGER.info(
-                "Skipping travel time computation for flat %s. No matched " "stations.",
+                "Skipping travel time computation for flat %s. No matched stations.",
                 flat["id"],
             )
             continue

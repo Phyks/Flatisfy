@@ -24,7 +24,7 @@ try:
     from weboob.core.ouiboube import WebNip
     from weboob.tools.json import WeboobEncoder
 except ImportError:
-    LOGGER.error("Weboob is not available on your system. Make sure you " "installed it.")
+    LOGGER.error("Weboob is not available on your system. Make sure you installed it.")
     raise
 
 
@@ -107,7 +107,7 @@ class WebOOBProxy(object):
             except CallErrors as exc:
                 # If an error occured, just log it
                 LOGGER.error(
-                    ("An error occured while building query for " "postal code %s: %s"),
+                    ("An error occured while building query for postal code %s: %s"),
                     postal_code,
                     str(exc),
                 )

@@ -416,7 +416,7 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
             ) as exc:
                 # Ignore any possible exception
                 LOGGER.warning(
-                    "An exception occurred during travel time lookup on " "Navitia: %s.",
+                    "An exception occurred during travel time lookup on Navitia: %s.",
                     str(exc),
                 )
         else:
@@ -461,7 +461,7 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
             except (requests.exceptions.RequestException, IndexError, KeyError) as exc:
                 # Ignore any possible exception
                 LOGGER.warning(
-                    "An exception occurred during travel time lookup on " "Mapbox: %s.",
+                    "An exception occurred during travel time lookup on Mapbox: %s.",
                     str(exc),
                 )
         else:

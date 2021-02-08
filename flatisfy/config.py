@@ -271,7 +271,7 @@ def load_config(args=None, check_with_data=True):
                 config_data.update(json.load(fh))
         except (IOError, ValueError) as exc:
             LOGGER.error(
-                "Unable to load configuration from file, " "using default configuration: %s.",
+                "Unable to load configuration from file, using default configuration: %s.",
                 exc,
             )
 

@@ -330,7 +330,7 @@ def deep_detect(flats_list, config):
             if n_common_items >= config["duplicate_threshold"]:
                 # Mark flats as duplicates
                 LOGGER.info(
-                    ("Found duplicates using deep detection: (%s, %s). " "Score is %d."),
+                    ("Found duplicates using deep detection: (%s, %s). Score is %d."),
                     flat1["id"],
                     flat2["id"],
                     n_common_items,
