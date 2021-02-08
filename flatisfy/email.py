@@ -62,28 +62,32 @@ def send_notification(config, flats):
         return
 
     i18n = {
-        "subject": [
-            f"{len(flats)} new flats found!",
-            f"{len(flats)} nouvelles annonces disponibles !",
-        ],
-        "hello": ["Hello dear user", "Bonjour cher utilisateur"],
-        "following_new_flats": [
-            "The following new flats have been found:",
-            "Voici les nouvelles annonces :",
-        ],
-        "area": ["area", "surface"],
-        "cost": ["cost", "coût"],
-        "signature": ["Hope you'll find what you were looking for.", "Bonne recherche"],
+        "en": {
+            "subject": f"{len(flats)} new flats found!",
+            "hello": "Hello dear user",
+            "following_new_flats": "The following new flats have been found:",
+            "area": "area",
+            "cost": "cost",
+            "signature": "Hope you'll find what you were looking for.",
+        },
+        "fr": {
+            "subject": f"{len(flats)} nouvelles annonces disponibles !",
+            "hello": "Bonjour cher utilisateur",
+            "following_new_flats": "Voici les nouvelles annonces :",
+            "area": "surface",
+            "cost": "coût",
+            "signature": "Bonne recherche",
+        },
     }
-    l = 1 if config["notification_lang"] == "fr" else 0
+    trs = i18n.get(config["notification_lang"], "en")
 
-    txt = i18n["hello"][l] + ",\n\n\n\n"
+    txt = trs["hello"] + ",\n\n\n\n"
     html = f"""
     <html>
       <head></head>
       <body>
-        <p>{i18n["hello"][l]}!</p>
-        <p>{i18n["following_new_flats"][l]}
+        <p>{trs["hello"]}!</p>
+        <p>{trs["following_new_flats"]}
 
             <ul>
     """
@@ -101,9 +105,9 @@ def send_notification(config, flats):
             title,
             website_url,
             flat_id,
-            i18n["area"][l],
+            trs["area"],
             area,
-            i18n["cost"][l],
+            trs["cost"],
             cost,
             currency,
         )
@@ -117,16 +121,16 @@ def send_notification(config, flats):
             website_url,
             flat_id,
             title,
-            i18n["area"][l],
+            trs["area"],
             area,
-            i18n["cost"][l],
+            trs["cost"],
             cost,
             currency,
         )
 
     html += "</ul>"
 
-    signature = f"\n{i18n['signature'][l]}\n\nBye!\nFlatisfy"
+    signature = f"\n{trs['signature']}\n\nBye!\nFlatisfy"
     txt += signature
     html += signature.replace("\n", "<br>")
 
@@ -137,7 +141,7 @@ def send_notification(config, flats):
     send_email(
         config["smtp_server"],
         config["smtp_port"],
-        i18n["subject"][l],
+        trs["subject"],
         config["smtp_from"],
         config["smtp_to"],
         txt,
