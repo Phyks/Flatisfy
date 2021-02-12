@@ -8,7 +8,7 @@ from builtins import str
 
 import logging
 import smtplib
-
+from money import Money
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate, make_msgid
@@ -97,36 +97,28 @@ def send_notification(config, flats):
     for flat in flats:
         title = str(flat.title)
         flat_id = str(flat.id)
-        area = str(flat.area)
-        cost = str(flat.cost)
+        area = str(int(flat.area))
+        cost = int(flat.cost)
         currency = str(flat.currency)
 
-        txt += "- {}: {}#/flat/{} ({}: {}, {}: {} {})\n".format(
-            title,
-            website_url,
-            flat_id,
-            trs["area"],
-            area,
-            trs["cost"],
-            cost,
-            currency,
-        )
-
-        html += """
+        txt += f"- {title}: {website_url}#/flat/{flat_id}"
+        html += f"""
             <li>
-                <a href="{}#/flat/{}">{}</a>
-                ({}: {}, {}: {} {})
-            </li>
-        """.format(
-            website_url,
-            flat_id,
-            title,
-            trs["area"],
-            area,
-            trs["cost"],
-            cost,
-            currency,
-        )
+                <a href="{website_url}#/flat/{flat_id}">{title}</a>
+        """
+
+        fields = []
+        if area:
+            fields.append(f"{trs['area']}: {area}m²")
+        if cost:
+            money = Money(cost, currency).format(config["notification_lang"])
+            fields.append(f"{trs['cost']}: {money}")
+
+        if len(fields):
+            txt += f'({", ".join(fields)})'
+            html += f'({", ".join(fields)})'
+
+        html += "</li>"
 
     html += "</ul>"
 

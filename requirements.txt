@@ -17,3 +17,4 @@ unidecode
 vobject
 whoosh
 https://git.weboob.org/weboob/weboob/repository/archive.zip?ref=master
+money
