@@ -7,7 +7,7 @@ function clean_up {
     exit
 }
 
-python -m flatisfy serve --config config.json &
+python -m flatisfy serve --config config.json -v &
 SERVE_PID=$!
 
 yarn watch:dev &

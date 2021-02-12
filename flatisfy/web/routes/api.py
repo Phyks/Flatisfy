@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import datetime
 import itertools
 import json
+import logging
 import re
 import os
 
@@ -15,6 +16,7 @@ import vobject
 
 import flatisfy.data
 from flatisfy.models import flat as flat_model
+from flatisfy.models import postal_code
 from flatisfy.models.postal_code import PostalCode
 from flatisfy import cmds
 
@@ -106,15 +108,17 @@ def _serialize_flat(flat, config):
         postal_codes[constraint_name] = flatisfy.data.load_data(PostalCode, constraint, config)
 
     try:
-        assert flat["flatisfy_postal_code"]
+        assert flat["flatisfy_position"]
 
+        lat = flat["flatisfy_position"]["lat"]
+        lng = flat["flatisfy_position"]["lng"]
         postal_code_data = next(
-            x
-            for x in postal_codes.get(flat["flatisfy_constraint"], [])
-            if x.postal_code == flat["flatisfy_postal_code"]
+            x for x in postal_codes.get(flat["flatisfy_constraint"], []) if x.lat == lat and x.lng == lng
         )
+        logging.warn(f"{postal_code_data.name}, {lat}, {lng}")
         flat["flatisfy_postal_code"] = {
-            "postal_code": flat["flatisfy_postal_code"],
+            "postal_code": postal_code_data.postal_code,
+            "insee_code": postal_code_data.insee_code,
             "name": postal_code_data.name,
             "gps": (postal_code_data.lat, postal_code_data.lng),
         }

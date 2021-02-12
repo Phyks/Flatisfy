@@ -17,11 +17,11 @@
         <template v-if="isLoading">
             <p>{{ $t("common.loading") }}</p>
         </template>
-        <template v-else-if="Object.keys(postalCodesFlatsBuckets).length">
-            <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}</h3>
+        <template v-else-if="Object.keys(inseeCodesFlatsBuckets).length">
+            <template v-for="(insee_code_data, insee_code) in inseeCodesFlatsBuckets">
+                <h3>{{ insee_code_data.name }} ({{ insee_code }}) - {{ insee_code_data.flats.length }} {{ $tc("common.flats", insee_code_data.flats.length) }}</h3>
                 <FlatsTable
-                    :flats="postal_code_data.flats"
+                    :flats="insee_code_data.flats"
                     :showNotationColumn="$route.params.status === 'followed'"
                     :showNotes="$route.params.status === 'followed'"
                     :initialSortBy="$route.params.status === 'followed' ? 'notation' : undefined"
@@ -81,8 +81,8 @@ export default {
     },
 
     computed: {
-        postalCodesFlatsBuckets () {
-            return this.$store.getters.postalCodesFlatsBuckets(flat => flat.status === this.$route.params.status)
+        inseeCodesFlatsBuckets () {
+            return this.$store.getters.inseeCodesFlatsBuckets(flat => flat.status === this.$route.params.status)
         },
         title () {
             return 'Flatisfy - ' + capitalize(this.$t('status.' + this.$route.params.status))

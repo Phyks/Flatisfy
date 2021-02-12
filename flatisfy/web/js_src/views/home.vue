@@ -15,16 +15,16 @@
             </label>
             </h2>
 
-            <template v-if="Object.keys(postalCodesFlatsBuckets).length > 0">
-                <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
+            <template v-if="Object.keys(inseeCodesFlatsBuckets).length > 0">
+                <template v-for="(insee_code_data, insee_code) in inseeCodesFlatsBuckets">
                     <h3>
-                        {{ postal_code_data.name || $t('common.Unknown') }}
-                        <span v-if="postal_code !== 'undefined'">
-                            ({{ postal_code }})
+                        {{ insee_code_data.name || $t('common.Unknown') }}
+                        <span v-if="insee_code !== 'undefined'">
+                            ({{ insee_code }})
                         </span>
-                        - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}
+                        - {{ insee_code_data.flats.length }} {{ $tc("common.flats", insee_code_data.flats.length) }}
                     </h3>
-                    <FlatsTable :flats="postal_code_data.flats" :key="postal_code"></FlatsTable>
+                    <FlatsTable :flats="insee_code_data.flats" :key="insee_code"></FlatsTable>
                 </template>
             </template>
             <template v-else-if="isLoading">
@@ -83,8 +83,8 @@ export default {
     },
 
     computed: {
-        postalCodesFlatsBuckets () {
-            return this.$store.getters.postalCodesFlatsBuckets(flat =>
+        inseeCodesFlatsBuckets () {
+            return this.$store.getters.inseeCodesFlatsBuckets(flat =>
                 flat.status === 'new' &&
                 (this.showExpiredFlats || !flat.is_expired)
             )
