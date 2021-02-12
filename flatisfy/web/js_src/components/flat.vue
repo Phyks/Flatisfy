@@ -15,7 +15,7 @@
             </h2>
             <div class="grid">
                 <div class="left-panel">
-                    <p>
+                    <span>
                         {{ flat.cost | cost(flat.currency) }}
                         <template v-if="flat.utilities === 'included'">
                             {{ $t("flatsDetails.utilities_included") }}
@@ -23,13 +23,14 @@
                         <template v-else-if="flat.utilities === 'excluded'">
                             {{ $t("flatsDetails.utilities_excluded") }}
                         </template>
-                    </p>
+                    </span>
+                    <span v-if="flat.flatisfy_postal_code.postal_code">
+                        à {{ flat.flatisfy_postal_code.name }} ({{ flat.flatisfy_postal_code.postal_code }})
+                    </span>
                 </div>
-                <p class="right-panel right">
-                    {{ flat.area ? flat.area : '?' }} m<sup>2</sup>,
-                    {{ flat.rooms ? flat.rooms : '?' }} {{ $tc("flatsDetails.rooms", flat.rooms) }} /
-                    {{ flat.bedrooms ? flat.bedrooms : '?' }} {{ $tc("flatsDetails.bedrooms", flat.bedrooms) }}
-                </p>
+                <span class="right-panel right">
+                    <template v-if="flat.area"><span>{{flat.area}} m<sup>2</sup></span></template><template v-if="flat.rooms"><span>, {{flat.rooms}} {{ $tc("flatsDetails.rooms", flat.rooms) }}</span></template><template v-if="flat.bedrooms"><span>/ {{flat.bedrooms}} {{ $tc("flatsDetails.bedrooms", flat.bedrooms) }}</span></template>
+                </span>
             </div>
             <div>
                 <template v-if="flat.photos && flat.photos.length > 0">
@@ -116,26 +117,29 @@
         <div class="right-panel">
             <h3>{{ $t("flatsDetails.Contact") }}</h3>
             <div class="contact">
-                <p>
-                    <template v-if="flat.phone">
-                        <template v-for="phoneNumber in flat.phone.split(',')">
-                            <a :href="'tel:+33' + normalizePhoneNumber(phoneNumber)">{{ phoneNumber }}</a><br/>
-                        </template>
-                    </template>
-                    <template v-else>
-                        {{ $t("flatsDetails.no_phone_found") }}
-                    </template>
-                </p>
-                <p>{{ $tc("common.Original_post", flat.urls.length) }}
-                    <ul>
-                        <li v-for="(url, index) in flat.urls">
-                            <a :href="url" target="_blank">
-                                {{ $tc("common.Original_post", 1) }} {{ index + 1 }}
-                                <i class="fa fa-external-link" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </p>
+                <template v-if="flat.phone">
+                    <p v-for="phoneNumber in flat.phone.split(',')">
+                        <a :href="'tel:+33' + normalizePhoneNumber(phoneNumber)">{{ phoneNumber }}</a>
+                    </p>
+                </template>
+                <template v-if="flat.urls.length == 1">
+                    <a :href="flat.urls[0]" target="_blank">
+                        {{ $tc("common.Original_post", 1) }}
+                        <i class="fa fa-external-link" aria-hidden="true"></i>
+                    </a>
+                </template>
+                <template v-else-if="flat.urls.length > 1">
+                    <p>{{ $tc("common.Original_post", flat.urls.length) }}
+                        <ul>
+                            <li v-for="(url, index) in flat.urls">
+                                <a :href="url" target="_blank">
+                                    {{ $tc("common.Original_post", 1) }} {{ index + 1 }}
+                                    <i class="fa fa-external-link" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </p>
+                </template>
             </div>
 
             <h3>{{ $t("flatsDetails.Visit") }}</h3>
