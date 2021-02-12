@@ -4,7 +4,7 @@
             <v-tilelayer :url="tiles.url" :attribution="tiles.attribution"></v-tilelayer>
             <v-marker-cluster>
                 <template v-for="marker in flats">
-                        <v-marker :lat-lng="{ lat: marker.gps[0], lng: marker.gps[1] }" :icon="icons.flat" v-on:click="$emit('select-flat', marker.flat_id)">
+                        <v-marker :lat-lng="{ lat: marker.gps[0], lng: marker.gps[1] }" :icon="icons.flat" v-on:click="$emit('select-flat', marker.flatId)">
                             <!-- <v-popup :content="marker.content"></v-popup> -->
                         </v-marker>
                 </template>

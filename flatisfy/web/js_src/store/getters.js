@@ -60,7 +60,7 @@ export default {
                             "</a>" +
                             cost,
                         gps: gps,
-                        flat_id: flat.id,
+                        flatId: flat.id,
                     });
                 }
             }
