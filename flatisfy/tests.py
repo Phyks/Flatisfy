@@ -30,6 +30,7 @@ class LocalImageCache(ImageCache):
     """
     A local cache for images, stored in memory.
     """
+
     @staticmethod
     def on_miss(path):
         """
@@ -46,48 +47,34 @@ class TestTexts(unittest.TestCase):
     """
     Checks string normalizations.
     """
+
     def test_roman_numbers(self):
         """
         Checks roman numbers replacement.
         """
-        self.assertEqual(
-            "XIV",
-            tools.convert_arabic_to_roman("14")
-        )
+        self.assertEqual("XIV", tools.convert_arabic_to_roman("14"))
 
-        self.assertEqual(
-            "XXXIX",
-            tools.convert_arabic_to_roman("39")
-        )
+        self.assertEqual("XXXIX", tools.convert_arabic_to_roman("39"))
 
-        self.assertEqual(
-            "40",
-            tools.convert_arabic_to_roman("40")
-        )
+        self.assertEqual("40", tools.convert_arabic_to_roman("40"))
 
-        self.assertEqual(
-            "1987",
-            tools.convert_arabic_to_roman("1987")
-        )
+        self.assertEqual("1987", tools.convert_arabic_to_roman("1987"))
 
         self.assertEqual(
             "Dans le XVe arrondissement",
-            tools.convert_arabic_to_roman_in_text("Dans le 15e arrondissement")
+            tools.convert_arabic_to_roman_in_text("Dans le 15e arrondissement"),
         )
 
-        self.assertEqual(
-            "XXeme arr.",
-            tools.convert_arabic_to_roman_in_text("20eme arr.")
-        )
+        self.assertEqual("XXeme arr.", tools.convert_arabic_to_roman_in_text("20eme arr."))
 
         self.assertEqual(
             "A AIX EN PROVENCE",
-            tools.convert_arabic_to_roman_in_text("A AIX EN PROVENCE")
+            tools.convert_arabic_to_roman_in_text("A AIX EN PROVENCE"),
         )
 
         self.assertEqual(
             "Montigny Le Bretonneux",
-            tools.convert_arabic_to_roman_in_text("Montigny Le Bretonneux")
+            tools.convert_arabic_to_roman_in_text("Montigny Le Bretonneux"),
         )
 
     def test_roman_numbers_in_text(self):
@@ -97,77 +84,54 @@ class TestTexts(unittest.TestCase):
         """
         self.assertEqual(
             "dans le XVe arrondissement",
-            tools.normalize_string("Dans le 15e arrondissement")
+            tools.normalize_string("Dans le 15e arrondissement"),
         )
 
-        self.assertEqual(
-            "paris XVe, 75005",
-            tools.normalize_string("Paris 15e, 75005")
-        )
+        self.assertEqual("paris XVe, 75005", tools.normalize_string("Paris 15e, 75005"))
 
-        self.assertEqual(
-            "paris xve, 75005",
-            tools.normalize_string("Paris XVe, 75005")
-        )
+        self.assertEqual("paris xve, 75005", tools.normalize_string("Paris XVe, 75005"))
 
     def test_multiple_whitespaces(self):
         """
         Checks whitespaces are collapsed.
         """
-        self.assertEqual(
-            "avec ascenseur",
-            tools.normalize_string("avec   ascenseur")
-        )
+        self.assertEqual("avec ascenseur", tools.normalize_string("avec   ascenseur"))
 
     def test_whitespace_trim(self):
         """
         Checks that trailing and beginning whitespaces are trimmed.
         """
-        self.assertEqual(
-            "rennes 35000",
-            tools.normalize_string("  Rennes 35000 ")
-        )
+        self.assertEqual("rennes 35000", tools.normalize_string("  Rennes 35000 "))
 
     def test_accents(self):
         """
         Checks accents are replaced.
         """
-        self.assertEqual(
-            "eeeaui",
-            tools.normalize_string(u"éèêàüï")
-        )
+        self.assertEqual("eeeaui", tools.normalize_string(u"éèêàüï"))
 
 
 class TestPhoneNumbers(unittest.TestCase):
     """
     Checks phone numbers normalizations.
     """
+
     def test_prefix(self):
         """
         Checks phone numbers with international prefixes.
         """
-        self.assertEqual(
-            "0605040302",
-            duplicates.homogeneize_phone_number("+33605040302")
-        )
+        self.assertEqual("0605040302", duplicates.homogeneize_phone_number("+33605040302"))
 
     def test_dots_separators(self):
         """
         Checks phone numbers with dots.
         """
-        self.assertEqual(
-            "0605040302",
-            duplicates.homogeneize_phone_number("06.05.04.03.02")
-        )
+        self.assertEqual("0605040302", duplicates.homogeneize_phone_number("06.05.04.03.02"))
 
     def test_spaces_separators(self):
         """
         Checks phone numbers with spaces.
         """
-        self.assertEqual(
-            "0605040302",
-            duplicates.homogeneize_phone_number("06 05 04 03 02")
-        )
+        self.assertEqual("0605040302", duplicates.homogeneize_phone_number("06 05 04 03 02"))
 
 
 class TestPhotos(unittest.TestCase):
@@ -183,96 +147,104 @@ class TestPhotos(unittest.TestCase):
         """
         Compares a photo against itself.
         """
-        photo = {
-            "url": TESTS_DATA_DIR + "127028739@seloger.jpg"
-        }
+        photo = {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"}
 
-        self.assertTrue(duplicates.compare_photos(
-            photo,
-            photo,
-            self.IMAGE_CACHE,
-            self.HASH_THRESHOLD
-        ))
+        self.assertTrue(duplicates.compare_photos(photo, photo, self.IMAGE_CACHE, self.HASH_THRESHOLD))
 
     def test_different_photos(self):
         """
         Compares two different photos.
         """
-        self.assertFalse(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
-            {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
-            self.IMAGE_CACHE,
-            self.HASH_THRESHOLD
-        ))
+        self.assertFalse(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
+                {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
+                self.IMAGE_CACHE,
+                self.HASH_THRESHOLD,
+            )
+        )
 
-        self.assertFalse(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
-            {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
-            self.IMAGE_CACHE,
-            self.HASH_THRESHOLD
-        ))
+        self.assertFalse(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
+                {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
+                self.IMAGE_CACHE,
+                self.HASH_THRESHOLD,
+            )
+        )
 
     def test_matching_photos(self):
         """
         Compares two matching photos with different size and source.
         """
-        self.assertTrue(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
-            {"url": TESTS_DATA_DIR + "14428129@explorimmo.jpg"},
-            self.IMAGE_CACHE,
-            self.HASH_THRESHOLD
-        ))
+        self.assertTrue(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
+                {"url": TESTS_DATA_DIR + "14428129@explorimmo.jpg"},
+                self.IMAGE_CACHE,
+                self.HASH_THRESHOLD,
+            )
+        )
 
-        self.assertTrue(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
-            {"url": TESTS_DATA_DIR + "14428129-2@explorimmo.jpg"},
-            self.IMAGE_CACHE,
-            self.HASH_THRESHOLD
-        ))
+        self.assertTrue(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "127028739-2@seloger.jpg"},
+                {"url": TESTS_DATA_DIR + "14428129-2@explorimmo.jpg"},
+                self.IMAGE_CACHE,
+                self.HASH_THRESHOLD,
+            )
+        )
 
-        self.assertTrue(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
-            {"url": TESTS_DATA_DIR + "14428129-3@explorimmo.jpg"},
-            self.IMAGE_CACHE,
-            self.HASH_THRESHOLD
-        ))
+        self.assertTrue(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "127028739-3@seloger.jpg"},
+                {"url": TESTS_DATA_DIR + "14428129-3@explorimmo.jpg"},
+                self.IMAGE_CACHE,
+                self.HASH_THRESHOLD,
+            )
+        )
 
-        self.assertTrue(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
-            {"url": TESTS_DATA_DIR + "127028739-watermark@seloger.jpg"},
-            self.IMAGE_CACHE,
-            self.HASH_THRESHOLD
-        ))
+        self.assertTrue(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "127028739@seloger.jpg"},
+                {"url": TESTS_DATA_DIR + "127028739-watermark@seloger.jpg"},
+                self.IMAGE_CACHE,
+                self.HASH_THRESHOLD,
+            )
+        )
 
     def test_matching_cropped_photos(self):
         """
         Compares two matching photos with one being cropped.
         """
         # Fixme: the image hash treshold should be 10 ideally
-        self.assertTrue(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "vertical.jpg"},
-            {"url": TESTS_DATA_DIR + "vertical-cropped.jpg"},
-            self.IMAGE_CACHE,
-            20
-        ))
+        self.assertTrue(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "vertical.jpg"},
+                {"url": TESTS_DATA_DIR + "vertical-cropped.jpg"},
+                self.IMAGE_CACHE,
+                20,
+            )
+        )
 
         # Fixme: the image hash treshold should be 10 ideally
-        self.assertTrue(duplicates.compare_photos(
-            {"url": TESTS_DATA_DIR + "13783671@explorimmo.jpg"},
-            {"url": TESTS_DATA_DIR + "124910113@seloger.jpg"},
-            self.IMAGE_CACHE,
-            20
-        ))
+        self.assertTrue(
+            duplicates.compare_photos(
+                {"url": TESTS_DATA_DIR + "13783671@explorimmo.jpg"},
+                {"url": TESTS_DATA_DIR + "124910113@seloger.jpg"},
+                self.IMAGE_CACHE,
+                20,
+            )
+        )
 
 
 class TestImageCache(unittest.TestCase):
     """
     Checks image cache is working as expected.
     """
+
     def __init__(self, *args, **kwargs):
-        self.IMAGE_CACHE = ImageCache(  # pylint: disable=invalid-name
-            storage_dir=tempfile.mkdtemp(prefix="flatisfy-")
-        )
+        self.IMAGE_CACHE = ImageCache(storage_dir=tempfile.mkdtemp(prefix="flatisfy-"))  # pylint: disable=invalid-name
         super(TestImageCache, self).__init__(*args, **kwargs)
 
     def test_invalid_url(self):
@@ -280,27 +252,22 @@ class TestImageCache(unittest.TestCase):
         Check that it returns nothing on an invalid URL.
         """
         # See https://framagit.org/phyks/Flatisfy/issues/116.
-        self.assertIsNone(
-            self.IMAGE_CACHE.get("https://httpbin.org/status/404")
-        )
-        self.assertIsNone(
-            self.IMAGE_CACHE.get("https://httpbin.org/status/500")
-        )
+        self.assertIsNone(self.IMAGE_CACHE.get("https://httpbin.org/status/404"))
+        self.assertIsNone(self.IMAGE_CACHE.get("https://httpbin.org/status/500"))
 
     def test_invalid_data(self):
         """
         Check that it returns nothing on an invalid data.
         """
         # See https://framagit.org/phyks/Flatisfy/issues/116.
-        self.assertIsNone(
-            self.IMAGE_CACHE.get("https://httpbin.org/")
-        )
+        self.assertIsNone(self.IMAGE_CACHE.get("https://httpbin.org/"))
 
 
 class TestDuplicates(unittest.TestCase):
     """
     Checks duplicates detection.
     """
+
     DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS = 8  # pylint: disable=invalid-name
     DUPLICATES_MIN_SCORE_WITH_PHOTOS = 15  # pylint: disable=invalid-name
     HASH_THRESHOLD = 10  # pylint: disable=invalid-name
@@ -316,9 +283,7 @@ class TestDuplicates(unittest.TestCase):
         """
         Generates a fake flat post.
         """
-        backend = BACKENDS_BY_PRECEDENCE[
-            random.randint(0, len(BACKENDS_BY_PRECEDENCE) - 1)
-        ]
+        backend = BACKENDS_BY_PRECEDENCE[random.randint(0, len(BACKENDS_BY_PRECEDENCE) - 1)]
         return {
             "id": str(random.randint(100000, 199999)) + "@" + backend,
             "phone": "0607080910",
@@ -326,7 +291,7 @@ class TestDuplicates(unittest.TestCase):
             "utilities": "",
             "area": random.randint(200, 1500) / 10,
             "cost": random.randint(100000, 300000),
-            "bedrooms": random.randint(1, 4)
+            "bedrooms": random.randint(1, 4),
         }
 
     @staticmethod
@@ -350,10 +315,7 @@ class TestDuplicates(unittest.TestCase):
         """
         flat1 = self.generate_fake_flat()
         flat2 = copy.deepcopy(flat1)
-        score = duplicates.get_duplicate_score(
-            flat1, flat2,
-            self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_prices(self):
@@ -364,10 +326,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["cost"] += 1000
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2,
-            self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_rooms(self):
@@ -379,10 +338,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["rooms"] += 1
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2,
-            self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_areas(self):
@@ -393,10 +349,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["area"] += 10
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2,
-            self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_areas_decimals(self):
@@ -409,10 +362,7 @@ class TestDuplicates(unittest.TestCase):
         flat1["area"] = 50.65
         flat2["area"] = 50.37
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2,
-            self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_different_phones(self):
@@ -424,10 +374,7 @@ class TestDuplicates(unittest.TestCase):
         flat2 = copy.deepcopy(flat1)
         flat2["phone"] = "0708091011"
 
-        score = duplicates.get_duplicate_score(
-            flat1, flat2,
-            self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flat1, flat2, self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertLess(score, self.DUPLICATES_MIN_SCORE_WITHOUT_PHOTOS)
 
     def test_real_duplicates(self):
@@ -435,15 +382,9 @@ class TestDuplicates(unittest.TestCase):
         Two flats with same price, area and rooms quantity should be detected
         as duplicates.
         """
-        flats = self.load_files(
-            "127028739@seloger",
-            "14428129@explorimmo"
-        )
+        flats = self.load_files("127028739@seloger", "14428129@explorimmo")
 
-        score = duplicates.get_duplicate_score(
-            flats[0], flats[1],
-            self.IMAGE_CACHE, self.HASH_THRESHOLD
-        )
+        score = duplicates.get_duplicate_score(flats[0], flats[1], self.IMAGE_CACHE, self.HASH_THRESHOLD)
         self.assertGreaterEqual(score, self.DUPLICATES_MIN_SCORE_WITH_PHOTOS)
 
         # TODO: fixme, find new testing examples
@@ -502,8 +443,13 @@ def run():
     """
     LOGGER.info("Running tests…")
     try:
-        for testsuite in [TestTexts, TestPhoneNumbers, TestImageCache,
-                          TestDuplicates, TestPhotos]:
+        for testsuite in [
+            TestTexts,
+            TestPhoneNumbers,
+            TestImageCache,
+            TestDuplicates,
+            TestPhotos,
+        ]:
             suite = unittest.TestLoader().loadTestsFromTestCase(testsuite)
             result = unittest.TextTestRunner(verbosity=2).run(suite)
             assert result.wasSuccessful()

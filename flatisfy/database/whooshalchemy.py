@@ -30,7 +30,6 @@ from whoosh.qparser import MultifieldParser
 
 
 class IndexService(object):
-
     def __init__(self, config=None, whoosh_base=None):
         if not whoosh_base and config:
             whoosh_base = config.get("WHOOSH_BASE")
@@ -84,8 +83,7 @@ class IndexService(object):
                 primary = field.name
                 continue
             if field.name in model_class.__searchable__:
-                schema[field.name] = whoosh.fields.TEXT(
-                    analyzer=StemmingAnalyzer())
+                schema[field.name] = whoosh.fields.TEXT(analyzer=StemmingAnalyzer())
         return Schema(**schema), primary
 
     def before_commit(self, session):
@@ -93,21 +91,18 @@ class IndexService(object):
 
         for model in session.new:
             model_class = model.__class__
-            if hasattr(model_class, '__searchable__'):
-                self.to_update.setdefault(model_class.__name__, []).append(
-                    ("new", model))
+            if hasattr(model_class, "__searchable__"):
+                self.to_update.setdefault(model_class.__name__, []).append(("new", model))
 
         for model in session.deleted:
             model_class = model.__class__
-            if hasattr(model_class, '__searchable__'):
-                self.to_update.setdefault(model_class.__name__, []).append(
-                    ("deleted", model))
+            if hasattr(model_class, "__searchable__"):
+                self.to_update.setdefault(model_class.__name__, []).append(("deleted", model))
 
         for model in session.dirty:
             model_class = model.__class__
-            if hasattr(model_class, '__searchable__'):
-                self.to_update.setdefault(model_class.__name__, []).append(
-                    ("changed", model))
+            if hasattr(model_class, "__searchable__"):
+                self.to_update.setdefault(model_class.__name__, []).append(("changed", model))
 
     def after_commit(self, session):
         """
@@ -128,16 +123,11 @@ class IndexService(object):
                     # added as a new doc. Could probably replace this with a whoosh
                     # update.
 
-                    writer.delete_by_term(
-                        primary_field, text_type(getattr(model, primary_field)))
+                    writer.delete_by_term(primary_field, text_type(getattr(model, primary_field)))
 
                     if change_type in ("new", "changed"):
-                        attrs = dict((key, getattr(model, key))
-                                     for key in searchable)
-                        attrs = {
-                            attr: text_type(getattr(model, attr))
-                            for attr in attrs.keys()
-                        }
+                        attrs = dict((key, getattr(model, key)) for key in searchable)
+                        attrs = {attr: text_type(getattr(model, attr)) for attr in attrs.keys()}
                         attrs[primary_field] = text_type(getattr(model, primary_field))
                         writer.add_document(**attrs)
 
@@ -158,8 +148,7 @@ class Searcher(object):
         self.parser = MultifieldParser(list(fields), index.schema)
 
     def __call__(self, session, query, limit=None):
-        results = self.index.searcher().search(
-            self.parser.parse(query), limit=limit)
+        results = self.index.searcher().search(self.parser.parse(query), limit=limit)
 
         keys = [x[self.primary] for x in results]
         primary_column = getattr(self.model_class, self.primary)

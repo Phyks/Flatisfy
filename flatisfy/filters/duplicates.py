@@ -35,14 +35,14 @@ def homogeneize_phone_number(numbers):
 
     clean_numbers = []
 
-    for number in numbers.split(','):
+    for number in numbers.split(","):
         number = number.strip()
         number = number.replace(".", "")
         number = number.replace(" ", "")
         number = number.replace("-", "")
         number = number.replace("(", "")
         number = number.replace(")", "")
-        number = re.sub(r'^\+\d\d', "", number)
+        number = re.sub(r"^\+\d\d", "", number)
 
         if not number.startswith("0"):
             number = "0" + number
@@ -94,12 +94,7 @@ def compare_photos(photo1, photo2, photo_cache, hash_threshold):
         return False
 
 
-def find_number_common_photos(
-    flat1_photos,
-    flat2_photos,
-    photo_cache,
-    hash_threshold
-):
+def find_number_common_photos(flat1_photos, flat2_photos, photo_cache, hash_threshold):
     """
     Compute the number of common photos between the two lists of photos for the
     flats.
@@ -174,22 +169,21 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
             # Sort matching flats by backend precedence
             matching_flats.sort(
                 key=lambda flat: next(
-                    i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE)
-                    if flat["id"].endswith(backend)
+                    i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE) if flat["id"].endswith(backend)
                 ),
-                reverse=True
+                reverse=True,
             )
 
             if len(matching_flats) > 1:
-                LOGGER.info("Found duplicates using key \"%s\": %s.",
-                            key,
-                            [flat["id"] for flat in matching_flats])
+                LOGGER.info(
+                    'Found duplicates using key "%s": %s.',
+                    key,
+                    [flat["id"] for flat in matching_flats],
+                )
             # Otherwise, check the policy
             if merge:
                 # If a merge is requested, do the merge
-                unique_flats_list.append(
-                    tools.merge_dicts(*matching_flats)
-                )
+                unique_flats_list.append(tools.merge_dicts(*matching_flats))
             else:
                 # Otherwise, just keep the most important of them
                 unique_flats_list.append(matching_flats[-1])
@@ -203,8 +197,7 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
     if should_intersect:
         # We added some flats twice with the above method, let's deduplicate on
         # id.
-        unique_flats_list, _ = detect(unique_flats_list, key="id", merge=True,
-                                      should_intersect=False)
+        unique_flats_list, _ = detect(unique_flats_list, key="id", merge=True, should_intersect=False)
 
     return unique_flats_list, duplicate_flats
 
@@ -250,14 +243,12 @@ def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold):
 
         # They should have the same postal code, if available
         if (
-                "flatisfy" in flat1 and "flatisfy" in flat2 and
-                flat1["flatisfy"].get("postal_code", None) and
-                flat2["flatisfy"].get("postal_code", None)
+            "flatisfy" in flat1
+            and "flatisfy" in flat2
+            and flat1["flatisfy"].get("postal_code", None)
+            and flat2["flatisfy"].get("postal_code", None)
         ):
-            assert (
-                flat1["flatisfy"]["postal_code"] ==
-                flat2["flatisfy"]["postal_code"]
-            )
+            assert flat1["flatisfy"]["postal_code"] == flat2["flatisfy"]["postal_code"]
             n_common_items += 1
 
         # TODO: Better text comparison (one included in the other, fuzzymatch)
@@ -279,28 +270,16 @@ def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold):
         # If the two flats are from the same website and have a
         # different float part, consider they cannot be duplicates. See
         # https://framagit.org/phyks/Flatisfy/issues/100.
-        both_are_from_same_backend = (
-            flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]
-        )
-        both_have_float_part = (
-            (flat1["area"] % 1) > 0 and (flat2["area"] % 1) > 0
-        )
-        both_have_equal_float_part = (
-            (flat1["area"] % 1) == (flat2["area"] % 1)
-        )
+        both_are_from_same_backend = flat1["id"].split("@")[-1] == flat2["id"].split("@")[-1]
+        both_have_float_part = (flat1["area"] % 1) > 0 and (flat2["area"] % 1) > 0
+        both_have_equal_float_part = (flat1["area"] % 1) == (flat2["area"] % 1)
         if both_have_float_part and both_are_from_same_backend:
             assert both_have_equal_float_part
 
         if flat1.get("photos", []) and flat2.get("photos", []):
-            n_common_photos = find_number_common_photos(
-                flat1["photos"],
-                flat2["photos"],
-                photo_cache,
-                hash_threshold
-            )
+            n_common_photos = find_number_common_photos(flat1["photos"], flat2["photos"], photo_cache, hash_threshold)
 
-            min_number_photos = min(len(flat1["photos"]),
-                                    len(flat2["photos"]))
+            min_number_photos = min(len(flat1["photos"]), len(flat2["photos"]))
 
             # Either all the photos are the same, or there are at least
             # three common photos.
@@ -332,9 +311,7 @@ def deep_detect(flats_list, config):
         storage_dir = os.path.join(config["data_directory"], "images")
     else:
         storage_dir = None
-    photo_cache = ImageCache(
-        storage_dir=storage_dir
-    )
+    photo_cache = ImageCache(storage_dir=storage_dir)
 
     LOGGER.info("Running deep duplicates detection.")
     matching_flats = collections.defaultdict(list)
@@ -347,30 +324,26 @@ def deep_detect(flats_list, config):
             if flat2["id"] in matching_flats[flat1["id"]]:
                 continue
 
-            n_common_items = get_duplicate_score(
-                flat1,
-                flat2,
-                photo_cache,
-                config["duplicate_image_hash_threshold"]
-            )
+            n_common_items = get_duplicate_score(flat1, flat2, photo_cache, config["duplicate_image_hash_threshold"])
 
             # Minimal score to consider they are duplicates
             if n_common_items >= config["duplicate_threshold"]:
                 # Mark flats as duplicates
                 LOGGER.info(
-                    ("Found duplicates using deep detection: (%s, %s). "
-                     "Score is %d."),
+                    ("Found duplicates using deep detection: (%s, %s). Score is %d."),
                     flat1["id"],
                     flat2["id"],
-                    n_common_items
+                    n_common_items,
                 )
                 matching_flats[flat1["id"]].append(flat2["id"])
                 matching_flats[flat2["id"]].append(flat1["id"])
 
     if photo_cache.total():
-        LOGGER.debug("Photo cache: hits: %d%% / misses: %d%%.",
-                     photo_cache.hit_rate(),
-                     photo_cache.miss_rate())
+        LOGGER.debug(
+            "Photo cache: hits: %d%% / misses: %d%%.",
+            photo_cache.hit_rate(),
+            photo_cache.miss_rate(),
+        )
 
     seen_ids = []
     duplicate_flats = []
@@ -381,16 +354,11 @@ def deep_detect(flats_list, config):
 
         seen_ids.extend(matching_flats[flat_id])
         to_merge = sorted(
-            [
-                flat
-                for flat in flats_list
-                if flat["id"] in matching_flats[flat_id]
-            ],
+            [flat for flat in flats_list if flat["id"] in matching_flats[flat_id]],
             key=lambda flat: next(
-                i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE)
-                if flat["id"].endswith(backend)
+                i for (i, backend) in enumerate(BACKENDS_BY_PRECEDENCE) if flat["id"].endswith(backend)
             ),
-            reverse=True
+            reverse=True,
         )
         unique_flats_list.append(tools.merge_dicts(*to_merge))
         # The ID of the added merged flat will be the one of the last item

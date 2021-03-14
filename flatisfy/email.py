@@ -8,7 +8,7 @@ from builtins import str
 
 import logging
 import smtplib
-
+from money import Money
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate, make_msgid
@@ -36,15 +36,15 @@ def send_email(server, port, subject, _from, _to, txt, html, username=None, pass
     if username or password:
         server.login(username or "", password or "")
 
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = _from
-    msg['To'] = ', '.join(_to)
-    msg['Date'] = formatdate()
-    msg['Message-ID'] = make_msgid()
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = _from
+    msg["To"] = ", ".join(_to)
+    msg["Date"] = formatdate()
+    msg["Message-ID"] = make_msgid()
 
-    msg.attach(MIMEText(txt, 'plain', 'utf-8'))
-    msg.attach(MIMEText(html, 'html', 'utf-8'))
+    msg.attach(MIMEText(txt, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
 
     server.sendmail(_from, _to, msg.as_string())
     server.quit()
@@ -61,13 +61,33 @@ def send_notification(config, flats):
     if not flats:
         return
 
-    txt = u'Hello dear user,\n\nThe following new flats have been found:\n\n'
-    html = """
+    i18n = {
+        "en": {
+            "subject": f"{len(flats)} new flats found!",
+            "hello": "Hello dear user",
+            "following_new_flats": "The following new flats have been found:",
+            "area": "area",
+            "cost": "cost",
+            "signature": "Hope you'll find what you were looking for.",
+        },
+        "fr": {
+            "subject": f"{len(flats)} nouvelles annonces disponibles !",
+            "hello": "Bonjour cher utilisateur",
+            "following_new_flats": "Voici les nouvelles annonces :",
+            "area": "surface",
+            "cost": "coût",
+            "signature": "Bonne recherche",
+        },
+    }
+    trs = i18n.get(config["notification_lang"], "en")
+
+    txt = trs["hello"] + ",\n\n\n\n"
+    html = f"""
     <html>
       <head></head>
       <body>
-        <p>Hello dear user!</p>
-        <p>The following new flats have been found:
+        <p>{trs["hello"]}!</p>
+        <p>{trs["following_new_flats"]}
 
             <ul>
     """
@@ -77,41 +97,47 @@ def send_notification(config, flats):
     for flat in flats:
         title = str(flat.title)
         flat_id = str(flat.id)
-        area = str(flat.area)
-        cost = str(flat.cost)
+        area = str(int(flat.area))
+        cost = int(flat.cost)
         currency = str(flat.currency)
 
-        txt += (
-            '- {}: {}#/flat/{} (area: {}, cost: {} {})\n'.format(
-                title, website_url, flat_id, area, cost, currency
-            )
-        )
-
-        html += """
+        txt += f"- {title}: {website_url}#/flat/{flat_id}"
+        html += f"""
             <li>
-                <a href="{}#/flat/{}">{}</a>
-                (area: {}, cost: {} {})
-            </li>
-        """.format(website_url, flat_id, title, area, cost, currency)
+                <a href="{website_url}#/flat/{flat_id}">{title}</a>
+        """
+
+        fields = []
+        if area:
+            fields.append(f"{trs['area']}: {area}m²")
+        if cost:
+            money = Money(cost, currency).format(config["notification_lang"])
+            fields.append(f"{trs['cost']}: {money}")
+
+        if len(fields):
+            txt += f'({", ".join(fields)})'
+            html += f'({", ".join(fields)})'
+
+        html += "</li>"
 
     html += "</ul>"
 
-    signature = (
-        u"\nHope you'll find what you were looking for.\n\nBye!\nFlatisfy"
-    )
+    signature = f"\n{trs['signature']}\n\nBye!\nFlatisfy"
     txt += signature
-    html += signature.replace('\n', '<br>')
+    html += signature.replace("\n", "<br>")
 
     html += """</p>
       </body>
     </html>"""
 
-    send_email(config["smtp_server"],
-               config["smtp_port"],
-               "New flats found!",
-               config["smtp_from"],
-               config["smtp_to"],
-               txt,
-               html,
-               config.get("smtp_username"),
-               config.get("smtp_password"))
+    send_email(
+        config["smtp_server"],
+        config["smtp_port"],
+        trs["subject"],
+        config["smtp_from"],
+        config["smtp_to"],
+        txt,
+        html,
+        config.get("smtp_username"),
+        config.get("smtp_password"),
+    )

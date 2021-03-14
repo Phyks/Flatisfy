@@ -8,6 +8,7 @@ future
 imagehash
 mapbox
 pillow
+ratelimit
 requests
 requests_mock
 sqlalchemy
@@ -15,5 +16,6 @@ titlecase
 unidecode
 vobject
 whoosh
-https://git.weboob.org/weboob/devel/repository/archive.zip?ref=master
-https://git.weboob.org/weboob/modules/repository/archive.zip?ref=master
+git+https://git.weboob.org/weboob/weboob/
+git+https://git.weboob.org/weboob/modules/
+money

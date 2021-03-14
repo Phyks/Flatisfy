@@ -36,48 +36,51 @@ def refine_with_housing_criteria(flats_list, constraint):
     for i, flat in enumerate(flats_list):
         # Check postal code
         postal_code = flat["flatisfy"].get("postal_code", None)
-        if (
-                postal_code and
-                postal_code not in constraint["postal_codes"]
-        ):
-            LOGGER.info("Postal code for flat %s is out of range.", flat["id"])
-            is_ok[i] = is_ok[i] and False
+        if postal_code and postal_code not in constraint["postal_codes"]:
+            LOGGER.info(
+                "Postal code %s for flat %s is out of range (%s).",
+                postal_code,
+                flat["id"],
+                ", ".join(constraint["postal_codes"]),
+            )
+            is_ok[i] = False
+        # Check insee code
+        insee_code = flat["flatisfy"].get("insee_code", None)
+        if insee_code and "insee_codes" in constraint and insee_code not in constraint["insee_codes"]:
+            LOGGER.info(
+                "insee code %s for flat %s is out of range (%s).",
+                insee_code,
+                flat["id"],
+                ", ".join(constraint["insee_codes"]),
+            )
+            is_ok[i] = False
 
         # Check time_to
         for place_name, time in flat["flatisfy"].get("time_to", {}).items():
             time = time["time"]
-            is_within_interval = tools.is_within_interval(
-                time,
-                *(constraint["time_to"][place_name]["time"])
-            )
+            is_within_interval = tools.is_within_interval(time, *(constraint["time_to"][place_name]["time"]))
             if not is_within_interval:
-                LOGGER.info("Flat %s is too far from place %s: %ds.",
-                            flat["id"], place_name, time)
+                LOGGER.info(
+                    "Flat %s is too far from place %s: %ds.",
+                    flat["id"],
+                    place_name,
+                    time,
+                )
             is_ok[i] = is_ok[i] and is_within_interval
 
         # Check other fields
         for field in ["area", "cost", "rooms", "bedrooms"]:
             interval = constraint[field]
-            is_within_interval = tools.is_within_interval(
-                flat.get(field, None),
-                *interval
-            )
+            is_within_interval = tools.is_within_interval(flat.get(field, None), *interval)
             if not is_within_interval:
-                LOGGER.info("%s for flat %s is out of range.",
-                            field.capitalize(), flat["id"])
+                LOGGER.info(
+                    "%s %s for flat %s is out of range.", field.capitalize(), str(flat.get(field, None)), flat["id"]
+                )
             is_ok[i] = is_ok[i] and is_within_interval
 
     return (
-        [
-            flat
-            for i, flat in enumerate(flats_list)
-            if is_ok[i]
-        ],
-        [
-            flat
-            for i, flat in enumerate(flats_list)
-            if not is_ok[i]
-        ]
+        [flat for i, flat in enumerate(flats_list) if is_ok[i]],
+        [flat for i, flat in enumerate(flats_list) if not is_ok[i]],
     )
 
 
@@ -103,54 +106,36 @@ def refine_with_details_criteria(flats_list, constraint):
 
     for i, flat in enumerate(flats_list):
         # Check number of pictures
-        has_enough_photos = tools.is_within_interval(
-            len(flat.get('photos', [])),
-            constraint['minimum_nb_photos'],
-            None
-        )
+        has_enough_photos = tools.is_within_interval(len(flat.get("photos", [])), constraint["minimum_nb_photos"], None)
         if not has_enough_photos:
             LOGGER.info(
                 "Flat %s only has %d photos, it should have at least %d.",
                 flat["id"],
-                len(flat['photos']),
-                constraint['minimum_nb_photos']
+                len(flat["photos"]),
+                constraint["minimum_nb_photos"],
             )
             is_ok[i] = False
 
-        has_all_good_terms_in_description = True
-        if constraint["description_should_contain"]:
-            has_all_good_terms_in_description = all(
-                term in flat['text']
-                for term in constraint["description_should_contain"]
-            )
-
-        has_a_bad_term_in_description = False
-        if constraint["description_should_not_contain"]:
-            has_a_bad_term_in_description = any(
-                term in flat['text']
-                for term in constraint["description_should_not_contain"]
-            )
-
-        if (not has_all_good_terms_in_description
-            or has_a_bad_term_in_description):
-            LOGGER.info(
-                ("Description for flat %s does not contain all the required "
-                 "terms, or contains a blacklisted term."),
-                flat["id"]
-            )
-            is_ok[i] = False
+        for term in constraint["description_should_contain"]:
+            if term.lower() not in flat["text"].lower():
+                LOGGER.info(
+                    ("Description for flat %s does not contain required term '%s'."),
+                    flat["id"],
+                    term,
+                )
+                is_ok[i] = False
+        for term in constraint["description_should_not_contain"]:
+            if term.lower() in flat["text"].lower():
+                LOGGER.info(
+                    ("Description for flat %s contains blacklisted term '%s'."),
+                    flat["id"],
+                    term,
+                )
+                is_ok[i] = False
 
     return (
-        [
-            flat
-            for i, flat in enumerate(flats_list)
-            if is_ok[i]
-        ],
-        [
-            flat
-            for i, flat in enumerate(flats_list)
-            if not is_ok[i]
-        ]
+        [flat for i, flat in enumerate(flats_list) if is_ok[i]],
+        [flat for i, flat in enumerate(flats_list) if not is_ok[i]],
     )
 
 
@@ -172,30 +157,25 @@ def first_pass(flats_list, constraint, config):
 
     # Handle duplicates based on ids
     # Just remove them (no merge) as they should be the exact same object.
-    flats_list, _ = duplicates.detect(
-        flats_list, key="id", merge=False, should_intersect=False
-    )
+    flats_list, _ = duplicates.detect(flats_list, key="id", merge=False, should_intersect=False)
     # Also merge duplicates based on urls (these may come from different
     # flatboob backends)
     # This is especially useful as some websites such as entreparticuliers
     # contains a lot of leboncoin housings posts.
-    flats_list, duplicates_by_urls = duplicates.detect(
-        flats_list, key="urls", merge=True, should_intersect=True
-    )
+    flats_list, duplicates_by_urls = duplicates.detect(flats_list, key="urls", merge=True, should_intersect=True)
 
     # Guess the postal codes
     flats_list = metadata.guess_postal_code(flats_list, constraint, config)
-    # Try to match with stations
-    flats_list = metadata.guess_stations(flats_list, constraint, config)
-    # Remove returned housing posts that do not match criteria
-    flats_list, ignored_list = refine_with_housing_criteria(flats_list,
-                                                            constraint)
 
-    return {
-        "new": flats_list,
-        "ignored": ignored_list,
-        "duplicate": duplicates_by_urls
-    }
+    if not config["ignore_station"]:
+        # Try to match with stations
+        flats_list = metadata.guess_stations(flats_list, constraint, config)
+
+    # Remove returned housing posts that do not match criteria
+    flats_list, ignored_list = refine_with_housing_criteria(flats_list, constraint)
+
+    return {"new": flats_list, "ignored": ignored_list, "duplicate": duplicates_by_urls}
+
 
 @tools.timeit
 def second_pass(flats_list, constraint, config):
@@ -222,28 +202,24 @@ def second_pass(flats_list, constraint, config):
     flats_list = metadata.guess_postal_code(flats_list, constraint, config)
 
     # Better match with stations (confirm and check better)
-    flats_list = metadata.guess_stations(flats_list, constraint, config)
+    if not config["ignore_station"]:
+        flats_list = metadata.guess_stations(flats_list, constraint, config)
 
-    # Compute travel time to specified points
-    flats_list = metadata.compute_travel_times(flats_list, constraint, config)
+        # Compute travel time to specified points
+        flats_list = metadata.compute_travel_times(flats_list, constraint, config)
 
     # Remove returned housing posts that do not match criteria
-    flats_list, ignored_list = refine_with_housing_criteria(flats_list,
-                                                            constraint)
+    flats_list, ignored_list = refine_with_housing_criteria(flats_list, constraint)
 
     # Remove returned housing posts which do not match criteria relying on
     # fetched details.
-    flats_list, ignored_list = refine_with_details_criteria(flats_list,
-                                                            constraint)
+    flats_list, ignored_list = refine_with_details_criteria(flats_list, constraint)
 
     if config["serve_images_locally"]:
         images.download_images(flats_list, config)
 
-    return {
-        "new": flats_list,
-        "ignored": ignored_list,
-        "duplicate": []
-    }
+    return {"new": flats_list, "ignored": ignored_list, "duplicate": []}
+
 
 @tools.timeit
 def third_pass(flats_list, config):
@@ -262,8 +238,4 @@ def third_pass(flats_list, config):
     # Deduplicate the list using every available data
     flats_list, duplicate_flats = duplicates.deep_detect(flats_list, config)
 
-    return {
-        "new": flats_list,
-        "ignored": [],
-        "duplicate": duplicate_flats
-    }
+    return {"new": flats_list, "ignored": [], "duplicate": duplicate_flats}

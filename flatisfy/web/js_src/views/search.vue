@@ -12,10 +12,10 @@
         <template v-if="isLoading">
             <p>{{ $t("common.loading") }}</p>
         </template>
-        <template v-else-if="Object.keys(postalCodesFlatsBuckets).length > 0">
-            <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                <h3>{{ postal_code_data.name }} ({{ postal_code }}) - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}</h3>
-                <FlatsTable :flats="postal_code_data.flats"></FlatsTable>
+        <template v-else-if="Object.keys(inseeCodesFlatsBuckets).length > 0">
+            <template v-for="(insee_code_data, insee_code) in inseeCodesFlatsBuckets">
+                <h3>{{ insee_code_data.name }} ({{ insee_code }}) - {{ insee_code_data.flats.length }} {{ $tc("common.flats", insee_code_data.flats.length) }}</h3>
+                <FlatsTable :flats="insee_code_data.flats"></FlatsTable>
             </template>
         </template>
         <template v-else>
@@ -51,12 +51,12 @@ export default {
     },
 
     computed: {
-        postalCodesFlatsBuckets () {
+        inseeCodesFlatsBuckets () {
             if (!this.$route.query.query || this.loading) {
                 return {}
             }
 
-            return this.$store.getters.postalCodesFlatsBuckets(
+            return this.$store.getters.inseeCodesFlatsBuckets(
                 flat => flat.status !== 'duplicate' && flat.status !== 'ignored' && flat.status !== 'user_deleted'
             )
         },

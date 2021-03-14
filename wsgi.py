@@ -12,11 +12,8 @@ import flatisfy.config
 from flatisfy.web import app as web_app
 
 
-class Args():
-    config = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        "config/config.json"
-    )
+class Args:
+    config = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config/config.json")
 
 
 LOGGER = logging.getLogger("flatisfy")
@@ -24,9 +21,7 @@ LOGGER = logging.getLogger("flatisfy")
 
 CONFIG = flatisfy.config.load_config(Args())
 if CONFIG is None:
-    LOGGER.error("Invalid configuration. Exiting. "
-                 "Run init-config before if this is the first time "
-                 "you run Flatisfy.")
+    LOGGER.error("Invalid configuration. Exiting. Run init-config before if this is the first time you run Flatisfy.")
     sys.exit(1)
 
 

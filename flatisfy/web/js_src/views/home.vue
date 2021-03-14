@@ -1,50 +1,56 @@
 <template>
-    <div>
-        <FlatsMap :flats="flatsMarkers" :places="timeToPlaces"></FlatsMap>
-
-        <h2>
-          {{ $t("home.new_available_flats") }}
-          <template v-if="lastUpdate">
-            <label class="show-last-update">
-              {{ $t("home.Last_update") }} {{ lastUpdate.fromNow() }}
-            </label>
-          </template>
-          <label class="show-expired-flats-label">
-            <input type="checkbox" class="show-expired-flats-checkbox" v-model="showExpiredFlats" />
-            {{ $t("home.show_expired_flats") }}
-          </label>
-        </h2>
-
-        <template v-if="Object.keys(postalCodesFlatsBuckets).length > 0">
-            <template v-for="(postal_code_data, postal_code) in postalCodesFlatsBuckets">
-                <h3>
-                    {{ postal_code_data.name || $t('common.Unknown') }}
-                    <span v-if="postal_code !== 'undefined'">
-                        ({{ postal_code }})
-                    </span>
-                    - {{ postal_code_data.flats.length }} {{ $tc("common.flats", postal_code_data.flats.length) }}
-                </h3>
-                <FlatsTable :flats="postal_code_data.flats" :key="postal_code"></FlatsTable>
+    <div class="flex-row">
+        <div class="flex" style="overflow: auto;">
+            <FlatsMap :flats="flatsMarkers" :places="timeToPlaces" v-on:select-flat="selectFlat($event)"></FlatsMap>
+            <h2>
+            {{ $t("home.new_available_flats") }}
+            <template v-if="lastUpdate">
+                <label class="show-last-update">
+                {{ $t("home.Last_update") }} {{ lastUpdate.fromNow() }}
+                </label>
             </template>
-        </template>
-        <template v-else-if="isLoading">
-            <p>{{ $t("common.loading") }}</p>
-        </template>
-        <template v-else>
-            <p>{{ $t("flatListing.no_available_flats") }}</p>
-        </template>
+            <label class="show-expired-flats-label">
+                <input type="checkbox" class="show-expired-flats-checkbox" v-model="showExpiredFlats" />
+                {{ $t("home.show_expired_flats") }}
+            </label>
+            </h2>
+
+            <template v-if="Object.keys(inseeCodesFlatsBuckets).length > 0">
+                <template v-for="(insee_code_data, insee_code) in inseeCodesFlatsBuckets">
+                    <h3>
+                        {{ insee_code_data.name || $t('common.Unknown') }}
+                        <span v-if="insee_code !== 'undefined'">
+                            ({{ insee_code }})
+                        </span>
+                        - {{ insee_code_data.flats.length }} {{ $tc("common.flats", insee_code_data.flats.length) }}
+                    </h3>
+                    <FlatsTable :flats="insee_code_data.flats" :key="insee_code"></FlatsTable>
+                </template>
+            </template>
+            <template v-else-if="isLoading">
+                <p>{{ $t("common.loading") }}</p>
+            </template>
+            <template v-else>
+                <p>{{ $t("flatListing.no_available_flats") }}</p>
+            </template>
+        </div>
+        <div v-if="selectedFlat" class="flex">
+            <Flat :flat="selectedFlat"></Flat>
+        </div>
     </div>
 </template>
 
 <script>
 import FlatsMap from '../components/flatsmap.vue'
 import FlatsTable from '../components/flatstable.vue'
+import Flat from '../components/flat.vue'
 import moment from 'moment'
 
 export default {
     components: {
         FlatsMap,
-        FlatsTable
+        FlatsTable,
+        Flat
     },
 
     created () {
@@ -60,13 +66,25 @@ export default {
 
     data () {
         return {
-            showExpiredFlats: false
+            showExpiredFlats: false,
+            selectedFlat: undefined
+        }
+    },
+
+    methods: {
+        selectFlat: async function (flatId) {
+            if (flatId) {
+                await this.$store.dispatch('getFlat', { flatId })
+                this.selectedFlat = await this.$store.getters.flat(flatId)
+            } else {
+                this.selectedFlat = undefined
+            }
         }
     },
 
     computed: {
-        postalCodesFlatsBuckets () {
-            return this.$store.getters.postalCodesFlatsBuckets(flat =>
+        inseeCodesFlatsBuckets () {
+            return this.$store.getters.inseeCodesFlatsBuckets(flat =>
                 flat.status === 'new' &&
                 (this.showExpiredFlats || !flat.is_expired)
             )
@@ -100,7 +118,12 @@ h2 {
     display: flex;
     justify-content: space-between;
 }
-
+.flex-row {
+    display:flex;
+}
+.flex {
+    flex: 1;
+}
 table {
     margin-left: 0;
     margin-right: 0;

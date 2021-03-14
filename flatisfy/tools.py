@@ -3,9 +3,7 @@
 This module contains basic utility functions, such as pretty printing of JSON
 output, checking that a value is within a given interval etc.
 """
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals
-)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 import itertools
@@ -41,7 +39,7 @@ def next_weekday(d, weekday):
     :returns: The datetime object for the next given weekday.
     """
     days_ahead = weekday - d.weekday()
-    if days_ahead <= 0: # Target day already happened this week
+    if days_ahead <= 0:  # Target day already happened this week
         days_ahead += 7
     return d + datetime.timedelta(days_ahead)
 
@@ -61,8 +59,18 @@ def convert_arabic_to_roman(arabic):
         return arabic
 
     to_roman = {
-        1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII',
-        8: 'VIII', 9: 'IX', 10: 'X', 20: 'XX', 30: 'XXX'
+        1: "I",
+        2: "II",
+        3: "III",
+        4: "IV",
+        5: "V",
+        6: "VI",
+        7: "VII",
+        8: "VIII",
+        9: "IX",
+        10: "X",
+        20: "XX",
+        30: "XXX",
     }
     roman_chars_list = []
     count = 1
@@ -71,7 +79,7 @@ def convert_arabic_to_roman(arabic):
         if digit != 0:
             roman_chars_list.append(to_roman[digit * count])
         count *= 10
-    return ''.join(roman_chars_list[::-1])
+    return "".join(roman_chars_list[::-1])
 
 
 def convert_arabic_to_roman_in_text(text):
@@ -82,11 +90,7 @@ def convert_arabic_to_roman_in_text(text):
     :returns: The corresponding text with roman literals converted to
         arabic.
     """
-    return re.sub(
-        r'(\d+)',
-        lambda matchobj: convert_arabic_to_roman(matchobj.group(0)),
-        text
-    )
+    return re.sub(r"(\d+)", lambda matchobj: convert_arabic_to_roman(matchobj.group(0)), text)
 
 
 def hash_dict(func):
@@ -96,11 +100,13 @@ def hash_dict(func):
 
     From https://stackoverflow.com/a/44776960.
     """
+
     class HDict(dict):
         """
         Transform mutable dictionnary into immutable. Useful to be compatible
         with lru_cache
         """
+
         def __hash__(self):
             return hash(json.dumps(self))
 
@@ -108,17 +114,10 @@ def hash_dict(func):
         """
         The wrapped function
         """
-        args = tuple(
-            [
-                HDict(arg) if isinstance(arg, dict) else arg
-                for arg in args
-            ]
-        )
-        kwargs = {
-            k: HDict(v) if isinstance(v, dict) else v
-            for k, v in kwargs.items()
-        }
+        args = tuple([HDict(arg) if isinstance(arg, dict) else arg for arg in args])
+        kwargs = {k: HDict(v) if isinstance(v, dict) else v for k, v in kwargs.items()}
         return func(*args, **kwargs)
+
     return wrapped
 
 
@@ -126,6 +125,7 @@ class DateAwareJSONEncoder(json.JSONEncoder):
     """
     Extend the default JSON encoder to serialize datetimes to iso strings.
     """
+
     def default(self, o):  # pylint: disable=locally-disabled,E0202
         if isinstance(o, (datetime.date, datetime.datetime)):
             return o.isoformat()
@@ -153,9 +153,7 @@ def pretty_json(data):
             "toto": "ok"
         }
     """
-    return json.dumps(data, cls=DateAwareJSONEncoder,
-                      indent=4, separators=(',', ': '),
-                      sort_keys=True)
+    return json.dumps(data, cls=DateAwareJSONEncoder, indent=4, separators=(",", ": "), sort_keys=True)
 
 
 def batch(iterable, size):
@@ -294,10 +292,7 @@ def distance(gps1, gps2):
     long2 = math.radians(gps2[1])
 
     # pylint: disable=locally-disabled,invalid-name
-    a = (
-        math.sin((lat2 - lat1) / 2.0)**2 +
-        math.cos(lat1) * math.cos(lat2) * math.sin((long2 - long1) / 2.0)**2
-    )
+    a = math.sin((lat2 - lat1) / 2.0) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin((long2 - long1) / 2.0) ** 2
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     earth_radius = 6371000
 
@@ -385,13 +380,14 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
                 "from": "%s;%s" % (latlng_from[1], latlng_from[0]),
                 "to": "%s;%s" % (latlng_to[1], latlng_to[0]),
                 "datetime": date_from.isoformat(),
-                "count": 1
+                "count": 1,
             }
             try:
                 # Do the query to Navitia API
                 req = requests.get(
-                    NAVITIA_ENDPOINT, params=payload,
-                    auth=(config["navitia_api_key"], "")
+                    NAVITIA_ENDPOINT,
+                    params=payload,
+                    auth=(config["navitia_api_key"], ""),
                 )
                 req.raise_for_status()
 
@@ -400,28 +396,28 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
                 for section in journeys["sections"]:
                     if section["type"] == "public_transport":
                         # Public transport
-                        sections.append({
-                            "geojson": section["geojson"],
-                            "color": (
-                                section["display_informations"].get("color", None)
-                            )
-                        })
+                        sections.append(
+                            {
+                                "geojson": section["geojson"],
+                                "color": (section["display_informations"].get("color", None)),
+                            }
+                        )
                     elif section["type"] == "street_network":
                         # Walking
-                        sections.append({
-                            "geojson": section["geojson"],
-                            "color": None
-                        })
+                        sections.append({"geojson": section["geojson"], "color": None})
                     else:
                         # Skip anything else
                         continue
-            except (requests.exceptions.RequestException,
-                    ValueError, IndexError, KeyError) as exc:
+            except (
+                requests.exceptions.RequestException,
+                ValueError,
+                IndexError,
+                KeyError,
+            ) as exc:
                 # Ignore any possible exception
                 LOGGER.warning(
-                    "An exception occurred during travel time lookup on "
-                    "Navitia: %s.",
-                    str(exc)
+                    "An exception occurred during travel time lookup on Navitia: %s.",
+                    str(exc),
                 )
         else:
             LOGGER.warning(
@@ -430,50 +426,43 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
             )
     elif mode in [TimeToModes.WALK, TimeToModes.BIKE, TimeToModes.CAR]:
         MAPBOX_MODES = {
-            TimeToModes.WALK: 'mapbox/walking',
-            TimeToModes.BIKE: 'mapbox/cycling',
-            TimeToModes.CAR: 'mapbox/driving'
+            TimeToModes.WALK: "mapbox/walking",
+            TimeToModes.BIKE: "mapbox/cycling",
+            TimeToModes.CAR: "mapbox/driving",
         }
         # Check that Mapbox API key is available
         if config["mapbox_api_key"]:
             try:
-                service = mapbox.Directions(
-                    access_token=config['mapbox_api_key']
-                )
+                service = mapbox.Directions(access_token=config["mapbox_api_key"])
                 origin = {
-                    'type': 'Feature',
-                    'properties': {'name': 'Start'},
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [latlng_from[1], latlng_from[0]]}}
+                    "type": "Feature",
+                    "properties": {"name": "Start"},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [latlng_from[1], latlng_from[0]],
+                    },
+                }
                 destination = {
-                    'type': 'Feature',
-                    'properties': {'name': 'End'},
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [latlng_to[1], latlng_to[0]]}}
-                response = service.directions(
-                    [origin, destination], MAPBOX_MODES[mode]
-                )
+                    "type": "Feature",
+                    "properties": {"name": "End"},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [latlng_to[1], latlng_to[0]],
+                    },
+                }
+                response = service.directions([origin, destination], MAPBOX_MODES[mode])
                 response.raise_for_status()
-                route = response.geojson()['features'][0]
+                route = response.geojson()["features"][0]
                 # Fix longitude/latitude inversion in geojson output
-                geometry = route['geometry']
-                geometry['coordinates'] = [
-                    (x[1], x[0]) for x in geometry['coordinates']
-                ]
-                sections = [{
-                    "geojson": geometry,
-                    "color": "000"
-                }]
-                travel_time = route['properties']['duration']
-            except (requests.exceptions.RequestException,
-                    IndexError, KeyError) as exc:
+                geometry = route["geometry"]
+                geometry["coordinates"] = [(x[1], x[0]) for x in geometry["coordinates"]]
+                sections = [{"geojson": geometry, "color": "000"}]
+                travel_time = route["properties"]["duration"]
+            except (requests.exceptions.RequestException, IndexError, KeyError) as exc:
                 # Ignore any possible exception
                 LOGGER.warning(
-                    "An exception occurred during travel time lookup on "
-                    "Mapbox: %s.",
-                    str(exc)
+                    "An exception occurred during travel time lookup on Mapbox: %s.",
+                    str(exc),
                 )
         else:
             LOGGER.warning(
@@ -482,10 +471,7 @@ def get_travel_time_between(latlng_from, latlng_to, mode, config):
             )
 
     if travel_time:
-        return {
-            "time": travel_time,
-            "sections": sections
-        }
+        return {"time": travel_time, "sections": sections}
     return None
 
 
@@ -493,6 +479,7 @@ def timeit(func):
     """
     A decorator that logs how much time was spent in the function.
     """
+
     def wrapped(*args, **kwargs):
         """
         The wrapped function
@@ -502,4 +489,5 @@ def timeit(func):
         runtime = time.time() - before
         LOGGER.info("%s -- Execution took %s seconds.", func.__name__, runtime)
         return res
+
     return wrapped

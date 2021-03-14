@@ -18,21 +18,23 @@ from flatisfy import fetch
 from flatisfy import tools
 from flatisfy.filters import metadata
 from flatisfy.web import app as web_app
-
+import time
+from ratelimit.exception import RateLimitException
 
 LOGGER = logging.getLogger(__name__)
 
 
-def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
+def filter_flats_list(config, constraint_name, flats_list, fetch_details=True, past_flats=None):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
     :param config: A config dict.
     :param constraint_name: The constraint name that the ``flats_list`` should
         satisfy.
+    :param flats_list: The initial list of flat objects to filter.
     :param fetch_details: Whether additional details should be fetched between
         the two passes.
-    :param flats_list: The initial list of flat objects to filter.
+    :param past_flats: The list of already fetched flats
     :return: A dict mapping flat status and list of flat objects.
     """
     # Add the flatisfy metadata entry and prepare the flat objects
@@ -44,13 +46,9 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
     except KeyError:
         LOGGER.error(
             "Missing constraint %s. Skipping filtering for these posts.",
-            constraint_name
+            constraint_name,
         )
-        return {
-            "new": [],
-            "duplicate": [],
-            "ignored": []
-        }
+        return {"new": [], "duplicate": [], "ignored": []}
 
     first_pass_result = collections.defaultdict(list)
     second_pass_result = collections.defaultdict(list)
@@ -58,52 +56,55 @@ def filter_flats_list(config, constraint_name, flats_list, fetch_details=True):
     # Do a first pass with the available infos to try to remove as much
     # unwanted postings as possible
     if config["passes"] > 0:
-        first_pass_result = flatisfy.filters.first_pass(flats_list,
-                                                        constraint,
-                                                        config)
+        first_pass_result = flatisfy.filters.first_pass(flats_list, constraint, config)
     else:
         first_pass_result["new"] = flats_list
 
     # Load additional infos
     if fetch_details:
+        past_ids = {x["id"]: x for x in past_flats} if past_flats else {}
         for i, flat in enumerate(first_pass_result["new"]):
-            details = fetch.fetch_details(config, flat["id"])
+            details = None
+
+            use_cache = past_ids.get(flat["id"])
+            if use_cache:
+                LOGGER.debug("Skipping details download for %s.", flat["id"])
+                details = use_cache
+            else:
+                if flat["id"].split("@")[1] in ["seloger", "leboncoin"]:
+                    try:
+                        details = fetch.fetch_details_rate_limited(config, flat["id"])
+                    except RateLimitException:
+                        time.sleep(60)
+                        details = fetch.fetch_details_rate_limited(config, flat["id"])
+                else:
+                    details = fetch.fetch_details(config, flat["id"])
+
             first_pass_result["new"][i] = tools.merge_dicts(flat, details)
 
     # Do a second pass to consolidate all the infos we found and make use of
     # additional infos
     if config["passes"] > 1:
-        second_pass_result = flatisfy.filters.second_pass(
-            first_pass_result["new"], constraint, config
-        )
+        second_pass_result = flatisfy.filters.second_pass(first_pass_result["new"], constraint, config)
     else:
         second_pass_result["new"] = first_pass_result["new"]
 
     # Do a third pass to deduplicate better
     if config["passes"] > 2:
-        third_pass_result = flatisfy.filters.third_pass(
-            second_pass_result["new"],
-            config
-        )
+        third_pass_result = flatisfy.filters.third_pass(second_pass_result["new"], config)
     else:
         third_pass_result["new"] = second_pass_result["new"]
 
     return {
         "new": third_pass_result["new"],
         "duplicate": (
-            first_pass_result["duplicate"] +
-            second_pass_result["duplicate"] +
-            third_pass_result["duplicate"]
+            first_pass_result["duplicate"] + second_pass_result["duplicate"] + third_pass_result["duplicate"]
         ),
-        "ignored": (
-            first_pass_result["ignored"] +
-            second_pass_result["ignored"] +
-            third_pass_result["ignored"]
-        )
+        "ignored": (first_pass_result["ignored"] + second_pass_result["ignored"] + third_pass_result["ignored"]),
     }
 
 
-def filter_fetched_flats(config, fetched_flats, fetch_details=True):
+def filter_fetched_flats(config, fetched_flats, fetch_details=True, past_flats={}):
     """
     Filter the available flats list. Then, filter it according to criteria.
 
@@ -120,12 +121,13 @@ def filter_fetched_flats(config, fetched_flats, fetch_details=True):
             config,
             constraint_name,
             flats_list,
-            fetch_details
+            fetch_details,
+            past_flats.get(constraint_name, None),
         )
     return fetched_flats
 
 
-def import_and_filter(config, load_from_db=False):
+def import_and_filter(config, load_from_db=False, new_only=False):
     """
     Fetch the available flats list. Then, filter it according to criteria.
     Finally, store it in the database.
@@ -136,17 +138,23 @@ def import_and_filter(config, load_from_db=False):
     :return: ``None``.
     """
     # Fetch and filter flats list
+    past_flats = fetch.load_flats_from_db(config)
     if load_from_db:
-        fetched_flats = fetch.load_flats_from_db(config)
+        fetched_flats = past_flats
     else:
         fetched_flats = fetch.fetch_flats(config)
     # Do not fetch additional details if we loaded data from the db.
-    flats_by_status = filter_fetched_flats(config, fetched_flats=fetched_flats,
-                                           fetch_details=(not load_from_db))
+    flats_by_status = filter_fetched_flats(
+        config,
+        fetched_flats=fetched_flats,
+        fetch_details=(not load_from_db),
+        past_flats=past_flats if new_only else {},
+    )
     # Create database connection
     get_session = database.init_db(config["database"], config["search_index"])
 
     new_flats = []
+    result = []
 
     LOGGER.info("Merging fetched flats in database...")
     # Flatten the flats_by_status dict
@@ -159,14 +167,11 @@ def import_and_filter(config, load_from_db=False):
         # Set is_expired to true for all existing flats.
         # This will be set back to false if we find them during importing.
         for flat in session.query(flat_model.Flat).all():
-            flat.is_expired = True;
+            flat.is_expired = True
 
         for status, flats_list in flatten_flats_by_status.items():
             # Build SQLAlchemy Flat model objects for every available flat
-            flats_objects = {
-                flat_dict["id"]: flat_model.Flat.from_dict(flat_dict)
-                for flat_dict in flats_list
-            }
+            flats_objects = {flat_dict["id"]: flat_model.Flat.from_dict(flat_dict) for flat_dict in flats_list}
 
             if flats_objects:
                 # If there are some flats, try to merge them with the ones in
@@ -179,9 +184,7 @@ def import_and_filter(config, load_from_db=False):
                     # status if the user defined it
                     flat_object = flats_objects[each.id]
                     if each.status in flat_model.AUTOMATED_STATUSES:
-                        flat_object.status = getattr(
-                            flat_model.FlatStatus, status
-                        )
+                        flat_object.status = getattr(flat_model.FlatStatus, status)
                     else:
                         flat_object.status = each.status
 
@@ -198,21 +201,22 @@ def import_and_filter(config, load_from_db=False):
                 flat.status = getattr(flat_model.FlatStatus, status)
                 if flat.status == flat_model.FlatStatus.new:
                     new_flats.append(flat)
+                    result.append(flat.id)
 
             session.add_all(flats_objects.values())
 
         if config["send_email"]:
             email.send_notification(config, new_flats)
 
+    LOGGER.info(f"Found {len(result)} new flats.")
+
     # Touch a file to indicate last update timestamp
-    ts_file = os.path.join(
-        config["data_directory"],
-        "timestamp"
-    )
-    with open(ts_file, 'w'):
+    ts_file = os.path.join(config["data_directory"], "timestamp")
+    with open(ts_file, "w"):
         os.utime(ts_file, None)
 
     LOGGER.info("Done!")
+    return result
 
 
 def purge_db(config):

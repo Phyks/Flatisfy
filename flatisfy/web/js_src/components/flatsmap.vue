@@ -1,21 +1,26 @@
 <template lang="html">
     <div class="full">
-        <v-map :zoom="zoom.defaultZoom" :center="center" :bounds="bounds" :min-zoom="zoom.minZoom" :max-zoom="zoom.maxZoom">
+        <v-map v-if="bounds" :zoom="zoom.defaultZoom" :bounds="bounds" :min-zoom="zoom.minZoom" :max-zoom="zoom.maxZoom" v-on:click="$emit('select-flat', null)" @update:bounds="bounds = $event">
             <v-tilelayer :url="tiles.url" :attribution="tiles.attribution"></v-tilelayer>
-            <template v-for="marker in flats">
-                <v-marker :lat-lng="{ lat: marker.gps[0], lng: marker.gps[1] }" :icon="icons.flat">
-                    <v-popup :content="marker.content"></v-popup>
-                </v-marker>
-            </template>
-            <template v-for="(place_gps, place_name) in places">
-                <v-marker :lat-lng="{ lat: place_gps[0], lng: place_gps[1] }" :icon="icons.place">
-                    <v-tooltip :content="place_name"></v-tooltip>
-                </v-marker>
-            </template>
+            <v-marker-cluster>
+                <template v-for="marker in flats">
+                        <v-marker :lat-lng="{ lat: marker.gps[0], lng: marker.gps[1] }" :icon="icons.flat" v-on:click="$emit('select-flat', marker.flatId)">
+                            <!-- <v-popup :content="marker.content"></v-popup> -->
+                        </v-marker>
+                </template>
+            </v-marker-cluster>
+            <v-marker-cluster>
+                <template v-for="(place_gps, place_name) in places">
+                        <v-marker :lat-lng="{ lat: place_gps[0], lng: place_gps[1] }" :icon="icons.place">
+                            <v-tooltip :content="place_name"></v-tooltip>
+                        </v-marker>
+                </template>
+            </v-marker-cluster>
             <template v-for="journey in journeys">
                 <v-geojson-layer :geojson="journey.geojson" :options="Object.assign({}, defaultGeoJSONOptions, journey.options)"></v-geojson-layer>
             </template>
         </v-map>
+        <div v-else>Nothing to display yet</div>
     </div>
 </template>
 
@@ -31,10 +36,13 @@ L.Icon.Default.mergeOptions({
 })
 
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 require('leaflet.icon.glyph')
 
-import Vue2Leaflet from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LTooltip, LPopup, LGeoJson } from 'vue2-leaflet'
+import Vue2LeafletMarkerCluster from 'vue2-leaflet-markercluster'
 
 export default {
     data () {
@@ -46,11 +54,11 @@ export default {
                 fillColor: '#e4ce7f',
                 fillOpacity: 1
             },
-            center: null,
+            bounds: [[40.91351257612758, -7.580566406250001], [51.65892664880053, 12.0849609375]],
             zoom: {
-                defaultZoom: 13,
+                defaultZoom: 6,
                 minZoom: 5,
-                maxZoom: 17
+                maxZoom: 20
             },
             tiles: {
                 url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -67,25 +75,27 @@ export default {
     },
 
     components: {
-        'v-map': Vue2Leaflet.Map,
-        'v-tilelayer': Vue2Leaflet.TileLayer,
-        'v-marker': Vue2Leaflet.Marker,
-        'v-tooltip': Vue2Leaflet.Tooltip,
-        'v-popup': Vue2Leaflet.Popup,
-        'v-geojson-layer': Vue2Leaflet.GeoJSON
+        'v-map': LMap,
+        'v-tilelayer': LTileLayer,
+        'v-marker': LMarker,
+        'v-marker-cluster': Vue2LeafletMarkerCluster,
+        'v-tooltip': LTooltip,
+        'v-popup': LPopup,
+        'v-geojson-layer': LGeoJson
     },
 
-    computed: {
-        bounds () {
-            let bounds = []
-            this.flats.forEach(flat => bounds.push(flat.gps))
-            Object.keys(this.places).forEach(place => bounds.push(this.places[place]))
+    watch: {
+        flats: 'computeBounds',
+        places: 'computeBounds'
+    },
 
-            if (bounds.length > 0) {
-                bounds = L.latLngBounds(bounds)
-                return bounds
-            } else {
-                return null
+    methods: {
+        computeBounds (newData, oldData) {
+            if (this.flats.length && JSON.stringify(newData) !== JSON.stringify(oldData)) {
+                const allBounds = []
+                this.flats.forEach(flat => allBounds.push(flat.gps))
+                Object.keys(this.places).forEach(place => allBounds.push(this.places[place]))
+                this.bounds = allBounds.length ? L.latLngBounds(allBounds) : undefined
             }
         }
     },

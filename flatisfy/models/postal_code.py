@@ -7,9 +7,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
-from sqlalchemy import (
-    Column, Float, Integer, String, UniqueConstraint
-)
+from sqlalchemy import Column, Float, Integer, String, UniqueConstraint
 
 from flatisfy.database.base import BASE
 
@@ -21,6 +19,7 @@ class PostalCode(BASE):
     """
     SQLAlchemy ORM model to store a postal code opendata.
     """
+
     __tablename__ = "postal_codes"
 
     id = Column(Integer, primary_key=True)
@@ -28,6 +27,7 @@ class PostalCode(BASE):
     # following ISO 3166-2.
     area = Column(String, index=True)
     postal_code = Column(String, index=True)
+    insee_code = Column(String, index=True)
     name = Column(String, index=True)
     lat = Column(Float)
     lng = Column(Float)
@@ -41,8 +41,4 @@ class PostalCode(BASE):
         Return a dict representation of this postal code object that is JSON
         serializable.
         """
-        return {
-            k: v
-            for k, v in self.__dict__.items()
-            if not k.startswith("_")
-        }
+        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}

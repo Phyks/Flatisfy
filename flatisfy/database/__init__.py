@@ -47,9 +47,7 @@ def init_db(database_uri=None, search_db_uri=None):
     Session = sessionmaker(bind=engine)  # pylint: disable=locally-disabled,invalid-name
 
     if search_db_uri:
-        index_service = IndexService(
-            whoosh_base=search_db_uri
-        )
+        index_service = IndexService(whoosh_base=search_db_uri)
         index_service.register_class(flatisfy.models.flat.Flat)
 
     @contextmanager

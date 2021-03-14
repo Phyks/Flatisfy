@@ -7,9 +7,7 @@ This module is heavily based on code from
 [Bottle-SQLAlchemy](https://github.com/iurisilvio/bottle-sqlalchemy) which is
 licensed under MIT license.
 """
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals
-)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import functools
 import inspect
@@ -22,7 +20,8 @@ class ConfigPlugin(object):
     A Bottle plugin to automatically pass the config object to the routes
     specifying they need it.
     """
-    name = 'config'
+
+    name = "config"
     api = 2
     KEYWORD = "config"
 
@@ -41,9 +40,7 @@ class ConfigPlugin(object):
             if not isinstance(other, ConfigPlugin):
                 continue
             else:
-                raise bottle.PluginError(
-                    "Found another conflicting Config plugin."
-                )
+                raise bottle.PluginError("Found another conflicting Config plugin.")
 
     def apply(self, callback, route):
         """

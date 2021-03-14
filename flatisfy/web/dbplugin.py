@@ -7,9 +7,7 @@ This module is heavily based on code from
 [Bottle-SQLAlchemy](https://github.com/iurisilvio/bottle-sqlalchemy) which is
 licensed under MIT license.
 """
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals
-)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import inspect
 
@@ -21,7 +19,8 @@ class DatabasePlugin(object):
     A Bottle plugin to automatically pass an SQLAlchemy database session object
     to the routes specifying they need it.
     """
-    name = 'database'
+
+    name = "database"
     api = 2
     KEYWORD = "db"
 
@@ -41,9 +40,7 @@ class DatabasePlugin(object):
             if not isinstance(other, DatabasePlugin):
                 continue
             else:
-                raise bottle.PluginError(
-                    "Found another conflicting Database plugin."
-                )
+                raise bottle.PluginError("Found another conflicting Database plugin.")
 
     def apply(self, callback, route):
         """
@@ -64,6 +61,7 @@ class DatabasePlugin(object):
         if self.KEYWORD not in callback_args:
             # If no need for a db session, call the route callback
             return callback
+
         def wrapper(*args, **kwargs):
             """
             Wrap the callback in a call to get_session.
@@ -72,6 +70,7 @@ class DatabasePlugin(object):
                 # Get a db session and pass it to the callback
                 kwargs[self.KEYWORD] = session
                 return callback(*args, **kwargs)
+
         return wrapper
 
 
