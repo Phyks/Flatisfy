@@ -149,14 +149,18 @@ class Flat(BASE):
         """
         Date validation method
         """
-        return arrow.get(date).naive
+        if date:
+            return arrow.get(date).naive
+        return None
 
     @validates("visit_date")
     def validate_visit_date(self, _, visit_date):
         """
         Visit date validation method
         """
-        return arrow.get(visit_date).naive
+        if visit_date:
+            return arrow.get(visit_date).naive
+        return None
 
     @validates("photos")
     def validate_photos(self, _, photos):

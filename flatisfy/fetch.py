@@ -78,7 +78,14 @@ class WebOOBProxy(object):
         self.webnip = WebNip(modules_path=config["modules_path"])
 
         # Create backends
-        self.backends = [self.webnip.load_backend(module, module, params={}) for module in backends]
+        self.backends = []
+        for module in backends:
+            try:
+                self.backends.append(
+                    self.webnip.load_backend(module, module, params={})
+                )
+            except Exception as exc:
+                raise Exception('Unable to load module ' + module) from exc
 
     def __enter__(self):
         return self

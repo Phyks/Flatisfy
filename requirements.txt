@@ -16,5 +16,6 @@ titlecase
 unidecode
 vobject
 whoosh
-https://git.weboob.org/weboob/weboob/repository/archive.zip?ref=master
+git+https://git.weboob.org/weboob/weboob/
+git+https://git.weboob.org/weboob/modules/
 money

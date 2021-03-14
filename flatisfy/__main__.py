@@ -99,7 +99,7 @@ def parse_args(argv=None):
     # Test subcommand parser
     subparsers.add_parser("test", parents=[parent_parser], help="Unit testing.")
 
-    return parser.parse_args(argv)
+    return parser, parser.parse_args(argv)
 
 
 def main():
@@ -108,14 +108,14 @@ def main():
     """
     # pylint: disable=locally-disabled,too-many-branches
     # Parse arguments
-    args = parse_args()
+    parser, args = parse_args()
 
     # Set logger
-    if args.vv:
+    if getattr(args, 'vv', False):
         logging.getLogger("").setLevel(logging.DEBUG)
         logging.getLogger("titlecase").setLevel(logging.INFO)
         logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
-    elif args.verbose:
+    elif getattr(args, 'verbose', False):
         logging.getLogger("").setLevel(logging.INFO)
         # sqlalchemy INFO level is way too loud, just stick with WARNING
         logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
@@ -128,6 +128,10 @@ def main():
         flatisfy.config.init_config(args.output)
         sys.exit(0)
     else:
+        if not args.cmd:
+            parser.print_help()
+            sys.exit(0)
+
         # Load config
         if args.cmd == "build-data":
             # Data not yet built, do not use it in config checks
