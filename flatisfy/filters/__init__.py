@@ -117,9 +117,16 @@ def refine_with_details_criteria(flats_list, constraint):
             is_ok[i] = False
 
         for term in constraint["description_should_contain"]:
-            if term.lower() not in flat["text"].lower():
+            if isinstance(term, str) and term.lower() not in flat["text"].lower():
                 LOGGER.info(
                     ("Description for flat %s does not contain required term '%s'."),
+                    flat["id"],
+                    term,
+                )
+                is_ok[i] = False
+            elif isinstance(term, list) and all(x.lower() not in flat["text"].lower() for x in term):
+                LOGGER.info(
+                    ("Description for flat %s does not contain any of required terms '%s'."),
                     flat["id"],
                     term,
                 )

@@ -38,7 +38,8 @@ DEFAULT_CONFIG = {
             "rooms": (None, None),  # (min, max)
             "bedrooms": (None, None),  # (min, max)
             "minimum_nb_photos": None,  # min number of photos
-            "description_should_contain": [],  # list of terms
+            "description_should_contain": [],  # list of terms (str) or list
+            # (acting as an or)
             "description_should_not_contain": [
                 "vendu",
                 "Vendu",
@@ -187,7 +188,11 @@ def validate_config(config, check_with_data):
             assert isinstance(constraint["description_should_contain"], list)
             if constraint["description_should_contain"]:
                 for term in constraint["description_should_contain"]:
-                    assert isinstance(term, str)
+                    try:
+                        assert isinstance(term, str)
+                    except AssertionError:
+                        assert isinstance(term, list)
+                        assert all(isinstance(x, str) for x in term)
 
             assert "description_should_not_contain" in constraint
             assert isinstance(constraint["description_should_not_contain"], list)
