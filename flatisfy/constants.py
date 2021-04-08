@@ -12,7 +12,7 @@ from enum import Enum
 # housing.
 BACKENDS_BY_PRECEDENCE = [
     "foncia",
-    "seloger",
+    #"seloger",
     "pap",
     "leboncoin",
     "explorimmo",
