@@ -310,7 +310,7 @@ def guess_stations(flats_list, constraint, config):
             LOGGER.info("No stations field for flat %s, skipping stations lookup.", flat["id"])
             continue
 
-        # Weboob modules can return several stations in a comma-separated list.
+        # Woob modules can return several stations in a comma-separated list.
         flat_stations = flat_station.split(",")
         # But some stations containing a comma exist, so let's add the initial
         # value to the list of stations to check if there was one.

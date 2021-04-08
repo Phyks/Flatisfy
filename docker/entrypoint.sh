@@ -14,7 +14,4 @@ echo "[ENTRYPOINT] Setting fake values for git config..."
 git config --global user.email flatisfy@example.com
 git config --global user.name "Flatisfy Root"
 
-echo "Update Weboob..."
-/home/user/update_weboob.sh
-
 exec su user -c "$@"

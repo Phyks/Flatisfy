@@ -10,5 +10,4 @@ data/
 doc/_build
 data_rework/
 .env
-weboob
 .htpasswd

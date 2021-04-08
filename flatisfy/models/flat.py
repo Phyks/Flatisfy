@@ -68,7 +68,7 @@ class Flat(BASE):
     __tablename__ = "flats"
     __searchable__ = ["title", "text", "station", "location", "details", "notes"]
 
-    # Weboob data
+    # Woob data
     id = Column(String, primary_key=True)
     area = Column(Float)
     bedrooms = Column(Float)

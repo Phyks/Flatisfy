@@ -161,7 +161,7 @@ def detect(flats_list, key="id", merge=True, should_intersect=False):
 
     for flat_key, matching_flats in seen.items():
         if flat_key is None:
-            # If the key is None, it means Weboob could not load the data. In
+            # If the key is None, it means Woob could not load the data. In
             # this case, we consider every matching item as being independant
             # of the others, to avoid over-deduplication.
             unique_flats_list.extend(matching_flats)
@@ -263,7 +263,7 @@ def get_duplicate_score(flat1, flat2, photo_cache, hash_threshold):
         flat2_phone = homogeneize_phone_number(flat2["phone"])
         if flat1_phone and flat2_phone:
             # Use an "in" test as there could be multiple phone numbers
-            # returned by a weboob module
+            # returned by a Woob module
             if flat1_phone in flat2_phone or flat2_phone in flat1_phone:
                 n_common_items += 4  # Counts much more than the rest
 

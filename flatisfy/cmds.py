@@ -134,7 +134,7 @@ def import_and_filter(config, load_from_db=False, new_only=False):
 
     :param config: A config dict.
     :param load_from_db: Whether to load flats from database or fetch them
-        using WebOOB.
+        using Woob.
     :return: ``None``.
     """
     # Fetch and filter flats list

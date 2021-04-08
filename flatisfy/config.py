@@ -15,12 +15,15 @@ import sys
 import traceback
 
 import appdirs
-from weboob.capabilities.housing import POSTS_TYPES, HOUSE_TYPES
+from woob.capabilities.housing import POSTS_TYPES, HOUSE_TYPES
 
 from flatisfy import data
 from flatisfy import tools
 from flatisfy.constants import TimeToModes
 from flatisfy.models.postal_code import PostalCode
+
+
+DIRPATH = os.path.dirname(os.path.realpath(__file__))
 
 
 # Default configuration
@@ -74,10 +77,8 @@ DEFAULT_CONFIG = {
     "max_entries": None,
     # Directory in wich data will be put. ``None`` is XDG default location.
     "data_directory": None,
-    # Path to the modules directory containing all Weboob modules. ``None`` if
-    # ``weboob_modules`` package is pip-installed, and you want to use
-    # ``pkgresource`` to automatically find it.
-    "modules_path": None,
+    # Path to the modules directory containing all Woob modules.
+    "modules_path": os.path.join(DIRPATH, '..', 'modules'),
     # SQLAlchemy URI to the database to use
     "database": None,
     # Path to the Whoosh search index file. Use ``None`` to put it in
@@ -89,7 +90,7 @@ DEFAULT_CONFIG = {
     "host": "127.0.0.1",
     # Web server to use to serve the webapp (see Bottle deployment doc)
     "webserver": None,
-    # List of Weboob backends to use (default to any backend available)
+    # List of Woob backends to use (default to any backend available)
     "backends": None,
     # Should email notifications be sent?
     "send_email": False,

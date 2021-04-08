@@ -53,9 +53,9 @@ locale.
 Thanks!
 
 
-## Adding support for a new Weboob backend
+## Adding support for a new Woob backend
 
-To enable a new Weboob `CapHousing` backend in Flatisfy, you should add it to
+To enable a new Woob `CapHousing` backend in Flatisfy, you should add it to
 the list of available backends in
 [flatisfy/fetch.py#L69-70](https://git.phyks.me/Phyks/flatisfy/blob/master/flatisfy/fetch.py#L69-70)
 and update the list of `BACKEND_PRECEDENCES` for deduplication in

@@ -20,27 +20,27 @@ LOGGER = logging.getLogger(__name__)
 
 
 try:
-    from weboob.capabilities.housing import Query, POSTS_TYPES, HOUSE_TYPES
-    from weboob.core.bcall import CallErrors
-    from weboob.core.ouiboube import WebNip
-    from weboob.tools.json import WeboobEncoder
+    from woob.capabilities.housing import Query, POSTS_TYPES, HOUSE_TYPES
+    from woob.core.bcall import CallErrors
+    from woob.core.ouiboube import WebNip
+    from woob.tools.json import WoobEncoder
 except ImportError:
-    LOGGER.error("Weboob is not available on your system. Make sure you installed it.")
+    LOGGER.error("Woob is not available on your system. Make sure you installed it.")
     raise
 
 
-class WebOOBProxy(object):
+class WoobProxy(object):
     """
-    Wrapper around WebOOB ``WebNip`` class, to fetch housing posts without
+    Wrapper around Woob ``WebNip`` class, to fetch housing posts without
     having to spawn a subprocess.
     """
 
     @staticmethod
     def version():
         """
-        Get WebOOB version.
+        Get Woob version.
 
-        :return: The installed WebOOB version.
+        :return: The installed Woob version.
         """
         return WebNip.VERSION
 
@@ -64,7 +64,7 @@ class WebOOBProxy(object):
 
     def __init__(self, config):
         """
-        Create a WebOOB handle and try to load the modules.
+        Create a Woob handle and try to load the modules.
 
         :param config: A config dict.
         """
@@ -95,13 +95,13 @@ class WebOOBProxy(object):
 
     def build_queries(self, constraints_dict):
         """
-        Build WebOOB ``weboob.capabilities.housing.Query`` objects from the
+        Build Woob ``woob.capabilities.housing.Query`` objects from the
         constraints defined in the configuration. Each query has at most 3
         cities, to comply with housing websites limitations.
 
         :param constraints_dict: A dictionary of constraints, as defined in the
             config.
-        :return: A list of WebOOB ``weboob.capabilities.housing.Query``
+        :return: A list of Woob ``woob.capabilities.housing.Query``
             objects. Returns ``None`` if an error occurred.
         """
         queries = []
@@ -163,9 +163,9 @@ class WebOOBProxy(object):
 
     def query(self, query, max_entries=None, store_personal_data=False):
         """
-        Fetch the housings posts matching a given WebOOB query.
+        Fetch the housings posts matching a given Woob query.
 
-        :param query: A WebOOB `weboob.capabilities.housing.Query`` object.
+        :param query: A Woob `woob.capabilities.housing.Query`` object.
         :param max_entries: Maximum number of entries to fetch.
         :param store_personal_data: Whether personal data should be fetched
             from housing posts (phone number etc).
@@ -181,7 +181,7 @@ class WebOOBProxy(object):
                     "search_housings",
                     query,
                     # Only run the call on the required backends.
-                    # Otherwise, WebOOB is doing weird stuff and returning
+                    # Otherwise, Woob is doing weird stuff and returning
                     # nonsense.
                     backends=[x for x in self.backends if x.name in useful_backends],
                 ),
@@ -189,7 +189,7 @@ class WebOOBProxy(object):
             ):
                 if not store_personal_data:
                     housing.phone = None
-                housings.append(json.dumps(housing, cls=WeboobEncoder))
+                housings.append(json.dumps(housing, cls=WoobEncoder))
         except CallErrors as exc:
             # If an error occured, just log it
             LOGGER.error("An error occured while fetching the housing posts: %s", str(exc))
@@ -199,7 +199,7 @@ class WebOOBProxy(object):
         """
         Get information (details) about an housing post.
 
-        :param full_flat_id: A WebOOB housing post id, in complete form
+        :param full_flat_id: A Woob housing post id, in complete form
             (ID@BACKEND)
         :param store_personal_data: Whether personal data should be fetched
             from housing posts (phone number etc).
@@ -223,7 +223,7 @@ class WebOOBProxy(object):
             # Otherwise, we miss the @backend afterwards
             housing.id = full_flat_id
 
-            return json.dumps(housing, cls=WeboobEncoder)
+            return json.dumps(housing, cls=WoobEncoder)
         except Exception as exc:  # pylint: disable=broad-except
             # If an error occured, just log it
             LOGGER.error("An error occured while fetching housing %s: %s", full_flat_id, str(exc))
@@ -232,7 +232,7 @@ class WebOOBProxy(object):
 
 def fetch_flats(config):
     """
-    Fetch the available flats using the Flatboob / WebOOB config.
+    Fetch the available flats using the Woob config.
 
     :param config: A config dict.
     :return: A dict mapping constraint in config to all available matching
@@ -242,16 +242,16 @@ def fetch_flats(config):
 
     for constraint_name, constraint in config["constraints"].items():
         LOGGER.info("Loading flats for constraint %s...", constraint_name)
-        with WebOOBProxy(config) as webOOB_proxy:
-            queries = webOOB_proxy.build_queries(constraint)
+        with WoobProxy(config) as woob_proxy:
+            queries = woob_proxy.build_queries(constraint)
             housing_posts = []
             for query in queries:
-                housing_posts.extend(webOOB_proxy.query(query, config["max_entries"], config["store_personal_data"]))
+                housing_posts.extend(woob_proxy.query(query, config["max_entries"], config["store_personal_data"]))
         housing_posts = housing_posts[: config["max_entries"]]
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
         constraint_flats_list = [json.loads(flat) for flat in housing_posts]
-        constraint_flats_list = [WebOOBProxy.restore_decimal_fields(flat) for flat in constraint_flats_list]
+        constraint_flats_list = [WoobProxy.restore_decimal_fields(flat) for flat in constraint_flats_list]
         fetched_flats[constraint_name] = constraint_flats_list
     return fetched_flats
 
@@ -266,18 +266,18 @@ def fetch_details_rate_limited(config, flat_id):
 
 def fetch_details(config, flat_id):
     """
-    Fetch the additional details for a flat using Flatboob / WebOOB.
+    Fetch the additional details for a flat using Woob.
 
     :param config: A config dict.
     :param flat_id: ID of the flat to fetch details for.
     :return: A flat dict with all the available data.
     """
-    with WebOOBProxy(config) as webOOB_proxy:
+    with WoobProxy(config) as woob_proxy:
         LOGGER.info("Loading additional details for flat %s.", flat_id)
-        webOOB_output = webOOB_proxy.info(flat_id, config["store_personal_data"])
+        woob_output = woob_proxy.info(flat_id, config["store_personal_data"])
 
-    flat_details = json.loads(webOOB_output)
-    flat_details = WebOOBProxy.restore_decimal_fields(flat_details)
+    flat_details = json.loads(woob_output)
+    flat_details = WoobProxy.restore_decimal_fields(flat_details)
     LOGGER.info("Fetched details for flat %s.", flat_id)
 
     return flat_details

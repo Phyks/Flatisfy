@@ -18,11 +18,6 @@ RUN pip install -U setuptools && \
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
     && apt-get install -y nodejs
 
-# Install weboob's code itself.
-RUN git clone --depth 1 https://git.weboob.org/weboob/weboob /home/user/weboob \
-    && cd /home/user/weboob \
-    && pip install .
-
 RUN mkdir -p /flatisfy/data
 VOLUME /flatisfy
 

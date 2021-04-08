@@ -2,20 +2,20 @@
 
 # Copyright(C) 2014      Bezleputh
 #
-# This file is part of a weboob module.
+# This file is part of a woob module.
 #
-# This weboob module is free software: you can redistribute it and/or modify
+# This woob module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# This weboob module is distributed in the hope that it will be useful,
+# This woob module is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this weboob module. If not, see <http://www.gnu.org/licenses/>.
+# along with this woob module. If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 
 import json
@@ -23,19 +23,19 @@ import math
 import re
 from decimal import Decimal
 from datetime import datetime
-from weboob.browser.filters.json import Dict
-from weboob.browser.elements import ItemElement, ListElement, DictElement, method
-from weboob.browser.pages import JsonPage, HTMLPage, pagination
-from weboob.browser.filters.standard import (CleanText, CleanDecimal, Currency,
+from woob.browser.filters.json import Dict
+from woob.browser.elements import ItemElement, ListElement, DictElement, method
+from woob.browser.pages import JsonPage, HTMLPage, pagination
+from woob.browser.filters.standard import (CleanText, CleanDecimal, Currency,
                                              Regexp, Env, BrowserURL, Filter,
                                              Format)
-from weboob.browser.filters.html import Attr, CleanHTML, XPath
-from weboob.capabilities.base import NotAvailable, NotLoaded, Currency as BaseCurrency
-from weboob.capabilities.housing import (Housing, HousingPhoto, City,
+from woob.browser.filters.html import Attr, CleanHTML, XPath
+from woob.capabilities.base import NotAvailable, NotLoaded, Currency as BaseCurrency
+from woob.capabilities.housing import (Housing, HousingPhoto, City,
                                          UTILITIES, ENERGY_CLASS, POSTS_TYPES,
                                          ADVERT_TYPES, HOUSE_TYPES)
-from weboob.tools.capabilities.housing.housing import PricePerMeterFilter
-from weboob.tools.compat import unquote
+from woob.tools.capabilities.housing.housing import PricePerMeterFilter
+from woob.tools.compat import unquote
 
 
 class CitiesPage(JsonPage):

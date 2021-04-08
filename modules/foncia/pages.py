@@ -2,37 +2,37 @@
 
 # Copyright(C) 2017      Phyks (Lucas Verney)
 #
-# This file is part of a weboob module.
+# This file is part of a woob module.
 #
-# This weboob module is free software: you can redistribute it and/or modify
+# This woob module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# This weboob module is distributed in the hope that it will be useful,
+# This woob module is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this weboob module. If not, see <http://www.gnu.org/licenses/>.
+# along with this woob module. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
 
 import datetime
 
-from weboob.browser.pages import JsonPage, HTMLPage, pagination
-from weboob.browser.filters.standard import (
+from woob.browser.pages import JsonPage, HTMLPage, pagination
+from woob.browser.filters.standard import (
     CleanDecimal, CleanText, Currency, Date, Env, Format, Regexp, RegexpError
 )
-from weboob.browser.filters.html import AbsoluteLink, Attr, Link, XPathNotFound
-from weboob.browser.elements import ItemElement, ListElement, method
-from weboob.capabilities.base import NotAvailable, NotLoaded
-from weboob.capabilities.housing import (
+from woob.browser.filters.html import AbsoluteLink, Attr, Link, XPathNotFound
+from woob.browser.elements import ItemElement, ListElement, method
+from woob.capabilities.base import NotAvailable, NotLoaded
+from woob.capabilities.housing import (
     City, Housing, HousingPhoto,
     UTILITIES, ENERGY_CLASS, POSTS_TYPES, ADVERT_TYPES
 )
-from weboob.tools.capabilities.housing.housing import PricePerMeterFilter
+from woob.tools.capabilities.housing.housing import PricePerMeterFilter
 
 from .constants import AVAILABLE_TYPES, QUERY_TYPES, QUERY_HOUSE_TYPES
 
