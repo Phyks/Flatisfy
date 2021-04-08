@@ -16,5 +16,5 @@ titlecase
 unidecode
 vobject
 whoosh
-git+https://gitlab.com/woob/modules/
+git+https://gitlab.com/woob/woob/
 money
