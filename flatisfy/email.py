@@ -101,7 +101,7 @@ def send_notification(config, flats):
         cost = int(flat.cost)
         currency = str(flat.currency)
 
-        txt += f"- {title}: {website_url}#/flat/{flat_id}"
+        txt += f"- {title}: {website_url}#/flat/{flat_id} "
         html += f"""
             <li>
                 <a href="{website_url}#/flat/{flat_id}">{title}</a>
@@ -119,6 +119,7 @@ def send_notification(config, flats):
             html += f'({", ".join(fields)})'
 
         html += "</li>"
+        txt += "\n"
 
     html += "</ul>"
 
