@@ -31,7 +31,7 @@ __all__ = ['PapModule']
 class PapModule(Module, CapHousing):
     NAME = 'pap'
     MAINTAINER = u'Romain Bignon'
-    EMAIL = 'romain@woob.org'
+    EMAIL = 'romain@weboob.org'
     VERSION = '2.1'
     DESCRIPTION = 'French housing website'
     LICENSE = 'AGPLv3+'
