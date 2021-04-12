@@ -5,7 +5,9 @@ This module contains all the code related to fetching and loading flats lists.
 from __future__ import absolute_import, print_function, unicode_literals
 from builtins import str
 
+import arrow
 import collections
+import datetime
 import itertools
 import json
 import logging
@@ -15,6 +17,7 @@ from flatisfy import database
 from flatisfy import tools
 from flatisfy.constants import BACKENDS_BY_PRECEDENCE
 from flatisfy.models import flat as flat_model
+from flatisfy.models import last_fetch as last_fetch_model
 
 LOGGER = logging.getLogger(__name__)
 
@@ -161,7 +164,11 @@ class WoobProxy(object):
 
         return queries
 
-    def query(self, query, max_entries=None, store_personal_data=False):
+    def query(
+        self, query,
+        max_entries=None, store_personal_data=False, force_fetch_all=False,
+        last_fetch_by_backend=None
+    ):
         """
         Fetch the housings posts matching a given Woob query.
 
@@ -169,12 +176,18 @@ class WoobProxy(object):
         :param max_entries: Maximum number of entries to fetch.
         :param store_personal_data: Whether personal data should be fetched
             from housing posts (phone number etc).
+        :param force_fetch_all: Whether to force fetching all available flats
+            or only diff from last fetch (based on timestamps).
+        :param last_fetch_by_backend: A dict mapping all backends to last fetch
+            datetimes.
         :return: The matching housing posts, dumped as a list of JSON objects.
         """
+        if last_fetch_by_backend is None:
+            last_fetch_by_backend = {}
+
         housings = []
         # List the useful backends for this specific query
         useful_backends = [x.backend for x in query.cities]
-        # TODO: Handle max_entries better
         try:
             for housing in itertools.islice(
                 self.webnip.do(
@@ -187,6 +200,16 @@ class WoobProxy(object):
                 ),
                 max_entries,
             ):
+                if not force_fetch_all:
+                    # Check whether we should continue iterating or not
+                    last_fetch_datetime = last_fetch_by_backend.get(housing.backend)
+                    if last_fetch_datetime and housing.date and housing.date < last_fetch_datetime:
+                        LOGGER.info(
+                            'Done iterating till last fetch (housing.date=%s, last_fetch=%s). Stopping iteration.',
+                            housing.date,
+                            last_fetch_datetime
+                        )
+                        break
                 if not store_personal_data:
                     housing.phone = None
                 housings.append(json.dumps(housing, cls=WoobEncoder))
@@ -240,19 +263,66 @@ def fetch_flats(config):
     """
     fetched_flats = {}
 
+    # Get last fetch datetimes for all constraints / backends
+    get_session = database.init_db(config["database"], config["search_index"])
+    with get_session() as session:
+        last_fetch = collections.defaultdict(dict)
+        for item in session.query(last_fetch_model.LastFetch).all():
+            last_fetch[item.constraint_name][item.backend] = item.last_fetch
+
+    # Do the actual fetching
     for constraint_name, constraint in config["constraints"].items():
         LOGGER.info("Loading flats for constraint %s...", constraint_name)
+
         with WoobProxy(config) as woob_proxy:
             queries = woob_proxy.build_queries(constraint)
             housing_posts = []
             for query in queries:
-                housing_posts.extend(woob_proxy.query(query, config["max_entries"], config["store_personal_data"]))
+                housing_posts.extend(
+                    woob_proxy.query(
+                        query,
+                        config["max_entries"],
+                        config["store_personal_data"],
+                        config["force_fetch_all"],
+                        last_fetch[constraint_name]
+                    )
+                )
+
+        housing_posts = [json.loads(flat) for flat in housing_posts]
+
+        # Update last_fetch
+        last_fetch_by_backends = collections.defaultdict(lambda: None)
+        for flat in housing_posts:
+            backend = flat['id'].split('@')[-1]
+            if (
+                last_fetch_by_backends[backend] is None
+                or last_fetch_by_backends[backend] < flat['date']
+            ):
+                last_fetch_by_backends[backend] = flat['date']
+        for backend in last_fetch_by_backends:
+            last_fetch_in_db = session.query(last_fetch_model.LastFetch).where(
+                last_fetch_model.LastFetch.constraint_name == constraint_name,
+                last_fetch_model.LastFetch.backend == backend
+            ).first()
+            if last_fetch_in_db:
+                last_fetch_in_db.last_fetch = arrow.get(
+                    last_fetch_by_backends[backend]
+                ).date()
+            else:
+                last_fetch_in_db = last_fetch_model.LastFetch(
+                    constraint_name=constraint_name,
+                    backend=backend,
+                    last_fetch=arrow.get(last_fetch_by_backends[backend]).date()
+                )
+            session.add(last_fetch_in_db)
+            session.commit()
+
         housing_posts = housing_posts[: config["max_entries"]]
         LOGGER.info("Fetched %d flats.", len(housing_posts))
 
-        constraint_flats_list = [json.loads(flat) for flat in housing_posts]
-        constraint_flats_list = [WoobProxy.restore_decimal_fields(flat) for flat in constraint_flats_list]
+        constraint_flats_list = [WoobProxy.restore_decimal_fields(flat) for flat in housing_posts]
         fetched_flats[constraint_name] = constraint_flats_list
+
     return fetched_flats
 
 
