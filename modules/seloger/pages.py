@@ -81,7 +81,11 @@ class SearchResultsPage(HTMLPage):
             klass = Housing
 
             def condition(self):
-                return Dict('cardType')(self) not in ['advertising', 'localExpert'] and Dict('id', default=False)(self)
+                return (
+                    Dict('cardType')(self) not in ['advertising', 'localExpert']
+                    and Dict('id', default=False)(self)
+                    and Dict('classifiedURL', default=False)(self)
+                )
 
             obj_id = Dict('id')
 

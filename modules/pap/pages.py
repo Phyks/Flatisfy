@@ -49,6 +49,8 @@ class HousingPage(HTMLPage):
     @method
     class iter_housings(ListElement):
         item_xpath = '//div[has-class("search-list-item-alt")]'
+        # Prevent DataError on same ids
+        ignore_duplicate = True
 
         def next_page(self):
             return Link('//ul[@class="pagination"]/li[@class="next"]/a')(self)
@@ -61,6 +63,9 @@ class HousingPage(HTMLPage):
                 isNotFurnishedOk = True
                 if self.env['query_type'] == POSTS_TYPES.RENT:
                     isNotFurnishedOk = 'meublé' not in title.lower()
+                id = self.obj_id(self)
+                if id is None:
+                    return False
                 return (
                     Regexp(Link('./div/a[has-class("item-title")]'), '/annonces/(.*)', default=None)(self) and
                     isNotFurnishedOk
@@ -94,7 +99,11 @@ class HousingPage(HTMLPage):
                         )(item)
                     self.env[name] = value
 
-            obj_id = Regexp(Link('./div/a[has-class("item-title")]'), '/annonces/(.*)')
+            obj_id = Regexp(
+                Link('./div/a[has-class("item-title")]'), '/annonces/(.*)',
+                default=None
+            )
+
             obj_type = Env('query_type')
             obj_advert_type = ADVERT_TYPES.PERSONAL
 
