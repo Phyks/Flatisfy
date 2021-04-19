@@ -34,6 +34,7 @@ from woob.tools.json import json
 from woob.exceptions import ActionNeeded
 from .constants import TYPES, RET
 import codecs
+import decimal
 
 
 class ErrorPage(HTMLPage):
@@ -66,6 +67,8 @@ class SearchResultsPage(HTMLPage):
     @method
     class iter_housings(DictElement):
         item_xpath = 'cards/list'
+        # Prevent DataError on same ids
+        ignore_duplicate = True
 
         def next_page(self):
             page_nb = Dict('navigation/pagination/page')(self)
@@ -136,29 +139,38 @@ class SearchResultsPage(HTMLPage):
 
 
 class HousingPage(HTMLPage):
+    def __init__(self, *args, **kwargs):
+        HTMLPage.__init__(self, *args, **kwargs)
+        json_content = Regexp(
+            CleanText('//script'),
+            r"window\[\"initialData\"\] = JSON.parse\(\"({.*})\"\);"
+        )(self.doc)
+        json_content = codecs.unicode_escape_decode(json_content)[0]
+        json_content = json_content.encode('utf-8', 'surrogatepass').decode('utf-8')
+        self.doc = {
+            "advert": json.loads(json_content).get('advert', {}).get('mainAdvert', {}),
+            "agency": json.loads(json_content).get('agency', {})
+        }
+
     @method
     class get_housing(ItemElement):
         klass = Housing
 
         def parse(self, el):
-            json_content = Regexp(CleanText('//script'), "var ava_data = ({.+?});")(self)
-            json_content = json_content.replace("logged", "\"logged\"")
-            json_content = json_content.replace("lengthcarrousel", "\"lengthcarrousel\"")
-            json_content = json_content.replace("products", "\"products\"")
-            json_content = json_content.replace("// // ANNONCES_SIMILAIRE / RECO", "")
-            self.house_json_datas = json.loads(json_content)['products'][0]
+            self.agency_doc = el['agency']
+            self.el = el['advert']
 
-        obj_id = CleanText('//form[@name="central"]/input[@name="idannonce"]/@value')
+        obj_id = Dict('id')
 
         def obj_house_type(self):
-            naturebien = CleanText('//form[@name="central"]/input[@name="naturebien"]/@value')(self)
+            naturebien = Dict('propertyNatureId')(self)
             try:
                 return next(k for k, v in RET.items() if v == naturebien)
             except StopIteration:
                 return NotLoaded
 
         def obj_type(self):
-            idType = int(CleanText('//form[@name="central"]/input[@name="idtt"]/@value')(self))
+            idType = Dict('idTransactionType')(self)
             type = next(k for k, v in TYPES.items() if v == idType)
             if type == POSTS_TYPES.FURNISHED_RENT:
                 # SeLoger does not let us discriminate between furnished and not furnished.
@@ -166,12 +178,7 @@ class HousingPage(HTMLPage):
             return type
 
         def obj_advert_type(self):
-            is_agency = (
-                CleanText('//form[@name="central"]/input[@name="nomagance"]/@value')(self) or
-                CleanText('//form[@name="central"]/input[@name="urlagence"]/@value')(self) or
-                CleanText('//form[@name="central"]/input[@name="adresseagence"]/@value')(self)
-            )
-            if is_agency:
+            if 'Agences' in self.agency_doc['type']:
                 return ADVERT_TYPES.PROFESSIONAL
             else:
                 return ADVERT_TYPES.PERSONAL
@@ -179,58 +186,50 @@ class HousingPage(HTMLPage):
         def obj_photos(self):
             photos = []
 
-            for photo in XPath('//div[@class="carrousel_slide"]/img/@src')(self):
-                photos.append(HousingPhoto("https:{}".format(photo)))
-
-            for photo in XPath('//div[@class="carrousel_slide"]/@data-lazy')(self):
-                p = json.loads(photo)
-                photos.append(HousingPhoto("https:{}".format(p['url'])))
+            for photo in Dict('photoList')(self):
+                photos.append(HousingPhoto("https:{}".format(photo['fullscreenUrl'])))
 
             return photos
 
-        obj_title = CleanText('//title[1]')
+        obj_title = Dict('title')
 
         def obj_location(self):
-            quartier = Regexp(CleanText('//script'),
-                              r"'nomQuartier', { value: \"([\w -]+)\", ")(self)
-            ville = CleanText('//form[@name="central"]/input[@name="ville"]/@value')(self)
-            ville = ville if ville else ''
-            cp = CleanText('//form[@name="central"]/input[@name="codepostal"]/@value')(self)
-            cp = cp if cp else ''
-            return u'%s %s (%s)' % (quartier, ville, cp)
+            address = Dict('address')(self)
+            return u'%s %s (%s)' % (address['neighbourhood'], address['city'],
+                                   address['zipCode'])
 
         def obj_address(self):
+            address = Dict('address')(self)
             p = PostalAddress()
-
-            p.street = Regexp(CleanText('//script'),
-                              r"'nomQuartier', { value: \"([\w -]+)\", ")(self)
-            p.postal_code = CleanText('//form[@name="central"]/input[@name="codepostal"]/@value')(self)
-            p.city = CleanText('//form[@name="central"]/input[@name="ville"]/@value')(self)
+            p.street = address['street']
+            p.postal_code = address['zipCode']
+            p.city = address['city']
             p.full_address = Field('location')(self)
             return p
 
-        obj_text = CleanText('//form[@name="central"]/input[@name="description"]/@value')
+        obj_text = Dict('description')
 
-        obj_cost = CleanDecimal(CleanText('//a[@id="price"]'), default=NotLoaded)
-        obj_currency = Currency(CleanText('//a[@id="price"]'), default=NotLoaded)
+        def obj_cost(self):
+            propertyPrice = Dict('propertyPrice')(self)
+            return decimal.Decimal(propertyPrice['prix'])
+        def obj_currency(self):
+            propertyPrice = Dict('propertyPrice')(self)
+            return propertyPrice['priceUnit']
+
         obj_price_per_meter = PricePerMeterFilter()
 
-        obj_area = CleanDecimal('//form[@name="central"]/input[@name="surface"]/@value', replace_dots=True)
-        obj_url = CleanText('//form[@name="central"]/input[@name="urlannonce"]/@value')
-        obj_phone = CleanText('//div[@class="data-action"]/a[@data-phone]/@data-phone')
+        obj_area = CleanDecimal(Dict('surface'))
+        def obj_url(self):
+            return self.page.url
+        def obj_phone(self):
+            return self.agency_doc.get('agencyPhoneNumber', {}).get('value',
+                                                                    NotAvailable)
 
         def obj_utilities(self):
-            mention = CleanText('//span[@class="detail_indice_prix"]', default="")(self)
-            if "(CC) Loyer mensuel charges comprises" in mention:
-                return UTILITIES.INCLUDED
-            else:
-                return UTILITIES.UNKNOWN
+            return NotLoaded  # TODO
 
-        def obj_bedrooms(self):
-            return CleanDecimal(Dict('nb_chambres', default=NotLoaded))(self.house_json_datas)
-
-        def obj_rooms(self):
-            return CleanDecimal(Dict('nb_pieces', default=NotLoaded))(self.house_json_datas)
+        obj_bedrooms = CleanDecimal(Dict('bedroomCount'))
+        obj_rooms = CleanDecimal(Dict('numberOfRooms'))
 
 
 class HousingJsonPage(JsonPage):
