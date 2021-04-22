@@ -22,6 +22,7 @@ from woob.tools.backend import Module
 from woob.capabilities.housing import (CapHousing, Housing, HousingPhoto,
                                          ADVERT_TYPES)
 from woob.capabilities.base import UserError
+from woob import __version__ as WOOB_VERSION
 from .browser import LogicimmoBrowser
 
 
@@ -42,7 +43,7 @@ class LogicimmoModule(Module, CapHousing):
     MAINTAINER = u'Bezleputh'
     EMAIL = 'carton_ben@yahoo.fr'
     LICENSE = 'AGPLv3+'
-    VERSION = '2.1'
+    VERSION = WOOB_VERSION
 
     BROWSER = LogicimmoBrowser
 

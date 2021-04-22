@@ -20,6 +20,7 @@
 
 from woob.capabilities.housing import CapHousing, Housing, HousingPhoto
 from woob.tools.backend import Module
+from woob import __version__ as WOOB_VERSION
 
 from .browser import SeLogerBrowser
 
@@ -31,7 +32,7 @@ class SeLogerModule(Module, CapHousing):
     NAME = 'seloger'
     MAINTAINER = u'Romain Bignon'
     EMAIL = 'romain@weboob.org'
-    VERSION = '2.1'
+    VERSION = WOOB_VERSION
     DESCRIPTION = 'French housing website'
     LICENSE = 'AGPLv3+'
     ICON = 'http://static.poliris.com/z/portail/svx/portals/sv6_gen/favicon.png'

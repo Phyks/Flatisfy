@@ -20,6 +20,7 @@
 
 from woob.tools.backend import Module
 from woob.capabilities.housing import CapHousing, Housing, HousingPhoto
+from woob import __version__ as WOOB_VERSION
 
 from .browser import ExplorimmoBrowser
 
@@ -33,7 +34,7 @@ class ExplorimmoModule(Module, CapHousing):
     MAINTAINER = u'Bezleputh'
     EMAIL = 'carton_ben@yahoo.fr'
     LICENSE = 'AGPLv3+'
-    VERSION = '2.1'
+    VERSION = WOOB_VERSION
 
     BROWSER = ExplorimmoBrowser
 

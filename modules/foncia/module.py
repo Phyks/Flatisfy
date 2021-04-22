@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 
 from woob.tools.backend import Module
 from woob.capabilities.housing import CapHousing, Housing, ADVERT_TYPES, HousingPhoto
+from woob import __version__ as WOOB_VERSION
 
 from .browser import FonciaBrowser
 
@@ -35,7 +36,7 @@ class FonciaModule(Module, CapHousing):
     MAINTAINER = u'Phyks (Lucas Verney)'
     EMAIL = 'phyks@phyks.me'
     LICENSE = 'AGPLv3+'
-    VERSION = '2.1'
+    VERSION = WOOB_VERSION
 
     BROWSER = FonciaBrowser
 

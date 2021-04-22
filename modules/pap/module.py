@@ -21,6 +21,7 @@
 from woob.capabilities.housing import (CapHousing, Housing, HousingPhoto,
                                          ADVERT_TYPES)
 from woob.tools.backend import Module
+from woob import __version__ as WOOB_VERSION
 
 from .browser import PapBrowser
 
@@ -32,7 +33,7 @@ class PapModule(Module, CapHousing):
     NAME = 'pap'
     MAINTAINER = u'Romain Bignon'
     EMAIL = 'romain@weboob.org'
-    VERSION = '2.1'
+    VERSION = WOOB_VERSION
     DESCRIPTION = 'French housing website'
     LICENSE = 'AGPLv3+'
     BROWSER = PapBrowser
