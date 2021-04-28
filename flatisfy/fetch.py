@@ -308,7 +308,7 @@ def fetch_flats(config):
                 last_fetch_in_db.last_fetch = arrow.get(
                     last_fetch_by_backends[backend]
                 ).date()
-            elif last_fetch_by_backends[backend]:
+            else:
                 last_fetch_in_db = last_fetch_model.LastFetch(
                     constraint_name=constraint_name,
                     backend=backend,
