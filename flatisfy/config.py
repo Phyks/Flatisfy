@@ -55,9 +55,6 @@ DEFAULT_CONFIG = {
             # Time is in seconds
         }
     },
-    # Whether to force fetching all available flats at each time or only fetch
-    # diff
-    "force_fetch_all": False,
     # Whether or not to store personal data from housing posts (phone number
     # etc)
     "store_personal_data": False,
@@ -165,7 +162,6 @@ def validate_config(config, check_with_data):
         assert config["smtp_to"] is None or isinstance(config["smtp_to"], list)
         assert config["notification_lang"] is None or isinstance(config["notification_lang"], str)
 
-        assert isinstance(config["force_fetch_all"], bool)
         assert isinstance(config["store_personal_data"], bool)
         assert isinstance(config["max_distance_housing_station"], (int, float))
         assert isinstance(config["duplicate_threshold"], int)
