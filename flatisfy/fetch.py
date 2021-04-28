@@ -314,9 +314,8 @@ def fetch_flats(config):
                     backend=backend,
                     last_fetch=arrow.get(last_fetch_by_backends[backend]).date()
                 )
-            if last_fetch_in_db:
-                session.add(last_fetch_in_db)
-                session.commit()
+            session.add(last_fetch_in_db)
+            session.commit()
 
         housing_posts = housing_posts[: config["max_entries"]]
         LOGGER.info("Fetched %d flats.", len(housing_posts))
