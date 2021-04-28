@@ -72,7 +72,7 @@ class SearchResultsPage(HTMLPage):
 
         def next_page(self):
             page_nb = Dict('navigation/pagination/page')(self)
-            max_results = Dict('navigation/pagination/maxResults')(self)
+            max_results = Dict('navigation/counts/count')(self)
             results_per_page = Dict('navigation/pagination/resultsPerPage')(self)
 
             if int(max_results) / int(results_per_page) > int(page_nb):
@@ -85,7 +85,7 @@ class SearchResultsPage(HTMLPage):
 
             def condition(self):
                 return (
-                    Dict('cardType')(self) not in ['advertising', 'localExpert']
+                    Dict('cardType')(self) not in ['advertising', 'ali', 'localExpert']
                     and Dict('id', default=False)(self)
                     and Dict('classifiedURL', default=False)(self)
                 )
@@ -171,11 +171,14 @@ class HousingPage(HTMLPage):
 
         def obj_type(self):
             idType = Dict('idTransactionType')(self)
-            type = next(k for k, v in TYPES.items() if v == idType)
-            if type == POSTS_TYPES.FURNISHED_RENT:
-                # SeLoger does not let us discriminate between furnished and not furnished.
-                return POSTS_TYPES.RENT
-            return type
+            try:
+                type = next(k for k, v in TYPES.items() if v == idType)
+                if type == POSTS_TYPES.FURNISHED_RENT:
+                    # SeLoger does not let us discriminate between furnished and not furnished.
+                    return POSTS_TYPES.RENT
+                return type
+            except StopIteration:
+                return NotAvailable
 
         def obj_advert_type(self):
             if 'Agences' in self.agency_doc['type']:
