@@ -111,8 +111,12 @@ def send_notification(config, flats):
         if area:
             fields.append(f"{trs['area']}: {area}m²")
         if cost:
+            if currency == '$':
+                currency = 'USD'
+            if currency == '€':
+                currency = 'EUR'
             money = Money(cost, currency).format(config["notification_lang"])
-            fields.append(f"{trs['cost']}: {money}")
+            fields.append(f"{trs['cost']}: {money.format()}")
 
         if len(fields):
             txt += f'({", ".join(fields)})'
