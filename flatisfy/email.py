@@ -97,8 +97,14 @@ def send_notification(config, flats):
     for flat in flats:
         title = str(flat.title)
         flat_id = str(flat.id)
-        area = str(int(flat.area))
-        cost = int(flat.cost)
+        try:
+            area = str(int(flat.area))
+        except (TypeError, ValueError):
+            area = None
+        try:
+            cost = int(flat.cost)
+        except (TypeError, ValueError):
+            cost = None
         currency = str(flat.currency)
 
         txt += f"- {title}: {website_url}#/flat/{flat_id} "
