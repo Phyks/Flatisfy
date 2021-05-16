@@ -190,7 +190,7 @@ class HousingPage(HTMLPage):
             photos = []
 
             for photo in Dict('photoList')(self):
-                photos.append(HousingPhoto("https:{}".format(photo['fullscreenUrl'])))
+                photos.append(HousingPhoto(photo['fullscreenUrl']))
 
             return photos
 
